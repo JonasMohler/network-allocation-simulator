@@ -132,6 +132,32 @@ def _normalize_array(array, target):
     return normed
 
 
+def set_internal_cap_const(graph, capacity):
+    for node in graph.nodes:
+        graph.nodes[node][INT_BW] = capacity
+    return graph
+
+
+def set_internal_cap_max_link(graph):
+    """Set the internal capacity as the maximum of the link capacities incoming."""
+    for node in graph.nodes:
+        max_cap = 0
+        for neigh in graph.adj[node]:
+            cur_cap = graph.adj[node][neigh]["capacity"]
+            max_cap = max(cur_cap, max_cap)
+        graph.nodes[node][INT_BW] = max_cap
+    return graph
+
+
+def set_internal_cap_fraction_out(graph, fraction=0.1, min_cap=0):
+    """Set the internal link capacity to be a fraction of all the capacity on the outside."""
+    for node in graph.nodes:
+        sum_cap = 0
+        for neigh in graph.adj[node]:
+            cur_cap = graph.adj[node][neigh]["capacity"]
+            sum_cap += cur_cap
+        graph.nodes[node][INT_BW] = max(sum_cap * fraction, min_cap)
+    return graph
 
 ###
 #

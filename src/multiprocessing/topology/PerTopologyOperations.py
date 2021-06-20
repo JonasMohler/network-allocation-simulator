@@ -6,6 +6,7 @@ from src.multiprocessing.topology.TopolgyMultiprocessing import TopologyMultipro
 import src.multiprocessing.node.PerNodeOperations as pno
 from src.util.const import *
 import src.util.data_handler as dh
+import fnss
 
 from src.path_algorithms.gma_improved import GMAImproved
 from src.path_algorithms.sqos_algorithm import ScaledQoSAlgorithmOB, ScaledQoSAlgorithmOT, ScaledQoSAlgorithmPB, ScaledQoSAlgorithmPT
@@ -438,6 +439,55 @@ class PathLengthComputation(TopologyMultiprocessing):
 
         except Exception as e:
             print(f'Error occured in Path Length Computation: {e}')
+
+
+class AddConstantCapacity(TopologyMultiprocessing):
+    def __init__(self, dirs, n_proc, capacity):
+        super(AddConstantCapacity, self).__init__(dirs, n_proc)
+        self.capacity = capacity
+
+    def find_or_compute_precursors(self, cur_dir):
+        pass
+
+    def per_dir_op(self, cur_dir):
+        graph = dh.get_graph(cur_dir)
+        fnss.set_capacities_constant(graph, self.capacity)
+        graph = set_internal_cap_const(graph, self.capacity)
+        dh.set_graph(graph, cur_dir)
+
+
+class AddDegreeGravityCapacity(TopologyMultiprocessing):
+    def __init__(self, dirs, cap_levels, n_proc):
+        super(AddDegreeGravityCapacity, self).__init__(dirs, n_proc)
+        self.cap_levels = cap_levels
+
+    def find_or_compute_precursors(self, cur_dir):
+        pass
+
+    def per_dir_op(self, cur_dir):
+        graph = dh.get_graph(cur_dir)
+        fnss.set_capacities_degree_gravity(graph, self.cap_levels, capacity_unit=UNIT)
+        graph = set_internal_cap_max_link(graph)
+        dh.set_graph(graph, cur_dir)
+
+
+class AddInternalFractionCapacity(TopologyMultiprocessing):
+    def __init__(self, dirs, n_proc, capacity, fraction):
+        super(AddInternalFractionCapacity, self).__init__(dirs, n_proc)
+        self.capacity = capacity
+        self.fraction = fraction
+
+    def find_or_compute_precursors(self, cur_dir):
+        pass
+
+    def per_dir_op(self, cur_dir):
+        graph = dh.get_graph(cur_dir)
+        fnss.set_capacities_constant(graph, self.capacity)
+        # Set internal bandwidth as minimum of the fraction and the capacity.
+        graph = set_internal_cap_fraction_out(
+            graph, self.fraction, min_cap=self.capacity
+        )
+        dh.set_graph(graph, cur_dir)
 
 
 '''

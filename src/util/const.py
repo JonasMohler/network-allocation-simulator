@@ -12,6 +12,8 @@ import os
 
 COVER_THRESHOLD = 1e-6
 
+CAPACITY_INTERVALS = [10, 40, 100]
+
 DATA_PATH = os.path.join(os.getcwd(), 'dat/topologies/')
 # DATA TYPE CONSTANTS
 ALLOCATION = 0

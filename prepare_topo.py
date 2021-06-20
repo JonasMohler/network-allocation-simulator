@@ -3,7 +3,9 @@ from argparse import ArgumentParser
 
 import fnss
 import networkx as nx
+from src.util.const import CAPACITY_INTERVALS
 import src.util.data_handler as dh
+from src.multiprocessing.topology.PerTopologyOperations import AddConstantCapacity, AddDegreeGravityCapacity
 
 DATA = "dat/topologyzoo"
 OUT = "dat/topologies"
@@ -38,3 +40,5 @@ for filename in os.listdir(DATA):
 
         graph = fnss.Topology(graph)
         fnss.write_topology(graph, os.path.join(graph_path, "topology.xml"))
+
+        proc = AddDegreeGravityCapacity(name, CAPACITY_INTERVALS, 1)
