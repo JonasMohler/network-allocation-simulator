@@ -22,7 +22,7 @@ from multiprocessing.pool import Pool
 class NodeMultiprocessing:
     description = ""
 
-    def __init__(self, dir, nodes, n_proc, data_type, force_recompute, ratio=None):
+    def __init__(self, dir, nodes, n_proc, data_type, force_recompute, ratio=None, strategy=None):
         print(f"----")
 
         self.dir = dir
@@ -31,6 +31,7 @@ class NodeMultiprocessing:
         self.n_proc = n_proc
         self.ratio = ratio
         self.data_type = data_type
+        self.strategy = strategy
 
     'Takes current node, must return result of form {node: compRes}'
     @abstractmethod
@@ -99,6 +100,8 @@ class NodeMultiprocessing:
             dh.set_pl(data, self.dir)
         elif self.data_type == ALLOCATION_MATRIX:
             dh.set_tm(data, self.dir)
+        elif self.data_type == COVER:
+            dh.set_cover(data, self.dir, self.strategy, self.ratio)
         else:
             print('unknown data type to store results to')
 

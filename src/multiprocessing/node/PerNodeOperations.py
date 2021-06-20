@@ -5,7 +5,7 @@ import numpy as np
 import networkx as nx
 
 from src.types import SinglePathsDict, PathLengthsDict, PathCountsDict, AllocationMatrices
-from src.util.utility import allocation_matrix, single_shortest_path, single_shortest_path_length
+from src.util.utility import allocation_matrix, single_shortest_path, single_shortest_path_length, per_node_alloc_to_cover
 from src.util.const import *
 
 
@@ -135,15 +135,20 @@ class PathCounting(NodeMultiprocessing):
 class CoverComputation(NodeMultiprocessing):
     description = "Cover Computation per Node"
 
-    def __init__(self, cur_dir, nodes, n_proc, force, shortest_paths, ratio=None):
+    def __init__(self, cur_dir, nodes, n_proc, force, shortest_paths, allocs, cover_thresh, strategy, ratio=None):
         super(CoverComputation, self).__init__(cur_dir, nodes, n_proc, COVER, force, ratio=ratio)
         self.shortest_paths = shortest_paths
+        self.strategy = strategy
+        self.allocs = allocs
+        self.cover_thresh = cover_thresh
 
     def per_node_op(self, cur_node):
 
+        res = per_node_alloc_to_cover(self.allocs[cur_node], self.cover_thresh, self.shortest_paths[cur_node])
 
-        pass
+        res = {cur_node: res}
 
+        return res
 
 
 class AllocationMatrixComputation(NodeMultiprocessing):

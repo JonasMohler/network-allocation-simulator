@@ -186,11 +186,16 @@ class CoverageComputation(TopologyMultiprocessing):
             super(CoverageComputation, self).per_dir_op(cur_dir)
 
             alloc = dh.get_allocations(cur_dir, self.strategy, self.ratio)
-
             sp = dh.get_shortest_paths(cur_dir, self.ratio)
-            cover = alloc_to_cover(alloc, self.cover_thresh, sp)
+            deg = dh.get_degrees(cur_dir)
+            nodes = deg['nodes']
 
-            dh.set_cover(cover, cur_dir, self.strategy, self.ratio)
+            proc = pno.CoverComputation(cur_dir, nodes, self.n_proc, self.force, sp, alloc, self.cover_thresh, self.strategy, self.ratio)
+            proc.run()
+
+            #cover = alloc_to_cover(alloc, self.cover_thresh, sp)
+
+            #dh.set_cover(cover, cur_dir, self.strategy, self.ratio)
 
             print(f"{cur_dir}: Done")
 
