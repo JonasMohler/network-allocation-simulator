@@ -25,23 +25,23 @@ class PathSampling(TopologyMultiprocessing):
 
     def per_dir_op(self, cur_dir):
         try:
-            super(PathSampling, self).per_dir_op(cur_dir)
+            #super(PathSampling, self).per_dir_op(cur_dir)
+            if not os.path.exists(dh.get_full_path(cur_dir,SHORTEST_PATH, ratio=self.ratio)):
+                sp = dh.get_shortest_paths(cur_dir)
+                deg = dh.get_degrees(cur_dir)
+                # Calculate the centrality of all nodes
+                s = sum(deg['degrees'])
 
-            sp = dh.get_shortest_paths(cur_dir)
-            deg = dh.get_degrees(cur_dir)
-            # Calculate the centrality of all nodes
-            s = sum(deg['degrees'])
+                centrality = [i / s for i in deg['degrees']]
+                r = float(self.ratio)
 
-            centrality = [i / s for i in deg['degrees']]
-            r = float(self.ratio)
+                l = len(deg['nodes'])
 
-            l = len(deg['nodes'])
+                n_dests = int(round(l * r))
 
-            n_dests = int(round(l * r))
-
-            # for each node, select a number of destinations at random, weighted by the centrality of nodes
-            proc = pno.PathSampling(cur_dir, deg['nodes'], self.n_proc, self.force, sp, deg, centrality, n_dests, self.ratio)
-            proc.run()
+                # for each node, select a number of destinations at random, weighted by the centrality of nodes
+                proc = pno.PathSampling(cur_dir, deg['nodes'], self.n_proc, self.force, sp, deg, centrality, n_dests, self.ratio)
+                proc.run()
 
             print(f"{cur_dir}: Done")
         except Exception as e:
