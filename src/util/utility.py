@@ -60,6 +60,7 @@ def get_matrix_entries(
     for idx_src, src in enumerate(neigh):
         for idx_dst, dst in enumerate(neigh):
             if src != dst:
+                print(G[src][node])
                 cap = G[src][node][BW]
                 if use_bgp:
                     allow = _get_bgp_bw(G, node, src, dst, cap)
