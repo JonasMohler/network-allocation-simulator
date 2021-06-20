@@ -22,7 +22,7 @@ from multiprocessing.pool import Pool
 class NodeMultiprocessing:
     description = ""
 
-    def __init__(self, dir, nodes, n_proc, data_type, force_recompute, ratio=None, strategy=None):
+    def __init__(self, dir, nodes, n_proc, data_type, force_recompute, strategy=None, ratio=None):
         print(f"----")
 
         self.dir = dir

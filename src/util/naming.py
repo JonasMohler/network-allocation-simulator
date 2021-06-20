@@ -21,15 +21,19 @@ TM_ALLOC_SUM_FILE_NAME = "tm_alloc_sum.json"
 
 
 def sampled_alloc_file_name(ratio):
-    return f"{ratio}_{ALLOC_FILE_NAME}.json"
+    return f"{ratio}_{ALLOC_FILE_NAME}"
 
 
 def sampled_sp_file_name(ratio):
     return f"{ratio}_{SP_FILE_NAME}"
 
 
-def sampled_cover_file_name(ratio):
-    return f"{ratio}_{COVER_FILE_NAME}"
+def sampled_cover_file_name(ratio, thresh):
+    return f"{ratio}_{thresh}_{COVER_FILE_NAME}"
+
+
+def cover_file_name(thresh):
+    return f"{thresh}_{COVER_FILE_NAME}"
 
 
 def sampled_degree_file_name(ratio):
@@ -52,7 +56,7 @@ def get_graph_path(graph):
     return os.path.join(get_topo_path(graph), 'graph/')
 
 
-def get_full_path(graph, data_type, strategy=None, ratio=None):
+def get_full_path(graph, data_type, strategy=None, ratio=None, thresh=None):
     topology_path = get_topo_path(graph)
 
     strategies_path = get_strategies_path(graph)
@@ -78,9 +82,9 @@ def get_full_path(graph, data_type, strategy=None, ratio=None):
         if strategy is not None:
 
             if ratio is not None:
-                name = sampled_cover_file_name(ratio)
+                name = sampled_cover_file_name(ratio, thresh)
             else:
-                name = COVER_FILE_NAME
+                name = cover_file_name(thresh)
 
         full_path = os.path.join(f"{strategies_path}{strategy}", name)
 

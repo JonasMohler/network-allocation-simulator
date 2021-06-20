@@ -206,8 +206,6 @@ def per_node_alloc_to_cover(src_alloc, thresh, src_sps):
     return cover
 
 
-
-
 # Fraction of pairs reachable by each other in some graph
 def alloc_to_pair_cover(alloc, thresh):
 

@@ -171,11 +171,10 @@ class CoverageComputation(TopologyMultiprocessing):
 
     description = "Computation of graph COVERAGE"
 
-    def __init__(self, dirs, n_proc, fair_mode, strategy, force_recompute, c_thresh, ratio=None):
+    def __init__(self, dirs, n_proc, strategy, force_recompute, c_thresh, ratio=None):
         super(CoverageComputation, self).__init__(dirs, n_proc, COVER, force_recompute, strategy, ratio)
         self.cover_thresh = c_thresh
-        self.fair_mode = fair_mode
-        self.description = self.description + " with "+self.strategy+" ALLOCATION MATRICES"
+        self.description = self.description + " with "+self.strategy+f" ALLOCATION MATRICES and thresh: {c_thresh}"
 
     def find_or_compute_precursors(self, cur_dir):
         # Needs Allocations

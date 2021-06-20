@@ -12,9 +12,9 @@ from src.util.naming import *
 from src.util.const import *
 
 
-def _load(graph, data_type, strategy=None, ratio=None):
+def _load(graph, data_type, strategy=None, ratio=None, thresh=None):
 
-    full_path = get_full_path(graph, data_type, strategy, ratio)
+    full_path = get_full_path(graph, data_type, strategy, ratio, thresh)
 
     # Load file
 
@@ -39,7 +39,7 @@ def _load(graph, data_type, strategy=None, ratio=None):
     return data
 
 
-def _store(data, graph, data_type, strategy=None, ratio=None):
+def _store(data, graph, data_type, strategy=None, ratio=None, thresh=None):
 
     # Build parent directory and make if they don't yet exist and is allowed
     topology_path = get_topo_path(graph)
@@ -65,7 +65,7 @@ def _store(data, graph, data_type, strategy=None, ratio=None):
         os.mkdir(graph_path)
 
     # Get file name
-    full_path = get_full_path(graph, data_type, strategy, ratio)
+    full_path = get_full_path(graph, data_type, strategy, ratio, thresh)
 
     # Store
 
@@ -124,14 +124,13 @@ def set_degrees(data, graph):
     _store(data, graph, DEGREE)
 
 
-def get_cover(graph, strategy, ratio=None):
-    data = _load(graph, COVER, strategy=strategy, ratio=ratio)
+def get_cover(graph, strategy, thresh, ratio=None):
+    data = _load(graph, COVER, strategy=strategy, ratio=ratio, thresh=thresh)
     return data
 
 
-def set_cover(data, graph, strategy, ratio=None):
-    _store(data, graph, COVER, strategy=strategy, ratio=ratio)
-    pass
+def set_cover(data, graph, strategy, thresh, ratio=None):
+    _store(data, graph, COVER, strategy=strategy, ratio=ratio, thresh=thresh)
 
 
 def get_tm(graph):
