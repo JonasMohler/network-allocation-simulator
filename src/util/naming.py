@@ -29,7 +29,7 @@ def sampled_sp_file_name(ratio):
 
 
 def sampled_cover_file_name(ratio, thresh):
-    return f"{ratio}_{thresh}_{COVER_FILE_NAME}"
+    return f"{thresh}_{ratio}_{COVER_FILE_NAME}"
 
 
 def cover_file_name(thresh):
@@ -86,7 +86,7 @@ def get_full_path(graph, data_type, strategy=None, ratio=None, thresh=None):
             else:
                 name = cover_file_name(thresh)
 
-        full_path = os.path.join(f"{strategies_path}{strategy}", name)
+            full_path = os.path.join(f"{strategies_path}{strategy}", name)
 
     if data_type == DEGREE:
 

@@ -231,7 +231,7 @@ def per_node_alloc_to_cover(src_alloc, thresh, src_sps):
             n_dest = n_dest+1
             if src_alloc[dst][0] > thresh:
                 n_cover = n_cover+1
-    cover = n_dest/n_cover
+    cover = n_cover/n_dest
     return cover
 
 

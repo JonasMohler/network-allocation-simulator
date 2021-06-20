@@ -157,9 +157,7 @@ class CoverComputation(NodeMultiprocessing):
         self.thresh = thresh
         '''
 
-
     def per_node_op(self, cur_node):
-
 
         res = per_node_alloc_to_cover(self.alloc[cur_node], self.thresh, self.shortest_paths[cur_node])
         return {cur_node: res}
