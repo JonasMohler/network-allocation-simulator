@@ -41,5 +41,5 @@ for filename in os.listdir(DATA):
         graph = fnss.Topology(graph)
         fnss.write_topology(graph, os.path.join(graph_path, "topology.xml"))
 
-        proc = AddDegreeGravityCapacity(name, CAPACITY_INTERVALS, 1)
+        proc = AddDegreeGravityCapacity([name], CAPACITY_INTERVALS, 1)
         proc.run()
