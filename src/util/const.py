@@ -11,7 +11,7 @@ import os
 
 
 COVER_THRESHOLD = 1e-6
-
+Unit = "Gbps"
 CAPACITY_INTERVALS = [10, 40, 100]
 
 DATA_PATH = os.path.join(os.getcwd(), 'dat/topologies/')

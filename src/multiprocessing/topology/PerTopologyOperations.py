@@ -443,7 +443,7 @@ class PathLengthComputation(TopologyMultiprocessing):
 
 class AddConstantCapacity(TopologyMultiprocessing):
     def __init__(self, dirs, n_proc, capacity):
-        super(AddConstantCapacity, self).__init__(dirs, n_proc)
+        super(AddConstantCapacity, self).__init__(dirs, n_proc, TOPOLOGY, True)
         self.capacity = capacity
 
     def find_or_compute_precursors(self, cur_dir):
@@ -458,7 +458,7 @@ class AddConstantCapacity(TopologyMultiprocessing):
 
 class AddDegreeGravityCapacity(TopologyMultiprocessing):
     def __init__(self, dirs, cap_levels, n_proc):
-        super(AddDegreeGravityCapacity, self).__init__(dirs, n_proc)
+        super(AddDegreeGravityCapacity, self).__init__(dirs, n_proc, TOPOLOGY, True)
         self.cap_levels = cap_levels
 
     def find_or_compute_precursors(self, cur_dir):
@@ -473,7 +473,7 @@ class AddDegreeGravityCapacity(TopologyMultiprocessing):
 
 class AddInternalFractionCapacity(TopologyMultiprocessing):
     def __init__(self, dirs, n_proc, capacity, fraction):
-        super(AddInternalFractionCapacity, self).__init__(dirs, n_proc)
+        super(AddInternalFractionCapacity, self).__init__(dirs, n_proc, TOPOLOGY, True)
         self.capacity = capacity
         self.fraction = fraction
 
