@@ -1,6 +1,6 @@
 from src.multiprocessing.node.NodeMultiprocessing import NodeMultiprocessing
 
-
+import time
 import numpy as np
 import networkx as nx
 
@@ -52,13 +52,19 @@ class PathSampling(NodeMultiprocessing):
     def per_node_op(self, cur_node):
         try:
 
+            st = time.time()
             try:
                 node_sps = self.sp[cur_node]
             except KeyError:
                 print(f"Key error in sps assignment:\ncur node: {cur_node}\nsp:\n{self.sp}")
 
+            t1 = time.time() -st
+            st1 = time.time()
             # Choose #destinations nodes from shortest paths
             destinations = np.random.choice(self.nodes, size=self.n_dests, p=self.centrality, replace=False)
+
+            t2 = time.time() -st1
+            st2 = time.time()
 
             # Keep only selected shortest paths
             selected_paths = {}
@@ -66,6 +72,13 @@ class PathSampling(NodeMultiprocessing):
                 if d != cur_node:
 
                     selected_paths[d] = node_sps[d]
+
+            t3 = time.time() -st2
+            t4 = time.time() - st
+            print(f"Overall time: {t4}")
+            print(f"Assignment: {t1}, %{t1/t4}")
+            print(f"Choice: {t2}, %{t2/t4}")
+            print(f"Select: {t3}, %{t3/t4}")
 
             res = {cur_node: selected_paths}
 
