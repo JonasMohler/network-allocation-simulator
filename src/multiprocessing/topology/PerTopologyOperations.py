@@ -467,9 +467,7 @@ class AddDegreeGravityCapacity(TopologyMultiprocessing):
     def per_dir_op(self, cur_dir):
         graph = dh.get_graph(cur_dir)
         fnss.set_capacities_degree_gravity(graph, self.cap_levels, capacity_unit=UNIT)
-        print(graph)
         graph = set_internal_cap_max_link(graph)
-        print(graph)
         dh.set_graph(graph, cur_dir)
 
 
