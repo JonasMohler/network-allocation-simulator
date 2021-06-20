@@ -44,10 +44,10 @@ relabeling = np.arange(len(nodes))
 labelmap = dict(zip(nodes, relabeling))
 topo_bidir = nx.relabel_nodes(topo_bidir, labelmap)
 
+print('Adding capacities')
 # Add capactiy to the links and nodes
 fnss.set_capacities_degree_gravity(topo_bidir, CAPACITY_INTERVALS, capacity_unit=UNIT)
 topo_bidir = set_internal_cap_max_link(topo_bidir)
-print(topo_bidir)
 # Add reverse edges with inverted business relation
 for s, e in topo_bidir.edges():
     rel = topo_bidir[s][e]["type"]
