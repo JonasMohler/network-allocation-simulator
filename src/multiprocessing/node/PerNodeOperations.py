@@ -135,17 +135,21 @@ class PathCounting(NodeMultiprocessing):
 class CoverComputation(NodeMultiprocessing):
     description = "Cover Computation per Node"
 
-    def __init__(self, cur_dir, nodes, n_proc, force, alloc, shortest_paths, thresh, strategy, ratio=None):
-        super(CoverComputation, self).__init__(cur_dir, nodes, n_proc, COVER, force, ratio=ratio)
+    def __init__(self, cur_dir, nodes, n_proc, force, alloc, shortest_paths,thresh, strategy, ratio=None):
+        super(CoverComputation, self).__init__(cur_dir, nodes, n_proc, COVER, force, ratio=ratio, strategy=strategy, thresh=thresh)
         self.shortest_paths = shortest_paths
         self.alloc = alloc
+        '''
         self.strategy = strategy
         self.thresh = thresh
+        '''
+
 
     def per_node_op(self, cur_node):
 
-        res = per_node_alloc_to_cover(self.alloc[cur_node],self.thresh, self.shortest_paths[cur_node])
-        return {cur_node:res}
+
+        res = per_node_alloc_to_cover(self.alloc[cur_node], self.thresh, self.shortest_paths[cur_node])
+        return {cur_node: res}
 
 
 class AllocationMatrixComputation(NodeMultiprocessing):

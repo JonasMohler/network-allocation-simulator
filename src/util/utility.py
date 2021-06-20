@@ -196,12 +196,14 @@ def alloc_to_cover(alloc, thresh, sps):
 
 
 def per_node_alloc_to_cover(src_alloc, thresh, src_sps):
+
     n_dest = 0
     n_cover = 0
     for dst, path in src_sps.items():
-        n_dest = n_dest+1
-        if src_alloc[dst] > thresh:
-            n_cover = n_cover+1
+        if len(path)>1:
+            n_dest = n_dest+1
+            if src_alloc[dst][0] > thresh:
+                n_cover = n_cover+1
     cover = n_dest/n_cover
     return cover
 

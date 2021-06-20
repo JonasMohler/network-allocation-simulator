@@ -116,6 +116,9 @@ def main(args):
     out = args.o
     cores = args.cores
     force = args.fr
+    thresh = args.thrs
+
+    strategies = ['GMAImproved', 'sqos_ot', 'sqos_ob', 'sqos_pt', 'sqos_pb']
 
     # Preprocessing:
     # - Create topologies from zoo / rand topologies, add capacities
@@ -166,6 +169,14 @@ def main(args):
         s21.run()
 
     # Covers: TODO
+    for s in strategies:
+        if s == 'sqos_ob' or s == 'sqos_ot':
+            for r in ratios:
+                c = CoverageComputation(dirs, cores, s, force, thresh, r)
+                c.run()
+        else:
+            c = CoverageComputation(dirs, cores, s, force, thresh)
+            c.run()
 
     # Aggregations: TODO
     if args.agg:

@@ -22,7 +22,7 @@ from multiprocessing.pool import Pool
 class NodeMultiprocessing:
     description = ""
 
-    def __init__(self, dir, nodes, n_proc, data_type, force_recompute, strategy=None, ratio=None):
+    def __init__(self, dir, nodes, n_proc, data_type, force_recompute, strategy=None, ratio=None, thresh=None):
         print(f"----")
 
         self.dir = dir
@@ -32,6 +32,7 @@ class NodeMultiprocessing:
         self.ratio = ratio
         self.data_type = data_type
         self.strategy = strategy
+        self.thresh = thresh
 
     'Takes current node, must return result of form {node: compRes}'
     @abstractmethod
@@ -110,7 +111,9 @@ class NodeMultiprocessing:
 
         if VERBOSITY >= 2: print(f"START: {self.description}...")
         st = time.time()
-        path = dh.get_full_path(self.dir, self.data_type, None, self.ratio)
+
+        path = dh.get_full_path(self.dir, self.data_type, self.strategy, self.ratio, self.thresh)
+
         if self.force or not os.path.exists(path):
 
             '''
