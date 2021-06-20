@@ -25,24 +25,19 @@ def dict_from_list(lst):
 
 
 def all_allocation_matrices(G, use_bgp=False):
-    print('all:0')
     allocation_matrices = {}
     for cur in G.nodes():
-        print('all: cur')
         # print("-")
         # print(cur, G.degree(cur))
         allocation_matrices[cur] = allocation_matrix(G, cur, use_bgp=use_bgp)
-    print('all:done')
     return allocation_matrices
 
 
 def allocation_matrix(G: nx.Graph, node: int, use_bgp: bool = False,) -> np.ndarray:
     """Create the allocation matrix for a node in the graph."""
-    print('one:0')
+
     mat = get_matrix_entries(G, node, use_bgp)
-    print('one:1')
     mat, _ = normalize_matrix(G, node, mat, MAX_ROUNDS)
-    print('one:done')
     if np.any(np.isnan(mat)):
         raise ValueError("Elements in the matrix are NaN.")
     return mat
@@ -60,7 +55,6 @@ def get_matrix_entries(
     for idx_src, src in enumerate(neigh):
         for idx_dst, dst in enumerate(neigh):
             if src != dst:
-                print(G[src][node])
                 cap = G[src][node][BW]
                 if use_bgp:
                     allow = _get_bgp_bw(G, node, src, dst, cap)

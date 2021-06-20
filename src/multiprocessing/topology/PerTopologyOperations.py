@@ -223,9 +223,7 @@ class AllocationMatrixComputation(TopologyMultiprocessing):
             if not os.path.exists(path) or self.force:
 
                 graph = dh.get_graph(cur_dir)
-                print('0')
                 allocation_matrices = all_allocation_matrices(graph)
-                print('fin')
                 dh.set_tm(allocation_matrices, cur_dir)
 
             print(f"{cur_dir}: Done")

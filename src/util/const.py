@@ -9,7 +9,7 @@ import os
 #
 ###
 
-
+CAIDA = "dat/CAIDA/20210601.as-rel.txt"
 COVER_THRESHOLD = 1e-6
 UNIT = "Gbps"
 CAPACITY_INTERVALS = [10, 40, 100]
