@@ -36,13 +36,16 @@ class NodeMultiprocessing:
 
     def listener(self, q):
         d = {}
+        count = 0
+        l = len(self.nodes)
         self.write(d)
         while 1:
             m = q.get()
 
             if m == 'kill':
                 break
-            print(f'Got result for node: {list(m.keys())[0]}')
+            count = count+1
+            print(f'Got result for node: {list(m.keys())[0]}\n{count/l}% done')
             data = self.get_data()
             data[list(m.keys())[0]] = list(m.values())[0]
             self.write(data)
