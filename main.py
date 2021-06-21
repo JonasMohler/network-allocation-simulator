@@ -125,21 +125,21 @@ def main(args):
     # TODO
 
     # - Compute Degrees, Diameters, shortest paths, traffic matrices, shortest path sampling, path lengths
-    degs = DegreesComputation(dirs, cores, force)
-    degs.run()
+    #degs = DegreesComputation(dirs, cores, force)
+    #degs.run()
 
-    shortest_paths = ShortestPathsComputation(dirs, cores, force)
-    shortest_paths.run()
+    #shortest_paths = ShortestPathsComputation(dirs, cores, force)
+    #shortest_paths.run()
 
-    diameters = DiameterComputation(dirs, cores, force)
-    diameters.run()
+    #diameters = DiameterComputation(dirs, cores, force)
+    #diameters.run()
 
-    tm = AllocationMatrixComputation(dirs, cores, force)
-    tm.run()
+    #tm = AllocationMatrixComputation(dirs, cores, force)
+    #tm.run()
 
-    for r in ratios:
-        sample = PathSampling(dirs, cores, force, r)
-        sample.run()
+    #for r in ratios:
+    #    sample = PathSampling(dirs, cores, force, r)
+    #    sample.run()
 
     count = PathCounting(dirs, cores, force)
     count.run()
