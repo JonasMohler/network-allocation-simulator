@@ -5,6 +5,12 @@ import src.util.data_handler as dh
 from src.util.const import *
 from src.util.utility import dict_from_list
 from multiprocessing.pool import Pool
+from multiprocessing.managers import SyncManager
+
+
+def init_lock(l):
+    global lock
+    lock = l
 
 
 class NodeMultiprocessing:
@@ -24,12 +30,37 @@ class NodeMultiprocessing:
 
     'Takes current node, must return result of form {node: compRes}'
     @abstractmethod
-    def per_node_op(self, cur_node):
+    def per_node_op(self, args):
         """Run this operation on every node selected."""
         raise NotImplementedError
 
-    def update(self, data):
-        pass
+    def listener(self, q):
+        d = {}
+        self.write(d)
+        while 1:
+            m = q.get()
+
+            if m == 'kill':
+                break
+            print(f'Got result for node: {list(m.keys())[0]}')
+            data = self.get_data()
+            data[list(m.keys())[0]] = list(m.values())[0]
+            self.write(data)
+
+    def get_data(self):
+        if self.data_type == SHORTEST_PATH:
+            data = dh.get_shortest_paths(self.dir, self.ratio)
+        elif self.data_type == PATH_COUNTS:
+            data = dh.get_pc(self.dir, self.ratio)
+        elif self.data_type == PATH_LENGTHS:
+            data = dh.get_pl(self.dir)
+        elif self.data_type == ALLOCATION_MATRIX:
+            data = dh.get_tm(self.dir)
+        elif self.data_type == COVER:
+            data = dh.get_cover(self.dir, self.strategy, self.thresh, self.ratio)
+        else:
+            print('unknown data type to store results to')
+        return data
 
     def write(self, data):
         if self.data_type == SHORTEST_PATH:
@@ -51,21 +82,30 @@ class NodeMultiprocessing:
 
         if VERBOSITY >= 2: print(f"START: {self.description}...")
         st = time.time()
+        with SyncManager() as man:
 
-        #path = dh.get_full_path(self.dir, self.data_type, self.strategy, self.thresh, self.ratio)
+            q = man.Queue()
 
-        #if self.force or not os.path.exists(path):
+            # path = dh.get_full_path(self.dir, self.data_type, self.strategy, self.thresh, self.ratio)
+            # if self.force or not os.path.exists(path):
 
-        pool_inner = Pool(self.n_proc)
+            p = Pool(self.n_proc)
 
-        res = pool_inner.map_async(self.per_node_op, self.nodes)
+            watcher = p.apply_async(self.listener, (q, ))
 
-        pool_inner.close()
+            qs = [q for i in self.nodes]
 
-        pool_inner.join()
+            res = p.map_async(self.per_node_op, zip(self.nodes, qs))
 
-        result = dict_from_list(res.get())
 
-        self.write(result)
+            res.get()
+
+            q.put('kill')
+            p.close()
+            p.join()
+
+            #result = dict_from_list(res.get())
+
+            #self.write(result)
 
         if VERBOSITY >= 2: print(f"END: {self.description}; completed in {time.time() - st}")

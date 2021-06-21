@@ -16,10 +16,14 @@ class ShortestPathsComputation(NodeMultiprocessing):
         super(ShortestPathsComputation, self).__init__(cur_dir, nodes, n_proc, SHORTEST_PATH, force)
         self.graph = graph
 
-    def per_node_op(self, node):
+    def per_node_op(self, args):
+        cur_node = args[0]
+        q = args[1]
+
         try:
-            sp = {node: single_shortest_path(self.graph, node)}
-            return sp
+            sp = {cur_node: single_shortest_path(self.graph, cur_node)}
+            q.put(sp)
+            return 0
         except Exception as e:
             print(f"Error occured in Node Shortest Path computation: {e}")
 
@@ -31,10 +35,14 @@ class PathLengthComputation(NodeMultiprocessing):
         super(PathLengthComputation, self).__init__(cur_dir, nodes, n_proc, PATH_LENGTHS, force)
         self.graph = graph
 
-    def per_node_op(self, node):
+    def per_node_op(self, args):
+        cur_node = args[0]
+        q = args[1]
+
         try:
-            pl = {node: single_shortest_path_length(self.graph, node)}
-            return pl
+            pl = {cur_node: single_shortest_path_length(self.graph, cur_node)}
+            q.put(pl)
+            return 0
         except Exception as e:
             print(f"Error occured in Node Path Length computation: {e}")
 
@@ -49,7 +57,10 @@ class PathSampling(NodeMultiprocessing):
         self.centrality = centrality
         self.n_dests = n_dests
 
-    def per_node_op(self, cur_node):
+    def per_node_op(self, args):
+        cur_node = args[0]
+        q = args[1]
+
         try:
 
             #st = time.time()
@@ -81,8 +92,8 @@ class PathSampling(NodeMultiprocessing):
             #print(f"Select: {t3}, %{t3/t4}")
 
             res = {cur_node: selected_paths}
-
-            return res
+            q.put(res)
+            return 0
 
         except Exception as e:
             print(f"Error occured in Node Path Sampling: {e}")
@@ -95,7 +106,10 @@ class PathCounting(NodeMultiprocessing):
         super(PathCounting, self).__init__(cur_dir, nodes, n_proc, PATH_COUNTS, force, ratio=ratio)
         self.shortest_paths = shortest_paths
 
-    def per_node_op(self, cur_node):
+    def per_node_op(self, args):
+        cur_node = args[0]
+        q = args[1]
+
 
         try:
 
@@ -138,8 +152,8 @@ class PathCounting(NodeMultiprocessing):
                         counter[(i_in, i_out)][src] = 1
 
             res = {cur_node: counter}
-
-            return res
+            q.put(res)
+            return 0
 
         except Exception as e:
             print(f"Error occured in Node Path counting: {e}")
@@ -157,10 +171,13 @@ class CoverComputation(NodeMultiprocessing):
         self.thresh = thresh
         '''
 
-    def per_node_op(self, cur_node):
+    def per_node_op(self, args):
+        cur_node = args[0]
+        q = args[1]
 
         res = per_node_alloc_to_cover(self.alloc[cur_node], self.thresh, self.shortest_paths[cur_node])
-        return {cur_node: res}
+        q.put({cur_node: res})
+        return 0
 
 
 class AllocationMatrixComputation(NodeMultiprocessing):
@@ -170,14 +187,16 @@ class AllocationMatrixComputation(NodeMultiprocessing):
         super(AllocationMatrixComputation, self).__init__(cur_dir, nodes, n_proc, ALLOCATION_MATRIX, force)
         self.graph = graph
 
-    def per_node_op(self, cur_node):
+    def per_node_op(self, args):
+        cur_node = args[0]
+        q = args[1]
 
         try:
             tm = allocation_matrix(self.graph, cur_node)
 
             res = AllocationMatrices(cur_node, tm)
-
-            return res
+            q.put(res)
+            return 0
 
         except Exception as e:
             print(f"Error occured in per node allocation matrix computation; {e}")
