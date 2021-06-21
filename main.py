@@ -145,7 +145,7 @@ def main(args):
     count.run()
 
     for r in ratios:
-        count = PathCounting(dirs, cores, force, r)
+        count = PathCounting2(dirs, cores, force, r)
         count.run()
 
     lengths = PathLengthComputation(dirs, cores, force)

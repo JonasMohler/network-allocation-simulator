@@ -90,8 +90,8 @@ class PathCounting2(TopologyMultiprocessing):
     def per_dir_op(self, cur_dir):
 
         try:
-
-            super(PathCounting, self).per_dir_op(cur_dir)
+            print('Counting in right class')
+            super(PathCounting2, self).per_dir_op(cur_dir)
             res = {}
             deg = dh.get_degrees(cur_dir)
             sp = dh.get_shortest_paths(cur_dir, self.ratio)
