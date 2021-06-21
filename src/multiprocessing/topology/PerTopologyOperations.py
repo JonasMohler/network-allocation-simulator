@@ -68,7 +68,7 @@ class PathCounting(TopologyMultiprocessing):
             sp = dh.get_shortest_paths(cur_dir, self.ratio)
             nodes = deg['nodes']
 
-            proc = pno.PathCounting(cur_dir, nodes, self.n_proc, self.force, sp, ratio=self.ratio)
+            proc = pno.PathCounting2(cur_dir, nodes, self.n_proc, self.force, sp, ratio=self.ratio)
 
             proc.run()
 

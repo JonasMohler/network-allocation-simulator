@@ -45,7 +45,7 @@ class NodeMultiprocessing:
             if m == 'kill':
                 break
             count = count+1
-            print(f'Got result for node: {list(m.keys())[0]}\n{count/l}% done')
+            print(f'Got result for node: {list(m.keys())[0]}\n{100*count/l}% done')
             data = self.get_data()
             data[list(m.keys())[0]] = list(m.values())[0]
             self.write(data)

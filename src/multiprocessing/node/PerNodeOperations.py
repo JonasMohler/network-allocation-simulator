@@ -159,6 +159,67 @@ class PathCounting(NodeMultiprocessing):
             print(f"Error occured in Node Path counting: {e}")
 
 
+class PathCounting2(NodeMultiprocessing):
+    description = "Counting of paths traversing nodes"
+
+    def __init__(self, cur_dir, nodes, n_proc, force, shortest_paths, ratio=None):
+        super(PathCounting2, self).__init__(cur_dir, nodes, n_proc, PATH_COUNTS, force, ratio=ratio)
+        self.shortest_paths = shortest_paths
+
+    def per_node_op(self, args):
+        cur_node = args[0]
+        q = args[1]
+
+        try:
+
+            # traversing_paths = []
+            sp = self.shortest_paths
+            counter = dict()
+
+            for n in sp:
+
+                for n2 in sp[n]:
+
+                    if cur_node in sp[n][n2]:
+
+            #            traversing_paths.append(sp[n][n2])
+                        path = sp[n][n2]
+
+
+            #for path in traversing_paths:
+                        if len(path) > 1:
+                            src = n
+                            id = path.index(cur_node)
+
+                            if id == 0:
+                                # node is first on path
+                                i_in = cur_node
+                                i_out = path[id+1]
+                            elif id == len(path) - 1:
+                                # node is last on path
+                                i_in = path[id-1]
+                                i_out = cur_node
+                            else:
+                                i_in = path[id-1]
+                                i_out = path[id+1]
+
+                            if (i_in, i_out) in counter:
+                                if src in counter[(i_in, i_out)]:
+                                    counter[(i_in, i_out)][src] = counter[(i_in, i_out)][src]+1
+                                else:
+                                    counter[(i_in, i_out)][src] = 1
+                            else:
+                                counter[(i_in, i_out)] = dict()
+                                counter[(i_in, i_out)][src] = 1
+
+            res = {cur_node: counter}
+            q.put(res)
+            return 0
+
+        except Exception as e:
+            print(f"Error occured in Node Path counting: {e}")
+
+
 class CoverComputation(NodeMultiprocessing):
     description = "Cover Computation per Node"
 
