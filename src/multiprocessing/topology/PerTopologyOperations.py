@@ -7,6 +7,8 @@ import src.multiprocessing.node.PerNodeOperations as pno
 from src.util.const import *
 import src.util.data_handler as dh
 import fnss
+from multiprocessing import Array, shared_memory
+from multiprocessing.managers import SyncManager
 
 from src.path_algorithms.gma_improved import GMAImproved
 from src.path_algorithms.sqos_algorithm import ScaledQoSAlgorithmOB, ScaledQoSAlgorithmOT, ScaledQoSAlgorithmPB, ScaledQoSAlgorithmPT
@@ -66,11 +68,18 @@ class PathCounting(TopologyMultiprocessing):
 
             deg = dh.get_degrees(cur_dir)
             sp = dh.get_shortest_paths(cur_dir, self.ratio)
+            man = SyncManager()
+            man.start()
+            d = man.dict(sp)
+            #arr = Array(lock=False)
             nodes = deg['nodes']
+            #for n in nodes:
+            #    arr[int(n)]=sp[n]
 
-            proc = pno.PathCounting2(cur_dir, nodes, self.n_proc, self.force, sp, ratio=self.ratio)
+            proc = pno.PathCounting2(cur_dir, nodes, self.n_proc, self.force, sp, ratio=self.ratio, shared_dict=d)
 
             proc.run()
+            man.shutdown()
 
             print(f"{cur_dir}: Done")
         except Exception as e:

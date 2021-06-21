@@ -162,9 +162,10 @@ class PathCounting(NodeMultiprocessing):
 class PathCounting2(NodeMultiprocessing):
     description = "Counting of paths traversing nodes"
 
-    def __init__(self, cur_dir, nodes, n_proc, force, shortest_paths, ratio=None):
+    def __init__(self, cur_dir, nodes, n_proc, force, shortest_paths=None, ratio=None, shared_dict=None):
         super(PathCounting2, self).__init__(cur_dir, nodes, n_proc, PATH_COUNTS, force, ratio=ratio)
         self.shortest_paths = shortest_paths
+        self.d = shared_dict
 
     def per_node_op(self, args):
         cur_node = args[0]
@@ -173,17 +174,19 @@ class PathCounting2(NodeMultiprocessing):
         try:
 
             # traversing_paths = []
-            sp = self.shortest_paths
+            #sp = self.shortest_paths
             counter = dict()
+            for n in self.nodes:
+            #for n in sp:
 
-            for n in sp:
-
-                for n2 in sp[n]:
-
-                    if cur_node in sp[n][n2]:
+                for n2 in self.d[n]:
+                #for n2 in sp[n]:
+                    if cur_node in self.d[n][n2]:
+                    #if cur_node in sp[n][n2]:
 
             #            traversing_paths.append(sp[n][n2])
-                        path = sp[n][n2]
+                        path = self.d[n][n2]
+                        #path = sp[n][n2]
 
 
             #for path in traversing_paths:

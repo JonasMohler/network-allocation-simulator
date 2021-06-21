@@ -141,11 +141,11 @@ def main(args):
     #    sample = PathSampling(dirs, cores, force, r)
     #    sample.run()
 
-    count = PathCounting2(dirs, cores, force)
+    count = PathCounting(dirs, cores, force)
     count.run()
 
     for r in ratios:
-        count = PathCounting2(dirs, cores, force, r)
+        count = PathCounting(dirs, cores, force, r)
         count.run()
 
     lengths = PathLengthComputation(dirs, cores, force)
