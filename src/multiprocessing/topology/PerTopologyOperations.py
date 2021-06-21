@@ -7,7 +7,7 @@ import src.multiprocessing.node.PerNodeOperations as pno
 from src.util.const import *
 import src.util.data_handler as dh
 import fnss
-from multiprocessing import Array, shared_memory
+#from multiprocessing import Array, shared_memory
 from multiprocessing.managers import SyncManager
 
 from src.path_algorithms.gma_improved import GMAImproved
