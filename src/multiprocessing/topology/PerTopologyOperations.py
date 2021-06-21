@@ -77,6 +77,74 @@ class PathCounting(TopologyMultiprocessing):
             print(f"Error occured in Path Counting: {e}")
 
 
+class PathCounting2(TopologyMultiprocessing):
+    description = 'Counting of Paths'
+
+    def __init__(self, dirs, n_proc, force_recompute, ratio=None):
+        super(PathCounting2, self).__init__(dirs, n_proc, PATH_COUNTS, force_recompute, ratio=ratio)
+
+    def find_or_compute_precursors(self, cur_dir):
+        # Needs Sampled shortest paths
+        pass
+
+    def per_dir_op(self, cur_dir):
+
+        try:
+
+            super(PathCounting, self).per_dir_op(cur_dir)
+            res = {}
+            deg = dh.get_degrees(cur_dir)
+            sp = dh.get_shortest_paths(cur_dir, self.ratio)
+            nodes = deg['nodes']
+
+            c = 0
+            alln = len(nodes)
+            for cur_node in nodes:
+                counter = dict()
+
+                for n in sp:
+
+                    for n2 in sp[n]:
+
+                        if cur_node in sp[n][n2]:
+
+                            #            traversing_paths.append(sp[n][n2])
+                            path = sp[n][n2]
+
+                            # for path in traversing_paths:
+                            if len(path) > 1:
+                                src = n
+                                id = path.index(cur_node)
+
+                                if id == 0:
+                                    # node is first on path
+                                    i_in = cur_node
+                                    i_out = path[id + 1]
+                                elif id == len(path) - 1:
+                                    # node is last on path
+                                    i_in = path[id - 1]
+                                    i_out = cur_node
+                                else:
+                                    i_in = path[id - 1]
+                                    i_out = path[id + 1]
+
+                                if (i_in, i_out) in counter:
+                                    if src in counter[(i_in, i_out)]:
+                                        counter[(i_in, i_out)][src] = counter[(i_in, i_out)][src] + 1
+                                    else:
+                                        counter[(i_in, i_out)][src] = 1
+                                else:
+                                    counter[(i_in, i_out)] = dict()
+                                    counter[(i_in, i_out)][src] = 1
+                res[cur_node] = counter
+                c=c+1
+                print(f"{100*c/alln}% done")
+
+            print(f"{cur_dir}: Done")
+        except Exception as e:
+            print(f"Error occured in Path Counting: {e}")
+
+
 class ShortestPathsComputation(TopologyMultiprocessing):
     description = "Computation of SHORTEST PATHS"
 

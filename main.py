@@ -141,7 +141,7 @@ def main(args):
     #    sample = PathSampling(dirs, cores, force, r)
     #    sample.run()
 
-    count = PathCounting(dirs, cores, force)
+    count = PathCounting2(dirs, cores, force)
     count.run()
 
     for r in ratios:
