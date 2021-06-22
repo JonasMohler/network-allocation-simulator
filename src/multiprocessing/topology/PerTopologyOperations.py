@@ -208,7 +208,7 @@ class AllShortestPathsComputation(TopologyMultiprocessing):
             graph = dh.get_graph(cur_dir)
 
             sps = all_shortest_paths(graph)
-            dh.get_shortest_paths(graph)
+            dh.set_shortest_paths(graph, cur_dir)
 
 
             print(f"{cur_dir}: Done")
