@@ -366,7 +366,7 @@ class CoverageComputation(TopologyMultiprocessing):
 
             cover = alloc_to_cover(alloc, self.cover_thresh, sp)
 
-            dh.set_cover(cover, cur_dir, self.strategy, self.ratio)
+            dh.set_cover(cover, cur_dir, self.strategy, self.cover_thresh, self.ratio)
 
             print(f"{cur_dir}: Done")
 
