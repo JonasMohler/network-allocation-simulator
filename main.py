@@ -141,14 +141,14 @@ def main(args):
         sample = PathSampling(dirs, cores, force, r)
         sample.run()
     #
-    count = PathCounting(dirs, cores, force)
+    count = PathCounting2(dirs, cores, force)
     count.run()
 
     for r in ratios:
         count = PathCounting2(dirs, cores, force, r)
         count.run()
 
-    lengths = PathLengthComputation2(dirs, cores, force)
+    lengths = PathLengthComputation(dirs, cores, force)
     lengths.run()
 
     gma = GMAAllocationComputation(dirs, cores, force)
