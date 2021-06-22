@@ -166,7 +166,8 @@ def set_internal_cap_fraction_out(graph, fraction=0.1, min_cap=0):
 #
 ###
 
-def numpy_choice(self, num_samples, sample_size, elements, probabilities):
+
+def numpy_choice(num_samples, sample_size, elements, probabilities):
     return np.asarray([np.random.choice(elements, sample_size, p=probabilities, replace=True) for _ in range(num_samples)])
 
 
