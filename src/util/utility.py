@@ -217,7 +217,7 @@ def alloc_to_cover(alloc, thresh, sps):
         num_destinations = len(sps[src])
         for dst, data in src_paths.items():
             if dst in sps[src]:
-                pall = data
+                pall = data[0]
                 if pall > thresh:
                     # The allocation is larger than the threshold.
                     # Update the cover.
