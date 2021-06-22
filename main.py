@@ -150,13 +150,15 @@ def main(args):
     for r in ratios:
         sample = PathSampling2(dirs, cores, force, r)
         sample.run()
-    '''
+    
     count = PathCounting2(dirs, cores, force)
     count.run()
 
     for r in ratios:
         count = PathCounting2(dirs, cores, force, r)
         count.run()
+
+    '''
 
     lengths = PathLengthComputation(dirs, cores, force)
     lengths.run()
