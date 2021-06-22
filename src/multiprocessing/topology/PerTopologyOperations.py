@@ -1,6 +1,8 @@
 """Parallel runners for experimentation and analysis."""
 import os.path
 
+import numpy as np
+
 from src.util.utility import *
 from src.multiprocessing.topology.TopolgyMultiprocessing import TopologyMultiprocessing
 import src.multiprocessing.node.PerNodeOperations as pno
@@ -44,6 +46,59 @@ class PathSampling(TopologyMultiprocessing):
                 # for each node, select a number of destinations at random, weighted by the centrality of nodes
                 proc = pno.PathSampling(cur_dir, deg['nodes'], self.n_proc, self.force, sp, deg, centrality, n_dests, self.ratio)
                 proc.run()
+
+            print(f"{cur_dir}: Done")
+        except Exception as e:
+            print(f"Error occured in Path Sampling: {e}")
+
+
+class PathSampling2(TopologyMultiprocessing):
+    description = 'Sampling of Paths'
+
+    def __init__(self, dirs, n_proc, force_recompute, ratio):
+        super(PathSampling2, self).__init__(dirs, n_proc, SHORTEST_PATH, force_recompute)
+        self.ratio = ratio
+
+    def find_or_compute_precursors(self, cur_dir):
+        # Needs shortest paths
+        pass
+
+    def per_dir_op(self, cur_dir):
+        try:
+            # super(PathSampling, self).per_dir_op(cur_dir)
+            if not os.path.exists(dh.get_full_path(cur_dir, SHORTEST_PATH, ratio=self.ratio)):
+                sp = dh.get_shortest_paths(cur_dir)
+                deg = dh.get_degrees(cur_dir)
+                nodes = deg['nodes']
+                degrees = deg['degrees']
+                # Calculate the centrality of all nodes
+                s = sum(degrees)
+
+                centrality = [i / s for i in deg['degrees']]
+                r = float(self.ratio)
+
+                n_nodes = len(nodes)
+
+                n_samples = int(round(n_nodes * r))
+
+                print('starting sampling')
+                dests = numpy_choice(n_nodes, n_samples, nodes, centrality)
+                print('sampling done')
+
+                print('start assigning')
+                all_selected_paths = {}
+                for i in range(len(nodes)):
+
+                    selected_paths = {}
+                    for d in dests[i]:
+                        if d != nodes[i]:
+                            selected_paths[d] = sp[nodes[i]][d]
+
+                    all_selected_paths[nodes[i]] = selected_paths
+                print('assigning done')
+                print('store')
+                dh.set_shortest_paths(all_selected_paths, cur_dir, ratio=self.ratio)
+                print('stored')
 
             print(f"{cur_dir}: Done")
         except Exception as e:
