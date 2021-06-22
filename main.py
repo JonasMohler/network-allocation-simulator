@@ -123,7 +123,7 @@ def main(args):
     # Preprocessing:
     # - Create topologies from zoo / rand topologies, add capacities
     # TODO
-    '''
+
     # - Compute Degrees, Diameters, shortest paths, traffic matrices, shortest path sampling, path lengths
     degs = DegreesComputation(dirs, cores, force)
     degs.run()
@@ -158,7 +158,7 @@ def main(args):
         count = PathCounting2(dirs, cores, force, r)
         count.run()
 
-    '''
+
 
     lengths = PathLengthComputation2(dirs, cores, force)
     lengths.run()

@@ -3,6 +3,7 @@ import matplotlib
 #matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
+import itertools
 import pandas as pd
 import os
 import src.util.data_handler as dh
@@ -52,6 +53,39 @@ _STRATEGY_MARKERS = [marker[i] for i in range(len(_STRATEGIES))]
 _ALL_GRAPHS = os.listdir('dat/topologies/')
 
 _THRESH = '0.01'
+
+_ADD_LINKS = [
+    1,
+    2,
+    5,
+    10,
+    15
+]
+_INIT_NODES = [
+    20,
+    25,
+    50,
+    75,
+    100
+]
+P_LINK_CREATE = [
+    0.05,
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9
+]
+RAND_N_NODES = 250
+_BARAB = [list(zip(each_permutation, _ADD_LINKS)) for each_permutation in itertools.permutations(_INIT_NODES, len(_ADD_LINKS))]
+_BARAB = [f'Barabasi_Albert_{add_link}_{init_l}_({RAND_N_NODES})' for (init_l, add_link) in _BARAB]
+_ERDOS = [f"Erdos_Renyi_{p}_({RAND_N_NODES})" for p in P_LINK_CREATE]
+
+_RAND_GRAPHS = _BARAB + _ERDOS
 
 
 def sfname(graph):

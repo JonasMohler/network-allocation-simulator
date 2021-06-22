@@ -432,11 +432,6 @@ class GMAAllocationComputation(TopologyMultiprocessing):
 
 
 class SQoSOTComputation(TopologyMultiprocessing):
-    """Compute the allocations for the k-shortest-paths case.
-
-    This class uses the "Strategy" design pattern.
-    A `PathAlgorithm` class (the strategy) computes the path allocations.
-    """
 
     description = "Computation of the ALLOCATIONS using Optimistic SQoS with Time Division"
 
@@ -469,11 +464,6 @@ class SQoSOTComputation(TopologyMultiprocessing):
 
 
 class SQoSOBComputation(TopologyMultiprocessing):
-    """Compute the allocations for the k-shortest-paths case.
-
-    This class uses the "Strategy" design pattern.
-    A `PathAlgorithm` class (the strategy) computes the path allocations.
-    """
 
     description = "Computation of the ALLOCATIONS using Optimistic SQoS with Bandwidth Divison"
 
@@ -506,11 +496,6 @@ class SQoSOBComputation(TopologyMultiprocessing):
 
 
 class SQoSPTComputation(TopologyMultiprocessing):
-    """Compute the allocations for the k-shortest-paths case.
-
-    This class uses the "Strategy" design pattern.
-    A `PathAlgorithm` class (the strategy) computes the path allocations.
-    """
 
     description = "Computation of the ALLOCATIONS using Pessimistic SQoS with Time Divison"
 
@@ -542,11 +527,6 @@ class SQoSPTComputation(TopologyMultiprocessing):
 
 
 class SQoSPBComputation(TopologyMultiprocessing):
-    """Compute the allocations for the k-shortest-paths case.
-
-    This class uses the "Strategy" design pattern.
-    A `PathAlgorithm` class (the strategy) computes the path allocations.
-    """
 
     description = "Computation of the ALLOCATIONS using Pessimistic SQoS with Bandwidth Divison"
 

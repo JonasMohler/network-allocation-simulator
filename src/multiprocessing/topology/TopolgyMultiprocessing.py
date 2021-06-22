@@ -29,14 +29,7 @@ class TopologyMultiprocessing:
     def per_dir_op(self, cur_dir):
         """Run this operation on every directory selected."""
         try:
-            path = dh.get_full_path(cur_dir, self.data_type, self.strategy, self.ratio)
-            if not self.force and os.path.exists(path):
-                print(f'File:\n{path}\nPresent already (use --fm to force recompute)')
-                return
-
-            #self.find_or_compute_precursors(cur_dir)
-
-            return
+            pass
         except Exception as e:
             print(f"Error occured: {e}")
 
