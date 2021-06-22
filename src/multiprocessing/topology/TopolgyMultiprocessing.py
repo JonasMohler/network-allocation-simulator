@@ -4,7 +4,7 @@ import time
 from abc import abstractmethod
 from argparse import ArgumentParser
 #from concurrent.futures import ProcessPoolExecutor as Pool
-from multiprocessing import Pool
+from multiprocessing.pool import Pool
 import src.util.data_handler as dh
 from src.util.const import VERBOSITY
 
@@ -13,7 +13,7 @@ class TopologyMultiprocessing:
     description = ""
 
     def __init__(self, dirs, n_proc, data_type, force_recompute, strategy=None, ratio=None):
-        print(f"----")
+        print(f"\n----\n")
         self.dirs = dirs
         self.n_proc = n_proc
         self.force = force_recompute
@@ -31,9 +31,10 @@ class TopologyMultiprocessing:
         try:
             path = dh.get_full_path(cur_dir, self.data_type, self.strategy, self.ratio)
             if not self.force and os.path.exists(path):
+                print(f'File:\n{path}\nPresent already (use --fm to force recompute)')
                 return
 
-            self.find_or_compute_precursors(cur_dir)
+            #self.find_or_compute_precursors(cur_dir)
 
             return
         except Exception as e:
@@ -59,6 +60,7 @@ class TopologyMultiprocessing:
             p.map(self.per_dir_op, self.dirs)
         '''
         for dir in self.dirs:
+            print(f"\n{dir}: Start")
             self.per_dir_op(dir)
 
         if VERBOSITY >= 2: print(f"END: {self.description}; completed in {time.time() - st}")

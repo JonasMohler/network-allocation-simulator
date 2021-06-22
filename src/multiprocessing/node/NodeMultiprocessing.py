@@ -17,7 +17,7 @@ class NodeMultiprocessing:
     description = ""
 
     def __init__(self, dir, nodes, n_proc, data_type, force_recompute, strategy=None, ratio=None, thresh=None):
-        print(f"----")
+        print(f"\n----\n")
 
         self.dir = dir
         self.force = force_recompute
@@ -45,10 +45,11 @@ class NodeMultiprocessing:
             if m == 'kill':
                 break
             count = count+1
-            print(f'Got result for node: {list(m.keys())[0]}\n{100*count/l}% done')
+            #print(f'Got result for node: {list(m.keys())[0]}\n{100*count/l}% done')
             data = self.get_data()
             data[list(m.keys())[0]] = list(m.values())[0]
             self.write(data)
+            #print(f"{count*100/l} % nodes done")
 
     def get_data(self):
         if self.data_type == SHORTEST_PATH:
@@ -67,7 +68,6 @@ class NodeMultiprocessing:
 
     def write(self, data):
         if self.data_type == SHORTEST_PATH:
-            print('here')
             dh.set_shortest_paths(data, self.dir, self.ratio)
         elif self.data_type == PATH_COUNTS:
             dh.set_pc(data, self.dir, self.ratio)
@@ -88,6 +88,8 @@ class NodeMultiprocessing:
         with SyncManager() as man:
 
             q = man.Queue()
+            #d = man.dict()
+
 
             # path = dh.get_full_path(self.dir, self.data_type, self.strategy, self.thresh, self.ratio)
             # if self.force or not os.path.exists(path):
