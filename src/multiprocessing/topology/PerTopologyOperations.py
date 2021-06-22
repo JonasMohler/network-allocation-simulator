@@ -578,6 +578,45 @@ class SQoSPBComputation(TopologyMultiprocessing):
             print(f"Error occurred in SQoS Allocation Computation: {e}")
 
 
+class PathLengthComputation2(TopologyMultiprocessing):
+
+    description = "Counting of Path shortest path lenghts"
+
+    def __init__(self, dirs, n_proc, force_recompute):
+        super(PathLengthComputation2, self).__init__(dirs, n_proc, 'path_lengths.csv', force_recompute)
+
+    def find_or_compute_precursors(self, cur_dir):
+        pass
+
+    def per_dir_op(self, cur_dir):
+        try:
+            #super(PathLengthComputation, self).per_dir_op(cur_dir)
+            deg = dh.get_degrees(cur_dir)
+            nodes = deg['nodes']
+            sps = dh.get_shortest_paths(cur_dir)
+            graph = dh.get_graph(cur_dir)
+
+            pls = {}
+            i = 0
+            alln = len(nodes)
+            for n in nodes:
+                pl = {}
+                for n2 in nodes:
+                    pl[n2] = len(sps[n][n2])
+                pls[n] = pl
+
+            i = i+1
+            if i == alln:
+                print(f"{round(100 * i / alln, 4)}%")
+            else:
+                print(f"{round(100 * i / alln, 4)}%", end="\r")
+
+            print(f"{cur_dir}: Done")
+
+        except Exception as e:
+            print(f'Error occured in Path Length Computation: {e}')
+
+
 class PathLengthComputation(TopologyMultiprocessing):
 
     description = "Counting of Path shortest path lenghts"
