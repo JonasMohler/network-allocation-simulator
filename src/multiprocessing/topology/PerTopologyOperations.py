@@ -95,8 +95,11 @@ class PathSampling2(TopologyMultiprocessing):
                             selected_paths[d] = sp[nodes[i]][d]
 
                     all_selected_paths[nodes[i]] = selected_paths
-                print('assigning done')
-                print('store')
+                    if i == n_nodes:
+                        print(f"{100*i/n_nodes}%")
+                    else:
+                        print(f"{100*i/n_nodes}%", end="\r")
+
                 dh.set_shortest_paths(all_selected_paths, cur_dir, ratio=self.ratio)
                 print('stored')
 
@@ -202,7 +205,13 @@ class PathCounting2(TopologyMultiprocessing):
                                     counter[(i_in, i_out)][src] = 1
                 res[cur_node] = counter
                 c=c+1
-                print(f"{100*c/alln}% done")
+                if c == alln:
+                    print(f"{100*c/alln}%")
+                else:
+                    print(f"{100*c/alln}%", end="\r")
+
+
+            dh.set_pc(res, cur_dir, self.ratio)
 
             print(f"{cur_dir}: Done")
         except Exception as e:
@@ -587,7 +596,7 @@ class PathLengthComputation(TopologyMultiprocessing):
 
     def per_dir_op(self, cur_dir):
         try:
-            super(PathLengthComputation, self).per_dir_op(cur_dir)
+            #super(PathLengthComputation, self).per_dir_op(cur_dir)
             deg = dh.get_degrees(cur_dir)
             nodes = deg['nodes']
             sps = dh.get_shortest_paths(cur_dir)
