@@ -160,7 +160,7 @@ def main(args):
 
     '''
 
-    lengths = PathLengthComputation(dirs, cores, force)
+    lengths = PathLengthComputation2(dirs, cores, force)
     lengths.run()
 
     gma = GMAAllocationComputation(dirs, cores, force)
