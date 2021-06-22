@@ -123,58 +123,60 @@ def main(args):
     # Preprocessing:
     # - Create topologies from zoo / rand topologies, add capacities
     # TODO
-
+    '''
     # - Compute Degrees, Diameters, shortest paths, traffic matrices, shortest path sampling, path lengths
-    #degs = DegreesComputation(dirs, cores, force)
-    #degs.run()
+    degs = DegreesComputation(dirs, cores, force)
+    degs.run()
 
     #shortest_paths = ShortestPathsComputation(dirs, cores, force)
     #shortest_paths.run()
+    
+    shortest_paths = AllShortestPathsComputation(dirs, cores, force)
+    shortest_paths.run()
 
-    #shortest_paths = AllShortestPathsComputation(dirs, cores, force)
-    #shortest_paths.run()
 
-    #diameters = DiameterComputation(dirs, cores, force)
-    #diameters.run()
+    diameters = DiameterComputation(dirs, cores, force)
+    diameters.run()
 
-    #tm = AllocationMatrixComputation(dirs, cores, force)
-    #tm.run()
+
+    tm = AllocationMatrixComputation(dirs, cores, force)
+    tm.run()
 
     #for r in ratios:
     #    sample = PathSampling(dirs, cores, force, r)
     #    sample.run()
     #
 
-    #for r in ratios:
-    #    sample = PathSampling2(dirs, cores, force, r)
-    #    sample.run()
+    for r in ratios:
+        sample = PathSampling2(dirs, cores, force, r)
+        sample.run()
+    '''
+    count = PathCounting2(dirs, cores, force)
+    count.run()
 
-    #count = PathCounting2(dirs, cores, force)
-    #count.run()
+    for r in ratios:
+        count = PathCounting2(dirs, cores, force, r)
+        count.run()
 
-    #for r in ratios:
-    #    count = PathCounting2(dirs, cores, force, r)
-    #    count.run()
+    lengths = PathLengthComputation(dirs, cores, force)
+    lengths.run()
 
-    #lengths = PathLengthComputation(dirs, cores, force)
-    #lengths.run()
+    gma = GMAAllocationComputation(dirs, cores, force)
+    gma.run()
 
-    #gma = GMAAllocationComputation(dirs, cores, force)
-    #gma.run()
+    s10 = SQoSPTComputation(dirs, cores, force)
+    s10.run()
 
-    #s10 = SQoSPTComputation(dirs, cores, force)
-    #s10.run()
+    s11 = SQoSPBComputation(dirs, cores, force)
+    s11.run()
 
-    #s11 = SQoSPBComputation(dirs, cores, force)
-    #s11.run()
+    for r in ratios:
+        s20 = SQoSOTComputation(dirs, cores, force, r)
+        s20.run()
 
-    #for r in ratios:
-    #    s20 = SQoSOTComputation(dirs, cores, force, r)
-    #    s20.run()
-
-    #for r in ratios:
-    #    s21 = SQoSOBComputation(dirs, cores, force, r)
-    #    s21.run()
+    for r in ratios:
+        s21 = SQoSOBComputation(dirs, cores, force, r)
+        s21.run()
 
     # Covers: TODO
     for s in strategies:
@@ -194,6 +196,8 @@ def main(args):
     # Vizualizations: TODO
     if args.viz:
         pass
+
+
 
 
 if __name__ == "__main__":

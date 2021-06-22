@@ -47,12 +47,21 @@ class PathAlgorithm:
 
     def compute_for_all_single_paths(self, paths: SinglePathsDict) -> PathsResult:
         """Compute the algorithm for all the paths provided."""
+
+        i=0
+        alln = len(paths.items())
+
         result: PathsResult = defaultdict(dict)
         for src, src_paths in paths.items():
             for dst, src_dst_path in src_paths.items():
                 if src != dst:
                     res = self.compute_for_path(src_dst_path)
                     result[src][dst] = [np.round(res, decimals=PRECISION)]
+            i=i+1
+            if i == alln:
+                print(f"{round(100 * i / alln, 4)}%")
+            else:
+                print(f"{round(100 * i / alln, 4)}%", end="\r")
         return result
 
 

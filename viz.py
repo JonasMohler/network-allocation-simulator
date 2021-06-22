@@ -10,6 +10,17 @@ from src.util.const import UNIT
 import seaborn as sns
 sns.set_theme(style="ticks", palette="pastel")
 
+_RATIOS = [
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9
+]
 
 _STRATEGIES = [
     'GMAImproved',
@@ -114,6 +125,31 @@ def cdf_cover_1v4(graph, ratio=0.5, thresh='0.01'):
 
         df = pd.concat([df, df_small], axis=0)
 
+    d_min = df['Cover Difference'].min()
+    d_max = df['Cover Difference'].max()
+
+    fig, ax = plt.subplots()
+    sns.ecdfplot(data=df, x=f"Cover Difference", hue="Strategies", ax=ax)
+    ax.set_xlim(d_min, d_max)
+    ax.grid(b=True)
+    ax.axvline(c='r')
+    plt.show()
+
+
+def cdf_cover_gma_vs_sqos_ot_ratios(graph, thresh='0.01'):
+    s1 = _STRATEGIES[0]
+    c1 = dh.get_cover(graph, s1, thresh)
+    df = pd.DataFrame(columns=['Strategies', f"Cover Difference"])
+    s2 = 'sqos_ot'
+    for r in _RATIOS:
+        c2 = dh.get_cover(graph, s2, thresh, r)
+        diff = cover_difference_list(c1, c2)
+        df_small = pd.DataFrame()
+        df_small[f"Cover Difference"] = diff
+        df_small['Strategies'] = f"{_STOL[s1]} vs. {r*100}% {_STOL[s2]}"
+
+        df = pd.concat([df, df_small], axis=0)
+
     sns.ecdfplot(data=df, x=f"Cover Difference", hue="Strategies")
     plt.show()
 
@@ -179,7 +215,7 @@ def cover_stats():
 
 
 # cover min/med/max by graph characteristics ( As boxplot?)
-def box_cover_by_strategies(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='0.01'):
+def box_cover_by_graph(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='0.01'):
     # Load relevant covers
     df = pd.DataFrame(columns=['Graph', 'Strategy', 'Cover'])
     for g in graphs:
@@ -214,11 +250,87 @@ def box_cover_by_diameter(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='0.0
             df_small['Strategy'] = _STOL[s]
             df = pd.concat([df, df_small], axis=0)
     print(df)
-    sns.boxplot(x='Graph', y='Value', hue='Strategy', data=df)
+    sns.boxplot(x='Diameter', y='Cover', hue='Strategy', data=df)
     plt.show()
 
 
-cdf_cover_1v4('Eenet(13)')
+def box_cover_by_size(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='0.01'):
+    # Load relevant covers
+    df = pd.DataFrame(columns=['# Nodes', 'Strategy', 'Cover'])
+    for g in graphs:
+        size = sfname(g)
+        for s in strategies:
+            if s in ['sqos_ot', 'sqos_ob']:
+                cover = dh.get_cover(g, s, thresh, ratio)
+            else:
+                cover = dh.get_cover(g, s, thresh, None)
+            c = list(cover.values())
+            df_small = pd.DataFrame(c, columns=['Cover'])
+            df_small['# Nodes'] = size
+            df_small['Strategy'] = _STOL[s]
+            df = pd.concat([df, df_small], axis=0)
+    print(df)
+    sns.boxplot(x='# Nodes', y='Cover', hue='Strategy', data=df)
+    plt.show()
+
+
+def lm_cover_by_diameter(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='0.01'):
+    # Load relevant covers
+    df = pd.DataFrame(columns=['Diameter', 'Strategy', 'Cover'])
+    for g in graphs:
+        diameter = dh.get_diameter(g)
+        for s in strategies:
+            if s in ['sqos_ot', 'sqos_ob']:
+                cover = dh.get_cover(g, s, thresh, ratio)
+            else:
+                cover = dh.get_cover(g, s, thresh, None)
+            c = list(cover.values())
+            df_small = pd.DataFrame(c, columns=['Cover'])
+            df_small['Diameter'] = diameter
+            df_small['Strategy'] = _STOL[s]
+            df = pd.concat([df, df_small], axis=0)
+
+    df[['Diameter', 'Cover']] = df[['Diameter', 'Cover']].astype(float)
+    print(df)
+    sns.lmplot(x='Diameter', y='Cover', hue='Strategy', data=df)
+    plt.show()
+
+
+def scatter_cover_by_diameter(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='0.01'):
+    # Load relevant covers
+    df = pd.DataFrame(columns=['Diameter', 'Strategy', 'Cover'])
+    for g in graphs:
+        diameter = dh.get_diameter(g)
+        for s in strategies:
+            if s in ['sqos_ot', 'sqos_ob']:
+                cover = dh.get_cover(g, s, thresh, ratio)
+            else:
+                cover = dh.get_cover(g, s, thresh, None)
+            c = list(cover.values())
+            df_small = pd.DataFrame(c, columns=['Cover'])
+            df_small['Diameter'] = int(diameter)
+            df_small['Strategy'] = _STOL[s]
+            df = pd.concat([df, df_small], axis=0)
+
+    #df[['Diameter', ' Cover']] = df[['Diameter', 'Cover']].astype(float)
+    print(df)
+    sns.scatterplot(x='Diameter', y='Cover', hue='Strategy', data=df)
+    plt.show()
+
+
+#lm_cover_by_diameter(_ALL_GRAPHS, thresh='0.001')
+
+#scatter_cover_by_diameter(_ALL_GRAPHS, thresh='0.001')
+
+#box_cover_by_diameter(_ALL_GRAPHS, thresh='0.001')
+
+#cdf_cover_gma_vs_sqos_ot_ratios('Eenet(13)', thresh='0.001')
+
+cdf_cover_1v4('Colt(153)', thresh='0.001')
+
+#box_cover_by_size(_ALL_GRAPHS, thresh='0.001')
+
+#cdf_cover_1v4('Eenet(13)')
 
 #cdf_alloc_1v4('Eenet(13)')
 

@@ -26,10 +26,18 @@ def dict_from_list(lst):
 
 def all_allocation_matrices(G, use_bgp=False):
     allocation_matrices = {}
+    i=0
+    alln = len(G.nodes())
     for cur in G.nodes():
         # print("-")
         # print(cur, G.degree(cur))
         allocation_matrices[cur] = allocation_matrix(G, cur, use_bgp=use_bgp)
+
+        i=i+1
+        if i == alln:
+            print(f"{round(100 * i / alln, 4)}%")
+        else:
+            print(f"{round(100 * i / alln, 4)}%", end="\r")
     return allocation_matrices
 
 
@@ -212,6 +220,8 @@ def all_k_shortest_paths(graph, num_sp):
 def alloc_to_cover(alloc, thresh, sps):
     """Compute the _cover_ of a graph, starting from allocations."""
     cover = {}
+    i = 0
+    alln = len(alloc.items())
     for src, src_paths in alloc.items():
         num_covered = 0
         num_destinations = len(sps[src])
@@ -223,6 +233,11 @@ def alloc_to_cover(alloc, thresh, sps):
                     # Update the cover.
                     num_covered += 1
         cover[src] = num_covered / num_destinations if num_destinations != 0 else 1
+        i=i+1
+        if i == alln:
+            print(f"{round(100 * i / alln, 4)}%")
+        else:
+            print(f"{round(100 * i / alln, 4)}%", end="\r")
     return cover
 
 
@@ -256,7 +271,6 @@ def alloc_to_pair_cover(alloc, thresh):
                 num_covered += 1
     cover = num_covered / num_pairs
     return cover
-
 
 
 def alloc_to_reach(shortest, thresh):
@@ -323,10 +337,18 @@ def shortest_to_diameter(shortest):
     This is preferred to the implementation in `networkx` as the shortest paths have
     already been computed.
     """
-    lengths = []
-    for src, src_paths in shortest.items():
-        for dst, path_list in src_paths.items():
-            for path in path_list:
-                lengths.append(len(path))
-    return max(lengths)
+    i=0
+    alln = len(shortest.items())
+    max_l = 0
+    for src, dests in shortest.items():
+        for dst, path in dests.items():
+            if len(path)>max_l:
+                max_l = len(path)
+
+        i=i+1
+        if i == alln:
+            print(f"{round(100 * i / alln, 4)}%")
+        else:
+            print(f"{round(100 * i / alln, 4)}%", end="\r")
+    return max_l
 

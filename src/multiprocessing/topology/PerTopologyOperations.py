@@ -266,13 +266,10 @@ class AllShortestPathsComputation(TopologyMultiprocessing):
             self.find_or_compute_precursors(cur_dir)
             deg = dh.get_degrees(cur_dir)
 
-            nodes = deg['nodes']
-
             graph = dh.get_graph(cur_dir)
 
             sps = all_shortest_paths(graph)
             dh.set_shortest_paths(sps, cur_dir)
-
 
             print(f"{cur_dir}: Done")
         except Exception as e:
@@ -358,8 +355,6 @@ class CoverageComputation(TopologyMultiprocessing):
 
             alloc = dh.get_allocations(cur_dir, self.strategy, self.ratio)
             sp = dh.get_shortest_paths(cur_dir, self.ratio)
-            deg = dh.get_degrees(cur_dir)
-            nodes = deg['nodes']
 
             #proc = pno.CoverComputation(cur_dir, nodes, self.n_proc, self.force, alloc, sp, self.cover_thresh, self.strategy, self.ratio)
             #proc.run()
