@@ -128,7 +128,10 @@ def main(args):
     degs = DegreesComputation(dirs, cores, force)
     degs.run()
 
-    shortest_paths = ShortestPathsComputation(dirs, cores, force)
+    #shortest_paths = ShortestPathsComputation(dirs, cores, force)
+    #shortest_paths.run()
+
+    shortest_paths = AllShortestPathsComputation(dirs, cores, force)
     shortest_paths.run()
 
     diameters = DiameterComputation(dirs, cores, force)

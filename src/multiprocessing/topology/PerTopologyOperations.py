@@ -185,6 +185,37 @@ class ShortestPathsComputation(TopologyMultiprocessing):
             print(f"Error occured in Shortest Path Computation: {e}")
 
 
+class AllShortestPathsComputation(TopologyMultiprocessing):
+    description = "Computation of SHORTEST PATHS"
+
+    def __init__(self, dirs, n_proc, force_recompute):
+        super(AllShortestPathsComputation, self).__init__(dirs, n_proc, SHORTEST_PATH, force_recompute)
+
+    def find_or_compute_precursors(self, cur_dir):
+        # Needs a topology
+        # Needs Degrees (Nodes only actually)
+        pass
+
+    def per_dir_op(self, cur_dir):
+        try:
+
+            super(AllShortestPathsComputation, self).per_dir_op(cur_dir)
+            self.find_or_compute_precursors(cur_dir)
+            deg = dh.get_degrees(cur_dir)
+
+            nodes = deg['nodes']
+
+            graph = dh.get_graph(cur_dir)
+
+            sps = all_shortest_paths(graph)
+            dh.get_shortest_paths(graph)
+
+
+            print(f"{cur_dir}: Done")
+        except Exception as e:
+            print(f"Error occured in Shortest Path Computation: {e}")
+
+
 class DegreesComputation(TopologyMultiprocessing):
     """Compute the degrees of the graph."""
 
