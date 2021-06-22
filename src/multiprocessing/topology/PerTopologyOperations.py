@@ -98,7 +98,7 @@ class PathSampling2(TopologyMultiprocessing):
                     if i == n_nodes:
                         print(f"{100*i/n_nodes}%")
                     else:
-                        print(f"{100*i/n_nodes}%", end="\r")
+                        print(f"{100*i/n_nodes}%", end="\r\033[K")
 
                 dh.set_shortest_paths(all_selected_paths, cur_dir, ratio=self.ratio)
                 print('stored')
@@ -208,7 +208,7 @@ class PathCounting2(TopologyMultiprocessing):
                 if c == alln:
                     print(f"{100*c/alln}%")
                 else:
-                    print(f"{100*c/alln}%", end="\r")
+                    print(f"{100*c/alln}%", end="\r\033[K")
 
 
             dh.set_pc(res, cur_dir, self.ratio)
