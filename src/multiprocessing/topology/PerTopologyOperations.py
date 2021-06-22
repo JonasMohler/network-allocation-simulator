@@ -361,12 +361,12 @@ class CoverageComputation(TopologyMultiprocessing):
             deg = dh.get_degrees(cur_dir)
             nodes = deg['nodes']
 
-            proc = pno.CoverComputation(cur_dir, nodes, self.n_proc, self.force, alloc, sp, self.cover_thresh, self.strategy, self.ratio)
-            proc.run()
+            #proc = pno.CoverComputation(cur_dir, nodes, self.n_proc, self.force, alloc, sp, self.cover_thresh, self.strategy, self.ratio)
+            #proc.run()
 
-            #cover = alloc_to_cover(alloc, self.cover_thresh, sp)
+            cover = alloc_to_cover(alloc, self.cover_thresh, sp)
 
-            #dh.set_cover(cover, cur_dir, self.strategy, self.ratio)
+            dh.set_cover(cover, cur_dir, self.strategy, self.ratio)
 
             print(f"{cur_dir}: Done")
 
