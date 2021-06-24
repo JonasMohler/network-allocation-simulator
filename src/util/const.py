@@ -32,7 +32,7 @@ FILE_TYPE = [
     'json',
     'json',
     'pkl',
-    'pkl',
+    'json',
     'pkl',
     'xml',
     'txt',

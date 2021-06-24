@@ -125,6 +125,8 @@ def main(args):
     # TODO
 
     # - Compute Degrees, Diameters, shortest paths, traffic matrices, shortest path sampling, path lengths
+    '''
+    
     degs = DegreesComputation(dirs, cores, force)
     degs.run()
 
@@ -150,7 +152,7 @@ def main(args):
     for r in ratios:
         sample = PathSampling2(dirs, cores, force, r)
         sample.run()
-    
+    '''
     count = PathCounting2(dirs, cores, force)
     count.run()
 
@@ -160,9 +162,11 @@ def main(args):
 
 
 
+    
     lengths = PathLengthComputation2(dirs, cores, force)
     lengths.run()
 
+ 
     gma = GMAAllocationComputation(dirs, cores, force)
     gma.run()
 
@@ -179,6 +183,7 @@ def main(args):
     for r in ratios:
         s21 = SQoSOBComputation(dirs, cores, force, r)
         s21.run()
+
 
     # Covers: TODO
     for s in strategies:
@@ -199,8 +204,8 @@ def main(args):
     if args.viz:
         pass
 
-
-
+    '''
+    '''
 
 if __name__ == "__main__":
     args = parse_args()

@@ -582,7 +582,7 @@ class PathLengthComputation2(TopologyMultiprocessing):
             for n in nodes:
                 pl = {}
                 for n2 in nodes:
-                    pl[n2] = len(sps[n][n2][0])
+                    pl[n2] = len(sps[n][n2])#[0])
                 pls[n] = pl
 
             i = i+1
@@ -590,6 +590,8 @@ class PathLengthComputation2(TopologyMultiprocessing):
                 print(f"{round(100 * i / alln, 4)}%")
             else:
                 print(f"{round(100 * i / alln, 4)}%", end="\r")
+
+            dh.set_pl(pls, cur_dir)
 
             print(f"{cur_dir}: Done")
 

@@ -23,9 +23,6 @@ _INIT_NODES = [
     100
 ]
 P_LINK_CREATE = [
-    0.001,
-    0.005,
-    0.01,
     0.05,
     0.1,
     0.2,
@@ -38,7 +35,7 @@ P_LINK_CREATE = [
     0.9
 ]
 
-_N_NODES = 250
+_N_NODES = 500
 
 def make_barabasi_albert(n_nodes, add_links, init_links):
     # Create random (barabasi albert) topology
@@ -92,10 +89,12 @@ def make_erdos_reniy(n_nodes, prob):
 
     proc = AddDegreeGravityCapacity([name], CAPACITY_INTERVALS, 1)
     proc.run()
-
+'''
 for adl in _ADD_LINKS:
     for init_n in _INIT_NODES:
         make_barabasi_albert(_N_NODES, adl, init_n)
 
 for p in P_LINK_CREATE:
     make_erdos_reniy(_N_NODES, p)
+'''
+make_barabasi_albert(2500, 20, 50)
