@@ -7,7 +7,8 @@ import itertools
 import pandas as pd
 import os
 import src.util.data_handler as dh
-from src.util.const import UNIT
+from src.util.const import UNIT, FIGURE_PATH
+from src.util.naming import *
 import seaborn as sns
 #sns.set_theme(style="ticks", palette="pastel")
 _PALETTE="terrain_r"
@@ -67,7 +68,7 @@ _ALL_GRAPHS = [i for i in _ALL_GRAPHS if not i == 'Barabasi_Albert_20_50_(2500)'
                and not i == 'Barabasi_Albert_10_100_(500)'
                and not i == 'Barabasi_Albert_10_75_(250)'
                and not i == 'Barabasi_Albert_15_100_(250)'
-               and not i == 'Barabasi_Albert__20_(250)']
+               and not i == 'Barabasi_Albert_20_(250)']
 
 _THRESH = '0.01'
 
@@ -105,6 +106,7 @@ RAND_N_NODES = 250
 #_RAND_GRAPHS = _BARAB + _ERDOS
 
 _BOX_ALPHA = .3
+
 
 def sfname(graph):
     size = int(graph.split('(')[1].split(')')[0])
@@ -157,7 +159,9 @@ def cdf_alloc_1v4(graph, ratio=0.5):
 
         df = pd.concat([df, df_small], axis=0)
 
+    fig, ax = plt.subplots()
     sns.ecdfplot(data=df, x=f"Allocation Difference [{UNIT}]", hue="Strategies")
+    fig.suptitle(f"Cumulative Differences of Allocations [GBpS] between GMA and M-Approach Strategies")
     plt.show()
 
 
@@ -185,6 +189,7 @@ def cdf_cover_1v4(graph, ratio=0.5, thresh='0.01'):
     ax.set_xlim(d_min, d_max)
     ax.grid(b=True)
     ax.axvline(c='r', linestyle='--', alpha=0.3)
+    fig.suptitle(f"Cumulative Differences of Covers between GMA and M-Approach Strategies")
     plt.show()
 
 
@@ -211,6 +216,7 @@ def cdf_cover_ratios_multigraph(graphs, thresh='0.01'):
     ax.set_xlim(d_min, d_max)
     ax.grid(b=True)
     ax.axvline(c='r', linestyle='--', alpha=0.3)
+    fig.suptitle(f"Cumulative Differences of Covers")
     plt.show()
 
 
@@ -237,6 +243,7 @@ def cdf_cover_gma_vs_sqos_ot_ratios(graph, thresh='0.01'):
     ax.set_xlim(d_min, d_max)
     ax.grid(b=True)
     ax.axvline(c='r', linestyle='--', alpha=0.3)
+    fig.suptitle(f"Cumulative Differences of Covers between GMA and Optimistic M-Approach w/ Time-Division Sampling Ratios")
     plt.show()
 
 
@@ -269,9 +276,10 @@ def scatter_allocs_by_pl(graphs, strategies=_STRATEGIES, ratio=0.5):
             df = pd.concat([df, df_small], axis=0)
 
     print(df)
-
+    fig, ax = plt.subplots()
     sns.scatterplot(data=df, x="Path Length", y=f"Allocation [{UNIT}]", hue="Strategy")#, palette=_C_MAP)
     plt.yscale('log')
+    fig.suptitle(f"Allocations [GBpS] over Path Lengths")
     plt.show()
 
 
@@ -304,6 +312,7 @@ def scatter_allocs_by_pl_split(graphs, strategies=_STRATEGIES, ratio=0.5):
         sns.scatterplot(data=df[df['Strategy'] == _STOL[s]], x="Path Length", y=f"Allocation [{UNIT}]", hue="Strategy", ax=axs[i], palette=_C_MAP)
         i = i+1
     #plt.yscale('log')
+    fig.suptitle(f"Allocations [GBpS] over Path Lengths")
     plt.show()
 
 
@@ -329,8 +338,10 @@ def scatter_alloc_by_pl(graphs, strategy, ratio=0.5):
         df = pd.concat([df, df_small], axis=0)
 
     print(df)
+    fig, ax = plt.subplots()
     sns.scatterplot(data=df, x="Path Length", y=f"Allocation [{UNIT}]", hue="Strategy", palette=_C_MAP)
     plt.yscale('log')
+    fig.suptitle(f"Allocations [GBpS] over Path Lengths")
     plt.show()
 
 
@@ -356,8 +367,10 @@ def lm_alloc_by_pl(graphs, strategy, ratio=0.5):
         df = pd.concat([df, df_small], axis=0)
 
     print(df)
+    fig, ax = plt.subplots()
     sns.lmplot(data=df, x="Path Length", y=f"Allocation [{UNIT}]", hue="Strategy", palette=_C_MAP, x_ci="sd")#, fit_reg=True)
     plt.yscale('log')
+    fig.suptitle(f"Allocations [GBpS] over Path Lengths")
     plt.show()
 
 
@@ -385,8 +398,10 @@ def box_alloc_by_pl(graphs, strategies=_STRATEGIES, ratio=0.5):
             df = pd.concat([df, df_small], axis=0)
 
     print(df)
+    fig, ax = plt.subplots()
     sns.boxplot(data=df, x="Path Length", y=f"Allocation [{UNIT}]", hue="Strategy")
     plt.yscale('log')
+    fig.suptitle(f"Allocations [GBpS] over Path Lengths")
     plt.show()
 
 
@@ -421,31 +436,7 @@ def box_alloc_by_pl_split(graphs, strategies=_STRATEGIES, ratio=0.5):
                         ax=axs[i], palette=_C_MAP)
         i = i + 1
     plt.yscale('log')
-    plt.show()
-
-
-# Aggregation of cover stats
-def cover_stats():
-    pass
-
-
-# cover min/med/max by graph characteristics ( As boxplot?)
-def box_cover_by_graph(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='0.01'):
-    # Load relevant covers
-    df = pd.DataFrame(columns=['Graph', 'Strategy', 'Cover'])
-    for g in graphs:
-        for s in strategies:
-            if s in ['sqos_ot', 'sqos_ob']:
-                cover = dh.get_cover(g, s, thresh, ratio)
-            else:
-                cover = dh.get_cover(g, s, thresh, None)
-            c = list(cover.values())
-            df_small = pd.DataFrame(c, columns=['Cover'])
-            df_small['Graph'] = g
-            df_small['Strategy'] = _STOL[s]
-            df = pd.concat([df, df_small], axis=0)
-
-    sns.boxplot(x='Graph', y='Cover', hue='Strategy', data=df)
+    fig.suptitle(f"Allocations [GBpS] over Path Lengths")
     plt.show()
 
 
@@ -470,6 +461,7 @@ def box_cover_by_diameter(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='0.0
     for patch in ax.artists:
         r, g, b, a, = patch.get_facecolor()
         patch.set_facecolor((r, g, b, _BOX_ALPHA))
+    fig.suptitle(f"Cover with {thresh} [GBpS] Threshold Over Graph Diameter")
     plt.show()
 
 
@@ -489,7 +481,9 @@ def box_cover_by_size(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='0.01'):
             df_small['Strategy'] = _STOL[s]
             df = pd.concat([df, df_small], axis=0)
     print(df)
+    fig, ax = plt.subplots()
     sns.boxplot(x='# Nodes', y='Cover', hue='Strategy', data=df)
+    fig.suptitle(f"Cover with {thresh} [GBpS] Threshold Over Graph Size")
     plt.show()
 
 
@@ -511,7 +505,9 @@ def lm_cover_by_diameter(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='0.01
 
     df[['Diameter', 'Cover']] = df[['Diameter', 'Cover']].astype(float)
     print(df)
+    fig, ax = plt.subplots()
     sns.lmplot(x='Diameter', y='Cover', hue='Strategy', data=df)
+    fig.suptitle(f"Cover with {thresh} [GBpS] Threshold Over Graph Diameter")
     plt.show()
 
 
@@ -533,7 +529,9 @@ def scatter_cover_by_diameter(graphs, strategies=_STRATEGIES, ratio=0.5, thresh=
 
     #df[['Diameter', ' Cover']] = df[['Diameter', 'Cover']].astype(float)
     print(df)
+    fig, ax = plt.subplots()
     sns.scatterplot(x='Diameter', y='Cover', hue='Strategy', data=df, markers=_STRATEGY_MARKERS)
+    fig.suptitle(f"Cover with {thresh} [GBpS] Threshold Over Graph Diameter")
     plt.show()
 
 
@@ -552,60 +550,166 @@ def box_cover_single_strat_by_diameter(graphs, strategy, ratio=0.5, thresh='0.00
         df = pd.concat([df, df_small], axis=0)
 
     print(df)
+    fig, ax = plt.subplots()
     sns.boxplot(x='Diameter', y='Cover', hue='Strategy', data=df)
+    fig.suptitle(f"Cover with {thresh} [GBpS] Threshold Over Graph Diameter")
     plt.show()
+
+
+# TODO
+def box_cover_by_node_degree(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='0.001'):
+    df = pd.DataFrame(columns=['Node Degree', 'Strategy', 'Cover'])
+    for g in graphs:
+        deg = dh.get_degrees(g)
+        degrees = deg['degrees']
+        for s in strategies:
+            if s in ['sqos_ot', 'sqos_ob']:
+                cover = dh.get_cover(g, s, thresh, ratio)
+            else:
+                cover = dh.get_cover(g, s, thresh, None)
+            c = list(cover.values())
+            df_small = pd.DataFrame(c, columns=['Cover'])
+            df_small['Node Degree'] = degrees
+            df_small['Strategy'] = _STOL[s]
+            df = pd.concat([df, df_small], axis=0)
+
+    # df[['Diameter', ' Cover']] = df[['Diameter', 'Cover']].astype(float)
+    print(df)
+    fig, ax = plt.subplots()
+    sns.boxplot(x='Node Degree', y='Cover', hue='Strategy', data=df, markers=_STRATEGY_MARKERS)
+    fig.suptitle(f"Cover with {thresh} [GBpS] Threshold Over Node Degrees")
+    plt.show()
+
+
+def scatter_cover_by_node_degree(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='0.001'):
+    df = pd.DataFrame(columns=['Node Degree', 'Strategy', 'Cover'])
+    for g in graphs:
+        deg = dh.get_degrees(g)
+        degrees = deg['degrees']
+        for s in strategies:
+            if s in ['sqos_ot', 'sqos_ob']:
+                cover = dh.get_cover(g, s, thresh, ratio)
+            else:
+                cover = dh.get_cover(g, s, thresh, None)
+            c = list(cover.values())
+            df_small = pd.DataFrame(c, columns=['Cover'])
+            df_small['Node Degree'] = degrees
+            df_small['Strategy'] = _STOL[s]
+            df = pd.concat([df, df_small], axis=0)
+
+    # df[['Diameter', ' Cover']] = df[['Diameter', 'Cover']].astype(float)
+    print(df)
+    fig, ax = plt.subplots()
+    sns.scatterplot(x='Node Degree', y='Cover', hue='Strategy', data=df, markers=_STRATEGY_MARKERS)
+    fig.suptitle(f"Cover with {thresh} [GBpS] Threshold Over Node Degrees")
+    plt.show()
+
+
+def lm_cover_by_node_degree(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='0.001'):
+    df = pd.DataFrame(columns=['Node Degree', 'Strategy', 'Cover'])
+    for g in graphs:
+        deg = dh.get_degrees(g)
+        degrees = deg['degrees']
+        for s in strategies:
+            if s in ['sqos_ot', 'sqos_ob']:
+                cover = dh.get_cover(g, s, thresh, ratio)
+            else:
+                cover = dh.get_cover(g, s, thresh, None)
+            c = list(cover.values())
+            df_small = pd.DataFrame(c, columns=['Cover'])
+            df_small['Node Degree'] = degrees
+            df_small['Strategy'] = _STOL[s]
+            df = pd.concat([df, df_small], axis=0)
+
+    # df[['Diameter', ' Cover']] = df[['Diameter', 'Cover']].astype(float)
+    print(df)
+    fig, ax = plt.subplots()
+    sns.lmplot(x='Node Degree', y='Cover', hue='Strategy', data=df, markers=_STRATEGY_MARKERS)
+    fig.suptitle(f"Cover with {thresh} [GBpS] Threshold Over Node Degrees")
+    plt.show()
+
+
+# Create all necessary dirs if not there yet
+gen_path = os.path.join(FIGURE_PATH, 'general/')
+graph_path = os.path.join(FIGURE_PATH, 'graph/')
+
+if not os.path.exists(gen_path):
+    os.mkdir(gen_path)
+if not os.path.exists(graph_path):
+    os.mkdir(graph_path)
+for g in _ALL_GRAPHS:
+    os.mkdir(get_graph_figure_path(g))
 
 
 # Per Topology figures
 for g in _ALL_GRAPHS:
+    # Allocation scatters
+    for s in _STRATEGIES:
+        scatter_alloc_by_pl([g], s)
+    scatter_allocs_by_pl([g])
+    scatter_allocs_by_pl_split([g])
+    # Allocation boxes
+    box_alloc_by_pl([g])
+    box_alloc_by_pl_split([g])
+    # Allocation lms
+    lm_alloc_by_pl([g], _STRATEGIES)
+    # Cover by node degree scatter
+    scatter_cover_by_node_degree([g])
+    # Cover by node degree box
+    box_cover_by_node_degree([g])
+    # Cover by node degree lm
+    lm_cover_by_node_degree([g])
+
+    # Alloc cdf
+    cdf_alloc_1v4(g)
+    # Cover cdf
+    cdf_cover_1v4(g)
+    # Cover cdf by ratios
+    cdf_cover_gma_vs_sqos_ot_ratios(g)
+
     pass
+
+
 # Group figures rand
+# TODO
+# Cover by diameter box
 box_cover_by_diameter(_ALL_GRAPHS, _STRATEGIES, thresh='0.001')
-#lm_cover_by_diameter(_ALL_GRAPHS, _STRATEGIES, thresh='0.001')
-#scatter_cover_by_diameter(_ALL_GRAPHS, _STRATEGIES, thresh='0.001')
+# Cover by diameter lm
+lm_cover_by_diameter(_ALL_GRAPHS, _STRATEGIES, thresh='0.001')
+# Cover by diameter scatter
+scatter_cover_by_diameter(_ALL_GRAPHS, _STRATEGIES, thresh='0.001')
+
+# Alloc by pl all
+# Alloc by pl single
+# Alloc by pl split
+
+# Alloc cdf
+# Cover cdf
+
 # Group figures zoo
+# Cover by diameter box
+# Cover by diameter lm
+# Cover by diameter scatter
+
+# Alloc by pl all
+# Alloc by pl single
+# Alloc by pl split
+
+# Alloc cdf
+# Cover cdf
 
 # Group figures general
+# Cover by diameter box
+# Cover by diameter lm
+# Cover by diameter scatter
 
+# Alloc by pl all
+# Alloc by pl single
+# Alloc by pl split
 
+# Alloc cdf
+# Cover cdf
 
-#lm_cover_by_diameter(_ALL_GRAPHS, thresh='0.001')
-
-#scatter_cover_by_diameter(_ALL_GRAPHS, thresh='0.001')
-
-#scatter_cover_by_diameter(_ALL_GRAPHS, thresh='0.001')
-
-#box_cover_single_strat_by_diameter(_ALL_GRAPHS, 'sqos_pt', thresh='0.01')
-
-#box_alloc_by_pl_split(_ALL_GRAPHS, _STRATEGIES)
-
-#scatter_allocs_by_pl(['Colt(153)'], _STRATEGIES)
-
-#scatter_alloc_by_pl(_ALL_GRAPHS, 'GMAImproved')
-
-#scatter_allocs_by_pl(_ALL_GRAPHS, _STRATEGIES)
-
-#cdf_cover_gma_vs_sqos_ot_ratios('Eenet(13)', thresh='0.001')
-
-#cdf_cover_1v4('Colt(153)', thresh='0.001')
-
-#box_cover_by_size(_ALL_GRAPHS, thresh='0.001')
-
-#cdf_cover_1v4('Colt(153)', thresh='0.001')
-
-cdf_cover_ratios_multigraph(_ALL_GRAPHS, thresh='0.001')
-
-#cdf_cover_gma_vs_sqos_ot_ratios('Barabasi_Albert_20_50_(2500)', thresh='0.001')
-
-#cdf_alloc_1v4('Eenet(13)')
-
-#box_alloc_by_pl('Eenet(13)')
-
-#scatter_alloc_by_pl('Eenet(13)')
-
-#cover_box_by_strategies(_GRAPHS)
-
-#cover_box_by_diameter(_ALL_GRAPHS, thresh='1e-3')
 
 
 

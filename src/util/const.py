@@ -15,6 +15,8 @@ UNIT = "Gbps"
 CAPACITY_INTERVALS = [10, 40, 100]
 
 DATA_PATH = os.path.join(os.getcwd(), 'dat/topologies/')
+FIGURE_PATH = os.path.join(os.getcwd(), 'dat/figures/')
+
 # DATA TYPE CONSTANTS
 ALLOCATION = 0
 SHORTEST_PATH = 1
@@ -26,6 +28,7 @@ DIAMETER = 6
 COMPARISON = 7
 COVER = 8
 DEGREE = 9
+FIGURE = 10
 
 # DATA TYPE - FILE TYPE MAP
 FILE_TYPE = [

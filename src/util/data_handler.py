@@ -167,3 +167,4 @@ def get_shortest_paths(graph, ratio=None):
 
 def set_shortest_paths(data, graph, ratio=None):
     _store(data, graph, SHORTEST_PATH, ratio=ratio)
+

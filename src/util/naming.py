@@ -56,8 +56,15 @@ def get_graph_path(graph):
     return os.path.join(get_topo_path(graph), 'graph/')
 
 
-def get_full_path(graph, data_type, strategy=None, ratio=None, thresh=None):
-    topology_path = get_topo_path(graph)
+def get_graph_figure_path(graph):
+    return os.path.join(os.path.join(FIGURE_PATH, 'graph/'), graph)
+
+
+def get_general_figure_path():
+    return os.path.join(FIGURE_PATH, 'general/')
+
+
+def get_full_path(graph, data_type, strategy=None, ratio=None, thresh=None, fig_name=None, gen_fig=False):
 
     strategies_path = get_strategies_path(graph)
     graph_path = get_graph_path(graph)
@@ -128,6 +135,12 @@ def get_full_path(graph, data_type, strategy=None, ratio=None, thresh=None):
     if data_type == DIAMETER:
         name = DIAMETER_FILE_NAME
         full_path = os.path.join(graph_path, name)
+
+    if data_type == FIGURE:
+        if gen_fig:
+            full_path = os.path.join(get_general_figure_path(), fig_name)
+        else:
+            full_path = os.path.join(get_graph_figure_path(graph, fig_name))
 
     return full_path
 

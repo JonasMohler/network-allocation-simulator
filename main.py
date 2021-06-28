@@ -152,7 +152,7 @@ def main(args):
     for r in ratios:
         sample = PathSampling2(dirs, cores, force, r)
         sample.run()
-    '''
+    
     count = PathCounting2(dirs, cores, force)
     count.run()
 
@@ -166,10 +166,11 @@ def main(args):
     lengths = PathLengthComputation2(dirs, cores, force)
     lengths.run()
 
- 
+    '''
     gma = GMAAllocationComputation(dirs, cores, force)
     gma.run()
 
+    '''
     s10 = SQoSPTComputation(dirs, cores, force)
     s10.run()
 
@@ -179,7 +180,7 @@ def main(args):
     for r in ratios:
         s20 = SQoSOTComputation(dirs, cores, force, r)
         s20.run()
-
+'''
     for r in ratios:
         s21 = SQoSOBComputation(dirs, cores, force, r)
         s21.run()
