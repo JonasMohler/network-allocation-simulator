@@ -166,11 +166,11 @@ def main(args):
     lengths = PathLengthComputation2(dirs, cores, force)
     lengths.run()
 
-    '''
+    
     gma = GMAAllocationComputation(dirs, cores, force)
     gma.run()
 
-    '''
+    
     s10 = SQoSPTComputation(dirs, cores, force)
     s10.run()
 
