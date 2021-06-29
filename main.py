@@ -180,12 +180,12 @@ def main(args):
     for r in ratios:
         s20 = SQoSOTComputation(dirs, cores, force, r)
         s20.run()
-'''
+
     for r in ratios:
         s21 = SQoSOBComputation(dirs, cores, force, r)
         s21.run()
 
-
+'''
     # Covers: TODO
     for s in strategies:
         if s == 'sqos_ob' or s == 'sqos_ot':
