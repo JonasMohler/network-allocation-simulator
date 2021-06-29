@@ -133,8 +133,9 @@ def get_per_src_traversing_path_count(path_counts, node, src, n_prev, n_next):
     current_node = path_counts[node]
     if (str(n_prev), str(n_next)) in current_node and str(src) in current_node[(str(n_prev), str(n_next))]:
         count = current_node[(str(n_prev), str(n_next))][str(src)]
+        print('Found')
     else:
-        print(f'No per src traversing path count for iface pair ({n_prev}, {n_next}) and src {src} in node {node}')
+        #print(f'No per src traversing path count for iface pair ({n_prev}, {n_next}) and src {src} in node {node}')
         return 1
     return count
 
