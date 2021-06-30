@@ -437,7 +437,7 @@ def box_alloc_by_pl_split(graphs, strategies=_STRATEGIES, ratio=0.5):
         i = i + 1
     plt.yscale('log')
     fig.suptitle(f"Allocations [GBpS] over Path Lengths")
-    plt.savefig('b_al_pl_s.eps', format='eps')
+    plt.savefig('dat/figures/graph/Core(10000)/b_al_pl_s.eps', format='eps')
     #plt.show()
 
 
