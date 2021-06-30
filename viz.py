@@ -407,13 +407,11 @@ def box_alloc_by_pl(graphs, strategies=_STRATEGIES, ratio=0.5):
 
 def box_alloc_by_pl_split(graphs, strategies=_STRATEGIES, ratio=0.5):
 
-    df = pd.DataFrame(columns=['Strategy', f"Allocation [{UNIT}]", 'Path Length'])
-
-
-    data = []
-
     for g in graphs:
         path_lengths = dh.get_pl(g)
+        pls = []
+        als = []
+        s_dfs = {}
         for s in strategies:
             if s in ['sqos_ot', 'sqos_ob']:
                 alloc = dh.get_allocations(g, s, ratio)
@@ -422,17 +420,20 @@ def box_alloc_by_pl_split(graphs, strategies=_STRATEGIES, ratio=0.5):
 
             for src, dests in alloc.items():
                 for dst in dests.keys():
-                    data.append((alloc[src][dst][0], path_lengths[src][dst]))
+                    als.append(alloc[src][dst][0])
+                    pls.append(path_lengths[src][dst])
 
-            df_small = pd.DataFrame(data, columns=[f"Allocation [{UNIT}]", "Path Length"])
+            df_small = pd.DataFrame()
+            df_small[f"Allocation [{UNIT}]"] = als
+            df_small["Path Length"] = pls
             df_small['Strategy'] = _STOL[s]
-            df = pd.concat([df, df_small], axis=0)
 
-    print(df)
-    fig, axs = plt.subplots(5, sharey=True)
+            s_dfs[s] = df_small
+
+    fig, axs = plt.subplots(5, sharey='True')
     i = 0
     for s in strategies:
-        sns.boxplot(data=df[df['Strategy'] == _STOL[s]], x="Path Length", y=f"Allocation [{UNIT}]", hue="Strategy",
+        sns.boxplot(data=s_dfs[s], x="Path Length", y=f"Allocation [{UNIT}]", hue="Strategy",
                         ax=axs[i], palette=_C_MAP)
         i = i + 1
     plt.yscale('log')
@@ -463,6 +464,18 @@ def box_cover_by_diameter(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='0.0
         r, g, b, a, = patch.get_facecolor()
         patch.set_facecolor((r, g, b, _BOX_ALPHA))
     fig.suptitle(f"Cover with {thresh} [GBpS] Threshold Over Graph Diameter")
+    plt.show()
+
+
+def make_box(x_name, y_name, data, title, save=False, path='', logy=False, logx=False):
+
+    fig, ax = plt.subplots()
+    sns.boxplot(x=x_name, y=y_name, hue='Strategy', data=data, ax=ax)
+    for patch in ax.artists:
+        r, g, b, a, = patch.get_facecolor()
+        patch.set_facecolor((r, g, b, _BOX_ALPHA))
+    fig.suptitle(title)
+
     plt.show()
 
 
