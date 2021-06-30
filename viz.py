@@ -11,7 +11,7 @@ from src.util.const import UNIT, FIGURE_PATH
 from src.util.naming import *
 import seaborn as sns
 #sns.set_theme(style="ticks", palette="pastel")
-_PALETTE="terrain_r"
+_PALETTE="Accent"
 sns.set_theme(style="ticks", palette=_PALETTE)
 
 _RATIOS = [
@@ -570,18 +570,19 @@ def box_cover_by_node_degree(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='
             c = list(cover.values())
             df_small = pd.DataFrame(c, columns=['Cover'])
             df_small['Node Degree'] = degrees
+            df_small['Node Degree'] = df_small['Node Degree'].astype(int)
             df_small['Strategy'] = _STOL[s]
             df = pd.concat([df, df_small], axis=0)
 
     # df[['Diameter', ' Cover']] = df[['Diameter', 'Cover']].astype(float)
     print(df)
     fig, ax = plt.subplots()
-    sns.boxplot(x='Node Degree', y='Cover', hue='Strategy', data=df, markers=_STRATEGY_MARKERS)
+    sns.boxplot(x='Node Degree', y='Cover', hue='Strategy', data=df)#, markers=_STRATEGY_MARKERS)
     fig.suptitle(f"Cover with {thresh} [GBpS] Threshold Over Node Degrees")
     plt.show()
 
 
-def scatter_cover_by_node_degree(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='0.001'):
+def scatter_cover_by_node_degree(graphs=_ALL_GRAPHS, strategies=_STRATEGIES, ratio=0.5, thresh='0.001'):
     df = pd.DataFrame(columns=['Node Degree', 'Strategy', 'Cover'])
     for g in graphs:
         deg = dh.get_degrees(g)
@@ -628,7 +629,110 @@ def lm_cover_by_node_degree(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='0
     fig.suptitle(f"Cover with {thresh} [GBpS] Threshold Over Node Degrees")
     plt.show()
 
+_XS = {
+    'degree': 'Node Degree',
+    'size': 'Graph Size',
+    'diameter': 'Graph Diameter',
+    'pl': 'Path Length'
+}
 
+_YS = {
+    'cover': 'Cover [%]',
+    'alloc': f'Allocations {[UNIT]}'
+}
+
+'''
+def get_x_metric(graph, kind):
+
+    if kind == 'degree':
+        x = dh.get_degrees(graph)
+        x = x['degrees']
+    elif kind == 'size':
+        x = sfname(graph)
+    elif kind == 'diameter':
+        x = dh.get_diameter(graph)
+    elif kind == 'pl':
+        x = dh.get_pl(graph)
+    else:
+        raise ValueError('Error getting x metric: Unknown metric')
+
+    return x
+
+def get_y_metric(graph, kind, strat, thresh, ratio):
+
+    if kind == 'cover':
+        if strat in ['sqos_ot', 'sqos_ob']:
+            cover = dh.get_cover(g, strat, thresh, ratio)
+        else:
+            cover = dh.get_cover(g, strat, thresh, None)
+        c = list(cover.values())
+        pass
+    if kind == 'alloc':
+        pass
+
+def get_data_as_df(graphs, strategies, ratio, thresh, xs, ys):
+     df = pd.DataFrame(columns=[_XS[xs], 'Strategy', _YS[ys]])
+     for g in graphs:
+         get_x_metric(g, xs)
+         for s in strategies:
+             get_y_metric(g, ys)
+
+     if xs == 'degree':
+         if ys == 'cover':
+             df = pd.DataFrame(columns=['Node Degree', 'Strategy', 'Cover'])
+             for g in graphs:
+                 deg = dh.get_degrees(g)
+                 degrees = deg['degrees']
+                 for s in strategies:
+                     if s in ['sqos_ot', 'sqos_ob']:
+                         cover = dh.get_cover(g, s, thresh, ratio)
+                     else:
+                         cover = dh.get_cover(g, s, thresh, None)
+                     c = list(cover.values())
+                     df_small = pd.DataFrame(c, columns=['Cover'])
+                     df_small['Node Degree'] = degrees
+                     df_small['Strategy'] = _STOL[s]
+                     df = pd.concat([df, df_small], axis=0)
+         elif ys =='alloc':
+             pass
+         else:
+             raise ValueError('Error: Unknown Y metric in DF get')
+     elif xs == 'size':
+         pass
+     elif xs == 'diameter':
+         pass
+     elif xs == 'pl':
+         pass
+     else:
+         raise ValueError('Error: Unknown X metric in DF get')
+
+
+def make_plot(graphs=_ALL_GRAPHS, strategies = _STRATEGIES, ratio=0.1, thresh='0.01', x_metric='degree', y_metric='cover', plot_kind='scatter'):
+
+    if y_metric == 'cover':
+       pass
+
+    pass
+'''
+
+
+def c_plot(store=True):
+    # load appropriate data
+
+    # create specified plot
+
+    # store or show
+
+    pass
+
+
+#box_cover_by_node_degree(['Core(10000)'], ['sqos_ot'], ratio=0.1)
+
+#scatter_cover_by_node_degree(ratio=0.1)
+
+box_alloc_by_pl_split(['Core(10000)'], ratio=0.1)
+
+'''
 # Create all necessary dirs if not there yet
 gen_path = os.path.join(FIGURE_PATH, 'general/')
 graph_path = os.path.join(FIGURE_PATH, 'graph/')
@@ -638,7 +742,8 @@ if not os.path.exists(gen_path):
 if not os.path.exists(graph_path):
     os.mkdir(graph_path)
 for g in _ALL_GRAPHS:
-    os.mkdir(get_graph_figure_path(g))
+    if not os.path.exists(get_graph_figure_path(g)):
+        os.mkdir(get_graph_figure_path(g))
 
 
 # Per Topology figures
@@ -648,15 +753,20 @@ for g in _ALL_GRAPHS:
         scatter_alloc_by_pl([g], s)
     scatter_allocs_by_pl([g])
     scatter_allocs_by_pl_split([g])
+
     # Allocation boxes
     box_alloc_by_pl([g])
     box_alloc_by_pl_split([g])
+
     # Allocation lms
     lm_alloc_by_pl([g], _STRATEGIES)
+
     # Cover by node degree scatter
     scatter_cover_by_node_degree([g])
+
     # Cover by node degree box
     box_cover_by_node_degree([g])
+
     # Cover by node degree lm
     lm_cover_by_node_degree([g])
 
@@ -672,19 +782,28 @@ for g in _ALL_GRAPHS:
 
 # Group figures rand
 # TODO
+
 # Cover by diameter box
 box_cover_by_diameter(_ALL_GRAPHS, _STRATEGIES, thresh='0.001')
+
 # Cover by diameter lm
 lm_cover_by_diameter(_ALL_GRAPHS, _STRATEGIES, thresh='0.001')
+
 # Cover by diameter scatter
 scatter_cover_by_diameter(_ALL_GRAPHS, _STRATEGIES, thresh='0.001')
 
 # Alloc by pl all
+scatter_allocs_by_pl()
 # Alloc by pl single
+scatter_alloc_by_pl()
 # Alloc by pl split
+scatter_allocs_by_pl_split()
 
 # Alloc cdf
+cdf_alloc_1v4()
 # Cover cdf
+cdf_cover_1v4()
+
 
 # Group figures zoo
 # Cover by diameter box
@@ -713,3 +832,4 @@ scatter_cover_by_diameter(_ALL_GRAPHS, _STRATEGIES, thresh='0.001')
 
 
 
+'''
