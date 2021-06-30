@@ -1,6 +1,6 @@
 import json
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import itertools
@@ -437,7 +437,8 @@ def box_alloc_by_pl_split(graphs, strategies=_STRATEGIES, ratio=0.5):
         i = i + 1
     plt.yscale('log')
     fig.suptitle(f"Allocations [GBpS] over Path Lengths")
-    plt.show()
+    plt.savefig('b_al_pl_s.eps', format='eps')
+    #plt.show()
 
 
 def box_cover_by_diameter(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='0.01'):
