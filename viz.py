@@ -1,17 +1,13 @@
-import json
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import numpy as np
-import itertools
 import pandas as pd
-import os
 import src.util.data_handler as dh
 from src.util.const import UNIT, FIGURE_PATH
 from src.util.naming import *
 import seaborn as sns
-#sns.set_theme(style="ticks", palette="pastel")
-_PALETTE="Accent"
+
+_PALETTE = "Accent"
 sns.set_theme(style="ticks", palette=_PALETTE)
 
 _RATIOS = [
@@ -45,66 +41,15 @@ _LABELS = [
 
 _C_MAP = dict(zip(_LABELS, sns.color_palette(_PALETTE, 5)))
 print(_C_MAP)
-
-_GRAPHS = [
-    'Eenet(13)',
-    'Epoch(6)',
-    'Aarnet(19)',
-    'Bics(33)',
-    'Amres(25)',
-    'Barabasi_Albert_2_20_(500)'
-]
 _STOL = dict(zip(_STRATEGIES, _LABELS))
 
 _MARKERS = ['o', 'x', '^', '+', '*', '8', 's', 'p', 'D', 'V']
 _STRATEGY_MARKERS = [_MARKERS[i] for i in range(len(_STRATEGIES))]
 
 _ALL_GRAPHS = os.listdir('dat/topologies/')
-_ALL_GRAPHS = [i for i in _ALL_GRAPHS if not i == 'Barabasi_Albert_20_50_(2500)'
-               and not i == 'Erdos_Renyi_0.05_(250)'
-               and not i == 'Erdos_Renyi_0.2_(500)'
-               and not i == 'Barabasi_Albert_1_25_(500)'
-               and not i == 'Barabasi_Albert_10_100_(250)'
-               and not i == 'Barabasi_Albert_10_100_(500)'
-               and not i == 'Barabasi_Albert_10_75_(250)'
-               and not i == 'Barabasi_Albert_15_100_(250)'
-               and not i == 'Barabasi_Albert_20_(250)']
-
 _THRESH = '0.01'
-
-_ADD_LINKS = [
-    1,
-    2,
-    5,
-    10,
-    15
-]
-_INIT_NODES = [
-    20,
-    25,
-    50,
-    75,
-    100
-]
-P_LINK_CREATE = [
-    0.05,
-    0.1,
-    0.2,
-    0.3,
-    0.4,
-    0.5,
-    0.6,
-    0.7,
-    0.8,
-    0.9
-]
-RAND_N_NODES = 250
-#_BARAB = [list(zip(each_permutation, _ADD_LINKS)) for each_permutation in itertools.permutations(_INIT_NODES, len(_ADD_LINKS))]
-#_BARAB = [f'Barabasi_Albert_{add_link}_{init_l}_({RAND_N_NODES})' for (init_l, add_link) in _BARAB]
-#_ERDOS = [f"Erdos_Renyi_{p}_({RAND_N_NODES})" for p in P_LINK_CREATE]
-
-#_RAND_GRAPHS = _BARAB + _ERDOS
-
+_RAND_GRAPHS = [x for x in os.listdir('dat/topologies') if x.startswith('Barabasi') or x.startswith('Erdos')]
+_ZOO_GRAPHS = [x for x in _ALL_GRAPHS if x not in _RAND_GRAPHS and not x == 'Core(10000)']
 _BOX_ALPHA = .3
 
 
@@ -430,7 +375,7 @@ def box_alloc_by_pl_split(graphs, strategies=_STRATEGIES, ratio=0.5):
 
             s_dfs[s] = df_small
     print('Got Data')
-    fig, axs = plt.subplots(5, sharey='True')
+    fig, axs = plt.subplots(5, sharey=True)
     i = 0
     for s in strategies:
         sns.boxplot(data=s_dfs[s], x="Path Length", y=f"Allocation [{UNIT}]", hue="Strategy",
@@ -468,16 +413,24 @@ def box_cover_by_diameter(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='0.0
     plt.show()
 
 
-def make_box(x_name, y_name, data, title, save=False, path='', logy=False, logx=False):
+def make_fig(x_name, y_name, data, title, type='scatter', save=False, path='', logy=False, logx=False):
 
-    fig, ax = plt.subplots()
-    sns.boxplot(x=x_name, y=y_name, hue='Strategy', data=data, ax=ax)
-    for patch in ax.artists:
-        r, g, b, a, = patch.get_facecolor()
-        patch.set_facecolor((r, g, b, _BOX_ALPHA))
-    fig.suptitle(title)
+    if type == 'scatter':
+        pass
+    elif type == 'box':
 
-    plt.show()
+        fig, ax = plt.subplots()
+        sns.boxplot(x=x_name, y=y_name, hue='Strategy', data=data, ax=ax)
+        for patch in ax.artists:
+            r, g, b, a, = patch.get_facecolor()
+            patch.set_facecolor((r, g, b, _BOX_ALPHA))
+        fig.suptitle(title)
+
+        plt.show()
+    elif type == 'lm':
+        pass
+
+
 
 
 def box_cover_by_size(graphs, strategies=_STRATEGIES, ratio=0.5, thresh='0.01'):
