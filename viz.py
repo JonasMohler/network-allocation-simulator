@@ -429,7 +429,7 @@ def box_alloc_by_pl_split(graphs, strategies=_STRATEGIES, ratio=0.5):
             df_small['Strategy'] = _STOL[s]
 
             s_dfs[s] = df_small
-
+    print('Got Data')
     fig, axs = plt.subplots(5, sharey='True')
     i = 0
     for s in strategies:
@@ -439,6 +439,7 @@ def box_alloc_by_pl_split(graphs, strategies=_STRATEGIES, ratio=0.5):
     plt.yscale('log')
     fig.suptitle(f"Allocations [GBpS] over Path Lengths")
     plt.savefig('dat/figures/graph/Core(10000)/b_al_pl_s.eps', format='eps')
+    print('Saved Plot')
     #plt.show()
 
 
