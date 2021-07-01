@@ -125,6 +125,7 @@ def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, p
 
     if save:
         plt.savefig(os.path.join(path, name))
+        plt.close()
     else:
         plt.show()
 
@@ -175,6 +176,7 @@ def make_fig_split(x_name, y_name, data, title, strategies, p_type='scatter', sa
 
     if save:
         plt.savefig(os.path.join(path, name))
+        plt.close()
     else:
         plt.show()
 
@@ -206,6 +208,7 @@ def make_cover_cdf(data, title, save=False, path='', logx=False):
 
     if save:
         plt.savefig(os.path.join(path, name))
+        plt.close()
     else:
         plt.show()
 
@@ -230,8 +233,11 @@ def make_alloc_cdf(data, title, save=False, path='', logx=False):
 
     if save:
         plt.savefig(os.path.join(path, name))
+        plt.close()
     else:
         plt.show()
+
+
 
 
 _XS = {
@@ -245,6 +251,21 @@ _YS = {
     'cover': 'Cover [%]',
     'alloc': f'Allocations {[UNIT]}'
 }
+
+
+def make_heat_scatter(data, path, s, save=False):
+    name = f'heatmap_{s}.{_FORMAT}'
+    fig, ax = plt.subplots()
+    sc = ax.scatter(data['Source Degree'], data['Destination Degree'], c=data[_YS['alloc']], cmap='copper')
+    fig.colorbar(sc, ax=ax)
+
+    fig.suptitle(f"Source and Destination Degree Heatmap for {s}")
+
+    if save:
+        plt.savefig(os.path.join(path, name))
+        plt.close()
+    else:
+        plt.show()
 
 
 def get_cover_diffs_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1], threshs=['0.001']):
@@ -407,6 +428,11 @@ def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
 
 
 #################################################
+'''
+data = get_allocs_as_df(['Colt(153)'], _STRATEGIES, [0.1])
+for s in _STRATEGIES:
+    make_heat_scatter(data[data["Strategy"] == _STOL[s]], dh.get_graph_figure_path('Colt(153)'), s)
+'''
 
 data = get_allocs_as_df(['Core(10000)'], _STRATEGIES, [0.1])
 # Allocation plots per strategy
@@ -449,6 +475,7 @@ data = get_alloc_diffs_as_df(['Core(10000)'], _STRATEGIES[0], _STRATEGIES[1:])
 make_alloc_cdf(data, f"CDF of Allocations in {'Core(10000)'}", save=True, path=dh.get_graph_figure_path('Core(10000)'))
 
 '''
+
 # Create all necessary dirs if not there yet
 gen_path = os.path.join(FIGURE_PATH, 'general/')
 graph_path = os.path.join(FIGURE_PATH, 'graph/')
@@ -466,11 +493,12 @@ for g in _ALL_GRAPHS:
 
 
 # Per Topology figures
-all_g = len(_ALL_GRAPHS)
+_SELECTED_GRAPHS = _RAND_GRAPHS + ['Kdl(754)', 'Colt(153)']
+all_g = len(_SELECTED_GRAPHS)
 i = 0
 
 print('Starting per topology plots')
-for g in _ALL_GRAPHS:
+for g in _SELECTED_GRAPHS:
     data = get_allocs_as_df([g], _STRATEGIES, [0.1])
     # Allocation plots per strategy
     for s in _STRATEGIES:
