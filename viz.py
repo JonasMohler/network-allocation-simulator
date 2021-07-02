@@ -10,7 +10,7 @@ import seaborn as sns
 _PALETTE = "Accent"
 sns.set_theme(style="ticks", palette=_PALETTE)
 
-_FORMAT = 'png'
+_FORMAT = 'pdf'
 
 _RATIOS = [
     0.1,
@@ -49,6 +49,7 @@ _MARKERS = ['o', 'x', '^', '+', '*', '8', 's', 'p', 'D', 'V']
 _STRATEGY_MARKERS = [_MARKERS[i] for i in range(len(_STRATEGIES))]
 
 _ALL_GRAPHS = os.listdir('dat/topologies/')
+_ALL_GRAPHS = [x for x in _ALL_GRAPHS if not x == 'Core(10000)']
 _THRESH = '0.01'
 _RAND_GRAPHS = [x for x in os.listdir('dat/topologies') if x.startswith('Barabasi') or x.startswith('Erdos')]
 _ZOO_GRAPHS = [x for x in _ALL_GRAPHS if x not in _RAND_GRAPHS and not x == 'Core(10000)']
@@ -101,8 +102,10 @@ def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, p
 
     elif p_type == 'box':
         name = f"{name}_b_single.{_FORMAT}"
-
-        sns.boxplot(x=x_name, y=y_name, hue='Strategy', data=data, ax=ax)
+        if y_name == _YS['cover']:
+            sns.boxplot(x=x_name, y=y_name, hue='Strategy', data=data, ax=ax)#, outlier=False)
+        else:
+            sns.boxplot(x=x_name, y=y_name, hue='Strategy', data=data, ax=ax)
         '''
         for patch in ax.artists:
             r, g, b, a, = patch.get_facecolor()
@@ -122,6 +125,8 @@ def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, p
         plt.yscale('log')
 
     fig.suptitle(title)
+    h, l = ax.get_legend_handles_labels()
+    ax.legend(handles=h, labels=l, bbox_to_anchor=(1.05,1),loc=2)
 
     if save:
         plt.savefig(os.path.join(path, name))
@@ -149,7 +154,10 @@ def make_fig_split(x_name, y_name, data, title, strategies, p_type='scatter', sa
 
         i = 0
         for s in strategies:
-            sns.boxplot(data=data[(data["Strategy"]==_STOL[s])], x=x_name, y=y_name, hue="Strategy", ax=axs[i], palette=_C_MAP)
+            if y_name == _YS['cover']:
+                sns.boxplot(data=data[(data["Strategy"]==_STOL[s])], x=x_name, y=y_name, hue="Strategy", ax=axs[i], palette=_C_MAP)#, outlier=False)
+            else:
+                sns.boxplot(data=data[(data["Strategy"]==_STOL[s])], x=x_name, y=y_name, hue="Strategy", ax=axs[i], palette=_C_MAP)
 
             '''
             for patch in axs[i].artists:
@@ -173,6 +181,11 @@ def make_fig_split(x_name, y_name, data, title, strategies, p_type='scatter', sa
         plt.yscale('log')
 
     fig.suptitle(title)
+    
+    #i=0
+    #for s in strategies:
+    #    h,l = axs[i].get_legend_handles_labels()
+    #    axs[i].legend(handles=h, labels=l, bbox_to_anchor=(1.05, 1), loc=2)
 
     if save:
         plt.savefig(os.path.join(path, name))
@@ -271,9 +284,18 @@ def make_heat_scatter(data, path, s, save=False):
 def get_cover_diffs_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1], threshs=['0.001']):
 
     df = pd.DataFrame(columns=['Strategies', f"Cover Difference", "Cover Threshold"])
+    small_dfs = []
+    print(f"Fetching Cover differences for {len(graphs)} graphs")
+
+    all_g = len(graphs)
+    j = 0
     for g in graphs:
+        print(f"Fetching Cover differences for {g}")
         for t in threshs:
             c1 = dh.get_cover(g, s1, t)
+            all_s = len(s2s)
+            i = 0
+            print(f"Fetching Covers for {all_s} Strategies")
             for s2 in s2s:
                 if s2 in ['sqos_ot','sqos_ob']:
                     for r in ratios:
@@ -284,7 +306,8 @@ def get_cover_diffs_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1
                         df_small['Strategies'] = f"{_STOL[s1]} vs. {r*100}% {_STOL[s2]}"
                         df_small["Cover Threshold"] = t
 
-                        df = pd.concat([df, df_small], axis=0)
+                        #df = pd.concat([df, df_small], axis=0)
+                        small_dfs.append(df_small)
                 else:
                     c2 = dh.get_cover(g, s2, t)
                     diff = cover_difference_list(c1, c2)
@@ -293,8 +316,17 @@ def get_cover_diffs_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1
                     df_small['Strategies'] = f"{_STOL[s1]} vs. {r * 100}% {_STOL[s2]}"
                     df_small["Cover Threshold"] = t
 
-                    df = pd.concat([df, df_small], axis=0)
+                    #df = pd.concat([df, df_small], axis=0)
+                    small_dfs.append((df_small))
+                i = i + 1
+                print(f'Done with {i * 100 / all_s}% of strategies for current graph')
 
+        j = j + 1
+        print(f"Donw with {j * 100 / all_g}% of graphs")
+
+    print("Concatenating results")
+
+    df = pd.concat(small_dfs)
 
     return df
 
@@ -302,19 +334,44 @@ def get_cover_diffs_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1
 def get_covers_as_df(graphs, strategies, ratios=[0.1], threshs=['0.001']):
 
     df = pd.DataFrame(columns=[_YS['cover'], _XS['degree'], _XS['size'], _XS['diameter'], "Strategy", "Ratio"])
+    small_dfs = []
+    print(f"Fetching Covers for {len(graphs)} graphs")
 
+    all_g = len(graphs)
+    j = 0
     for g in graphs:
+        print(f"Fetching Covers for {g}")
 
         deg = dh.get_degrees(g)
         degrees = [float(x) for x in deg['degrees']]
         size = float(sfname(g))
         diameter = float(dh.get_diameter(g))
 
+        all_s = len(strategies)
+        i = 0
+        print(f"Fetching Covers for {all_s} Strategies")
         for s in strategies:
             for t in threshs:
                 if s in ['sqos_ot', 'sqos_ob']:
                     for r in ratios:
-                        cover = dh.get_cover(g, s, t, r)
+                        try:
+                            cover = dh.get_cover(g, s, t, r)
+                            c = list(cover.values())
+                            df_small = pd.DataFrame()
+                            df_small[_YS['cover']] = c
+                            df_small[_XS['degree']] = degrees
+                            df_small[_XS['size']] = size
+                            df_small[_XS['diameter']] = diameter
+                            df_small['Strategy'] = _STOL[s]
+                            df_small["Ratio"] = r
+
+                            #df = pd.concat([df, df_small])
+                            small_dfs.append(df_small)
+                        except Exception as e:
+                            break
+                else:
+                    try:
+                        cover = dh.get_cover(g, s, t, None)
                         c = list(cover.values())
                         df_small = pd.DataFrame()
                         df_small[_YS['cover']] = c
@@ -322,30 +379,40 @@ def get_covers_as_df(graphs, strategies, ratios=[0.1], threshs=['0.001']):
                         df_small[_XS['size']] = size
                         df_small[_XS['diameter']] = diameter
                         df_small['Strategy'] = _STOL[s]
-                        df_small["Ratio"] = r
+                        df_small["Ratio"] = 1
 
-                        df = pd.concat([df, df_small])
-                else:
-                    cover = dh.get_cover(g, s, t, None)
-                    c = list(cover.values())
-                    df_small = pd.DataFrame()
-                    df_small[_YS['cover']] = c
-                    df_small[_XS['degree']] = degrees
-                    df_small[_XS['size']] = size
-                    df_small[_XS['diameter']] = diameter
-                    df_small['Strategy'] = _STOL[s]
-                    df_small["Ratio"] = 1
+                        #df = pd.concat([df, df_small])
+                        small_dfs.append(df_small)
+                    except Exception as e:
+                        break
 
-                    df = pd.concat([df, df_small])
+            i = i + 1
+            print(f'Done with {i * 100 / all_s}% of strategies for current graph')
+
+        j = j + 1
+        print(f"Done with {j * 100 / all_g}% of graphs")
+    print("Concatenating results")
+    df = pd.concat(small_dfs)
 
     return df
 
 
 def get_alloc_diffs_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1]):
+
     df = pd.DataFrame(columns=['Strategies', f"Allocation Difference [{UNIT}]"])
+    small_dfs = []
+
+    print(f"Fetching Allocation differences for {len(graphs)} graphs")
+
+    all_g = len(graphs)
+    j = 0
     for g in graphs:
+        print(f"Fetching Allocation differences for {g}")
         a1 = dh.get_allocations(g, s1)
 
+        all_s = len(s2s)
+        i = 0
+        print(f"Fetching Allocation differences for {all_s} Strategies")
         for s2 in s2s:
             if s2 in ['sqos_ot', 'sqos_ob']:
                 for r in ratios:
@@ -355,7 +422,8 @@ def get_alloc_diffs_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1
                     df_small[f"Allocation Difference [{UNIT}]"] = diff
                     df_small['Strategies'] = f"{_STOL[s1]} vs. {_STOL[s2]}"
 
-                    df = pd.concat([df, df_small], axis=0)
+                    #df = pd.concat([df, df_small], axis=0)
+                    small_dfs.append(df_small)
             else:
                 a2 = dh.get_allocations(g, s2)
                 diff = alloc_difference_list(a1, a2)
@@ -363,7 +431,18 @@ def get_alloc_diffs_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1
                 df_small[f"Allocation Difference [{UNIT}]"] = diff
                 df_small['Strategies'] = f"{_STOL[s1]} vs. {_STOL[s2]}"
 
-                df = pd.concat([df, df_small], axis=0)
+                #df = pd.concat([df, df_small], axis=0)
+                small_dfs.append(df_small)
+
+            i = i + 1
+            print(f'Done with {i * 100 / all_s}% of strategies for current graph')
+
+        j = j + 1
+        print(f"Donw with {j * 100 / all_g}% of graphs")
+
+    print("Concatenating single results")
+
+    df = pd.concat(small_dfs)
     return df
 
 
@@ -371,16 +450,25 @@ def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
 
     df = pd.DataFrame(columns=[_YS['alloc'], "Path Length", "Source Degree", "Destination Degree", "Strategy", "Ratio"])
 
-    for g in graphs:
+    print(f"Fetching Allocations for {len(graphs)} graphs")
 
+    all_g = len(graphs)
+    j = 0
+    for g in graphs:
+        print(f"Fetching Allocations for {g}")
         als = []
         pls = []
         src_degs = []
         dst_degs = []
+        small_dfs = []
 
         path_lengths = dh.get_pl(g)
         degrees = dh.get_degrees(g)
 
+
+        all_s = len(strategies)
+        i=0
+        print(f"Fetching Allocations for {all_s} Strategies")
         for s in strategies:
             if s in ['sqos_ot', 'sqos_ob']:
                 for r in ratios:
@@ -401,7 +489,8 @@ def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
                     df_small['Strategy'] = _STOL[s]
                     df_small["Ratio"] = r
 
-                    df = pd.concat([df, df_small])
+                    #df = pd.concat([df, df_small])
+                    small_dfs.append(df_small)
 
             else:
                 alloc = dh.get_allocations(g, s)
@@ -422,8 +511,16 @@ def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
                 df_small['Strategy'] = _STOL[s]
                 df_small["Ratio"] = 1
 
-                df = pd.concat([df, df_small])
+                #df = pd.concat([df, df_small])
+                small_dfs.append(df_small)
 
+            i=i+1
+            print(f'Done with {i*100/all_s}% of strategies for current graph')
+
+        j=j+1
+        print(f"Donw with {j*100/all_g}% of graphs")
+    print("Concatenating single results")
+    df = pd.concat(small_dfs)
     return df
 
 
@@ -474,8 +571,8 @@ make_cover_cdf(data, f"CDF of Covers in {'Core(10000)'}", save=True, path=dh.get
 data = get_alloc_diffs_as_df(['Core(10000)'], _STRATEGIES[0], _STRATEGIES[1:])
 make_alloc_cdf(data, f"CDF of Allocations in {'Core(10000)'}", save=True, path=dh.get_graph_figure_path('Core(10000)'))
 
-'''
 
+'''
 # Create all necessary dirs if not there yet
 gen_path = os.path.join(FIGURE_PATH, 'general/')
 graph_path = os.path.join(FIGURE_PATH, 'graph/')
@@ -493,7 +590,7 @@ for g in _ALL_GRAPHS:
 
 
 # Per Topology figures
-_SELECTED_GRAPHS = _RAND_GRAPHS + ['Kdl(754)', 'Colt(153)']
+_SELECTED_GRAPHS = ['Kdl(754)', 'Colt(153)'] #_RAND_GRAPHS +
 all_g = len(_SELECTED_GRAPHS)
 i = 0
 
@@ -545,7 +642,8 @@ for g in _SELECTED_GRAPHS:
     i = i+1
     print(f"{i*100/all_g}% of topologies plotted ")
 
-
+'''
+'''
 print('Starting Group plots: All Graphs')
 
 # Group figures all graphs
@@ -556,25 +654,29 @@ for s in _STRATEGIES:
     dat = data[data["Strategy"] == _STOL[s]]
     for t in ['scatter', 'box']:
         make_fig_single(_XS['pl'], _YS['alloc'], dat, f"{_STOL[s]} Allocations by Path Length in all Graphs", p_type=t,
-                        save=True, path=dh.get_general_figure_path(), strat=s)
+                        save=True, path=dh.get_general_figure_path(), strat=s, logy=True)
 
     # TODO: Heatmap src-dst alloc
 # Allocation plots all strategies
 for t in ['scatter', 'box']:
     make_fig_single(_XS['pl'], _YS['alloc'], data, f"Allocations by Path Length in all Graphs", p_type=t, save=True,
-                    path=dh.get_graph_figure_path(g))
+                    path=dh.get_general_figure_path(), logy=True)
     make_fig_split(_XS['pl'], _YS['alloc'], data, f"Allocations by Path Length in all Graphs", _STRATEGIES, p_type=t,
-                   save=True, path=dh.get_general_figure_path())
+                   save=True, path=dh.get_general_figure_path(), logy=True)
 
 # Cover plots per strategy
 print('Starting Cover Plots')
-data = get_covers_as_df([g], _STRATEGIES)
+data = get_covers_as_df(_ALL_GRAPHS, _STRATEGIES)
+print(data)
 for s in _STRATEGIES:
     dat = data[data["Strategy"] == s]
     for t in ['scatter', 'box']:
         for xm in ['degree', 'size', 'diameter']:
-            make_fig_single(_XS[xm], _YS['cover'], dat, f"{_STOL[s]} Cover by {_XS[xm]} in all Graphs", p_type=t, save=True,
+            try:
+                make_fig_single(_XS[xm], _YS['cover'], dat, f"{_STOL[s]} Cover by {_XS[xm]} in all Graphs", p_type=t, save=True,
                             path=dh.get_general_figure_path(), strat=s)
+            except ValueError as e:
+                print(f'Error in plotting for \nstrat: {s}\ntype: {t}\n x metric: {xm}\n Error: {e}')
 
 # Cover plots all strategies
 for t in ['scatter', 'box']:
