@@ -125,8 +125,8 @@ def main(args):
     # TODO
 
     # - Compute Degrees, Diameters, shortest paths, traffic matrices, shortest path sampling, path lengths
+
     '''
-    
     degs = DegreesComputation(dirs, cores, force)
     degs.run()
 

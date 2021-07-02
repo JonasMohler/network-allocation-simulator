@@ -103,9 +103,9 @@ def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, p
     elif p_type == 'box':
         name = f"{name}_b_single.{_FORMAT}"
         if y_name == _YS['cover']:
-            sns.boxplot(x=x_name, y=y_name, hue='Strategy', data=data, ax=ax)#, outlier=False)
+            sns.boxplot(x=x_name, y=y_name, hue='Strategy', data=data, ax=ax, palette=_C_MAP)#, outlier=False)
         else:
-            sns.boxplot(x=x_name, y=y_name, hue='Strategy', data=data, ax=ax)
+            sns.boxplot(x=x_name, y=y_name, hue='Strategy', data=data, ax=ax, palette=_C_MAP)
         '''
         for patch in ax.artists:
             r, g, b, a, = patch.get_facecolor()
@@ -138,7 +138,7 @@ def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, p
 def make_fig_split(x_name, y_name, data, title, strategies, p_type='scatter', save=False, path='', logy=False, logx=False):
 
     name = f'{y_name}_{x_name}'
-    fig, axs = plt.subplots(len(strategies), sharey=True)
+    fig, axs = plt.subplots(2, 2, sharey=True)
 
     if p_type == 'scatter':
         name = f"{name}_s_split.{_FORMAT}"
@@ -182,10 +182,15 @@ def make_fig_split(x_name, y_name, data, title, strategies, p_type='scatter', sa
 
     fig.suptitle(title)
     
-    #i=0
-    #for s in strategies:
-    #    h,l = axs[i].get_legend_handles_labels()
-    #    axs[i].legend(handles=h, labels=l, bbox_to_anchor=(1.05, 1), loc=2)
+    i=0
+    hs = []
+    ls = []
+    for s in strategies:
+        h,l = axs[i].get_legend_handles_labels()
+        hs = hs+h
+        ls = ls+l
+    
+    fig.legend(handles=hs, labels=ls, bbox_to_anchor=(1.05, 1), loc=2)
 
     if save:
         plt.savefig(os.path.join(path, name))
@@ -194,11 +199,27 @@ def make_fig_split(x_name, y_name, data, title, strategies, p_type='scatter', sa
         plt.show()
 
 
-def make_fig(x_name, y_name, data, title, type='scatter', split=False, save=False, path='', logy=False, logx=False):
-    if split:
-        make_fig_split(x_name, y_name, data, title, type=type, save=save, path=path, logy=logy, logx=logx)
+def make_cover_cdf_abs(data, title, save=False, path='', logx=False):
+    name = f"cov_cdf_abs_strats.{_FORMAT}"
+
+    d_min = data[_YS['cover']].min()
+    d_max = data[_YS['cover']].max()
+
+    fig, ax = plt.subplots()
+    sns.ecdfplot(data=data, x = _YS['cover'], hue="Strategy", ax=ax)
+    ax.set_xlim(d_min, d_max)
+    ax.grid(b=True)
+
+    fig.suptitle(title)
+
+    if logx:
+        plt.xscale('log')
+
+    if save:
+        plt.savefig(os.path.join(path,name))
+        plt.close()
     else:
-        make_fig_single(x_name, y_name, data, title, type=type, save=save, path=path, logy=logy, logx=logx)
+        plt.show()
 
 
 def make_cover_cdf(data, title, save=False, path='', logx=False):
@@ -452,7 +473,7 @@ def get_alloc_diffs_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1
     return df
 
 
-def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
+def get_allocs_with_deg_as_df(graphs, strategies, ratios=[0.1]):
 
     df = pd.DataFrame(columns=[_YS['alloc'], "Path Length", "Source Degree", "Destination Degree", "Strategy", "Ratio"])
 
@@ -530,12 +551,77 @@ def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
     return df
 
 
+def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
+
+    df = pd.DataFrame(columns=[_YS['alloc'], "Path Length", "Strategy", "Ratio"])
+
+    print(f"Fetching Allocations for {len(graphs)} graphs")
+
+    all_g = len(graphs)
+    j = 0
+    for g in graphs:
+        print(f"Fetching Allocations for {g}")
+        als = []
+        pls = []
+        small_dfs = []
+
+        path_lengths = dh.get_pl(g)
+
+        all_s = len(strategies)
+        i=0
+        print(f"Fetching Allocations for {all_s} Strategies")
+        for s in strategies:
+            if s in ['sqos_ot', 'sqos_ob']:
+                for r in ratios:
+                    alloc = dh.get_allocations(g, s, r)
+                    for src, dests in alloc.items():
+                        for dst in dests.keys():
+                            als.append(alloc[src][dst][0])
+                            pls.append(path_lengths[src][dst])
+
+                    df_small = pd.DataFrame()
+                    df_small[_YS['alloc']] = als
+                    df_small["Path Length"] = pls
+                    df_small['Strategy'] = _STOL[s]
+                    df_small["Ratio"] = r
+
+                    #df = pd.concat([df, df_small])
+                    small_dfs.append(df_small)
+
+            else:
+                alloc = dh.get_allocations(g, s)
+
+                for src, dests in alloc.items():
+                    for dst in dests.keys():
+                        als.append(alloc[src][dst][0])
+                        pls.append(path_lengths[src][dst])
+
+                df_small = pd.DataFrame()
+                df_small[_YS['alloc']] = als
+                df_small["Path Length"] = pls
+                df_small['Strategy'] = _STOL[s]
+                df_small["Ratio"] = 1
+
+                #df = pd.concat([df, df_small])
+                small_dfs.append(df_small)
+
+            i=i+1
+            print(f'Done with {i*100/all_s}% of strategies for current graph')
+
+        j=j+1
+        print(f"Donw with {j*100/all_g}% of graphs")
+    print("Concatenating single results")
+    df = pd.concat(small_dfs)
+    return df
+
+
 #################################################
 '''
 data = get_allocs_as_df(['Colt(153)'], _STRATEGIES, [0.1])
 for s in _STRATEGIES:
     make_heat_scatter(data[data["Strategy"] == _STOL[s]], dh.get_graph_figure_path('Colt(153)'), s)
 '''
+
 '''
 data = get_allocs_as_df(['Core(10000)'], _STRATEGIES, [0.1])
 # Allocation plots per strategy
@@ -573,12 +659,15 @@ for t in ['scatter', 'box']:
 data = get_cover_diffs_as_df(['Core(10000)'], _STRATEGIES[0], _STRATEGIES[1:])
 make_cover_cdf(data, f"CDF of Covers in {'Core(10000)'}", save=True, path=dh.get_graph_figure_path('Core(10000)'))
 '''
+
+'''
 # Alloc CDF
 data = get_alloc_diffs_as_df(['Core(10000)'], _STRATEGIES[0], _STRATEGIES[1:])
 make_alloc_cdf(data, f"CDF of Allocations in {'Core(10000)'}", save=True, path=dh.get_graph_figure_path('Core(10000)'), logx=True)
 '''
-'''
-'''
+
+
+
 # Create all necessary dirs if not there yet
 gen_path = os.path.join(FIGURE_PATH, 'general/')
 graph_path = os.path.join(FIGURE_PATH, 'graph/')
@@ -597,11 +686,11 @@ for g in _ALL_GRAPHS:
 
 # Per Topology figures
 _SELECTED_GRAPHS = ['Kdl(754)', 'Colt(153)'] #_RAND_GRAPHS +
-all_g = len(_SELECTED_GRAPHS)
+all_g = len(_ALL_GRAPHS)
 i = 0
-
+'''
 print('Starting per topology plots')
-for g in _SELECTED_GRAPHS:
+for g in _ALL_GRAPHS:
     data = get_allocs_as_df([g], _STRATEGIES, [0.1])
     # Allocation plots per strategy
     for s in _STRATEGIES:
@@ -633,7 +722,7 @@ for g in _SELECTED_GRAPHS:
                             path=dh.get_graph_figure_path(g))
 
     # CDF plots
-
+    make_cover_cdf_abs(data, f"CDF of Covers in {g}", save=True, path=dh.get_graph_figure_path(g))
     # Cover CDF
     data = get_cover_diffs_as_df([g], _STRATEGIES[0], _STRATEGIES[1:])
     make_cover_cdf(data, f"CDF of Covers in {g}", save=True, path=dh.get_graph_figure_path(g))
@@ -648,8 +737,9 @@ for g in _SELECTED_GRAPHS:
     i = i+1
     print(f"{i*100/all_g}% of topologies plotted ")
 
+
 '''
-'''
+
 print('Starting Group plots: All Graphs')
 
 # Group figures all graphs
@@ -693,19 +783,19 @@ for t in ['scatter', 'box']:
                        path=dh.get_general_figure_path())
 
 # CDF plots
-
+make_cover_cdf_abs(data, f"CDF of Covers in all Graphs", save=True, path = dh.get_general_figure_path())
 # Cover CDF
 print('Starting Cover CDF')
 data = get_cover_diffs_as_df(_ALL_GRAPHS, _STRATEGIES[0], _STRATEGIES[1:])
-make_cover_cdf(data, f"CDF of Covers in all Graphs", save=True, path=dh.get_general_figure_path())
-'''
-'''
+make_cover_cdf(data, f"CDF of Cover Differences in all Graphs", save=True, path=dh.get_general_figure_path())
+
+
 # Alloc CDF
 print('Starting Alloc CDF')
 data = get_alloc_diffs_as_df(_ALL_GRAPHS, _STRATEGIES[0], _STRATEGIES[1:])
 print('Creating Alloc CDF Plot')
 make_alloc_cdf(data, f"CDF of Allocations in all Graphs", save=True, path=dh.get_general_figure_path())
-'''
+
 
 # Group figures zoo
 # Cover by diameter box
