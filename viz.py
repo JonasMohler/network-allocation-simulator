@@ -1,5 +1,5 @@
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 import src.util.data_handler as dh
