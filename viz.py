@@ -556,14 +556,14 @@ def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
     df = pd.DataFrame(columns=[_YS['alloc'], "Path Length", "Strategy", "Ratio"])
 
     print(f"Fetching Allocations for {len(graphs)} graphs")
-
+    small_dfs=[]
     all_g = len(graphs)
     j = 0
     for g in graphs:
         print(f"Fetching Allocations for {g}")
         als = []
         pls = []
-        small_dfs = []
+        #small_dfs = []
 
         path_lengths = dh.get_pl(g)
 
