@@ -40,8 +40,8 @@ _THRESH = '0.01'
 data = get_allocs_as_df(['Core(10000)'], _STRATEGIES, [0.1])
     # TODO: Heatmap src-dst alloc
 # Allocation plots all strategies
-make_fig_single(_XS['pl'], _YS['alloc'], data[data["Strategy"] == _STOL['GMAImproved']], f"Allocations by Path Length in Core", p_type='box', save=True, path=dh.get_graph_figure_path(g), logy=True, strat='GMA')
-make_fig_split(_XS['pl'], _YS['alloc'], data, f"Allocations by Path Length in {'Core(10000)'}", _STRATEGIES[1:], p_type='box', save=True, path=dh.get_graph_figure_path(g), logy=True)
+make_fig_single(_XS['pl'], _YS['alloc'], data[data["Strategy"] == _STOL['GMAImproved']], f"Allocations by Path Length in Core", p_type='box', save=True, path=dh.get_graph_figure_path('Core(10000)'), logy=True, strat='GMA')
+make_fig_split(_XS['pl'], _YS['alloc'], data, f"Allocations by Path Length in {'Core(10000)'}", _STRATEGIES[1:], p_type='box', save=True, path=dh.get_graph_figure_path('Core(10000)'), logy=True)
 
 # Cover plots per strategy
 data = get_covers_as_df(['Core(10000)'], _STRATEGIES)
