@@ -557,7 +557,7 @@ for s in _STRATEGIES:
     dat = data[data["Strategy"] == s]
     for t in ['scatter']:#, 'box']:
         for xm in ['degree', 'size', 'diameter']:
-           make_fig_single(_XS[xm], _YS['cover'], dat, f"{_STOL[s]} Cover by {_XS[xm]} in {'Core(10000)'}", p_type=t, save=True, path=dh.get_graph_figure_path(g))
+           make_fig_single(_XS[xm], _YS['cover'], dat, f"{_STOL[s]} Cover by {_XS[xm]} in {'Core(10000)'}", p_type=t, save=True, path=dh.get_graph_figure_path('Core(10000)'))
 
 # Cover plots all strategies
 for t in ['scatter', 'box']:
