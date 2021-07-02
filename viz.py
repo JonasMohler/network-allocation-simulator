@@ -666,7 +666,7 @@ data = get_alloc_diffs_as_df(['Core(10000)'], _STRATEGIES[0], _STRATEGIES[1:])
 make_alloc_cdf(data, f"CDF of Allocations in {'Core(10000)'}", save=True, path=dh.get_graph_figure_path('Core(10000)'), logx=True)
 '''
 
-
+'''
 
 # Create all necessary dirs if not there yet
 gen_path = os.path.join(FIGURE_PATH, 'general/')
@@ -688,6 +688,7 @@ for g in _ALL_GRAPHS:
 _SELECTED_GRAPHS = ['Kdl(754)', 'Colt(153)'] #_RAND_GRAPHS +
 all_g = len(_ALL_GRAPHS)
 i = 0
+'''
 '''
 print('Starting per topology plots')
 for g in _ALL_GRAPHS:
@@ -739,7 +740,7 @@ for g in _ALL_GRAPHS:
 
 
 '''
-
+'''
 print('Starting Group plots: All Graphs')
 
 # Group figures all graphs
@@ -821,5 +822,5 @@ make_alloc_cdf(data, f"CDF of Allocations in all Graphs", save=True, path=dh.get
 # Alloc cdf
 # Cover cdf
 
-
+'''
 
