@@ -20,7 +20,7 @@ _XS = {
 
 _YS = {
     'cover': 'Cover [%]',
-    'alloc': f'Allocations {[UNIT]}'
+    'alloc': 'Allocations GBpS'
 }
 
 _LABELS = [
