@@ -126,7 +126,7 @@ def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, p
 
     fig.suptitle(title)
     h, l = ax.get_legend_handles_labels()
-    ax.legend(handles=h, labels=l, bbox_to_anchor=(1.05,1),loc=2)
+    ax.legend(handles=h, labels=l, bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.)
 
     if save:
         plt.savefig(os.path.join(path, name))
@@ -230,11 +230,17 @@ def make_alloc_cdf(data, title, save=False, path='', logx=False):
 
     name = f"alloc_cdf_strats.{_FORMAT}"
 
+    print('Getting min/max')
     d_min = data[f"Allocation Difference [{UNIT}]"].min()
     d_max = data[f"Allocation Difference [{UNIT}]"].max()
 
+    print('Start plotting')
+
     fig, ax = plt.subplots()
     sns.ecdfplot(data=data, x=f"Allocation Difference [{UNIT}]", hue="Strategies", ax=ax)
+    
+    print('Plot cleanup')
+
     ax.set_xlim(d_min, d_max)
     ax.grid(b=True)
     ax.axvline(c='r', linestyle='--', alpha=0.3)
@@ -530,7 +536,7 @@ data = get_allocs_as_df(['Colt(153)'], _STRATEGIES, [0.1])
 for s in _STRATEGIES:
     make_heat_scatter(data[data["Strategy"] == _STOL[s]], dh.get_graph_figure_path('Colt(153)'), s)
 '''
-
+'''
 data = get_allocs_as_df(['Core(10000)'], _STRATEGIES, [0.1])
 # Allocation plots per strategy
 for s in _STRATEGIES:
@@ -544,7 +550,7 @@ for s in _STRATEGIES:
 for t in ['scatter', 'box']:
     make_fig_single(_XS['pl'], _YS['alloc'], data, f"Allocations by Path Length in {'Core(10000)'}", p_type=t, save=True, path=dh.get_graph_figure_path(g), logy=True)
     make_fig_split(_XS['pl'], _YS['alloc'], data, f"Allocations by Path Length in {'Core(10000)'}", _STRATEGIES, p_type=t, save=True, path=dh.get_graph_figure_path(g), logy=True)
-
+'''
 # Cover plots per strategy
 data = get_covers_as_df(['Core(10000)'], _STRATEGIES)
 for s in _STRATEGIES:
@@ -570,8 +576,8 @@ make_cover_cdf(data, f"CDF of Covers in {'Core(10000)'}", save=True, path=dh.get
 # Alloc CDF
 data = get_alloc_diffs_as_df(['Core(10000)'], _STRATEGIES[0], _STRATEGIES[1:])
 make_alloc_cdf(data, f"CDF of Allocations in {'Core(10000)'}", save=True, path=dh.get_graph_figure_path('Core(10000)'))
-
-
+'''
+'''
 '''
 # Create all necessary dirs if not there yet
 gen_path = os.path.join(FIGURE_PATH, 'general/')
@@ -692,12 +698,14 @@ for t in ['scatter', 'box']:
 print('Starting Cover CDF')
 data = get_cover_diffs_as_df(_ALL_GRAPHS, _STRATEGIES[0], _STRATEGIES[1:])
 make_cover_cdf(data, f"CDF of Covers in all Graphs", save=True, path=dh.get_general_figure_path())
-
+'''
+'''
 # Alloc CDF
 print('Starting Alloc CDF')
 data = get_alloc_diffs_as_df(_ALL_GRAPHS, _STRATEGIES[0], _STRATEGIES[1:])
+print('Creating Alloc CDF Plot')
 make_alloc_cdf(data, f"CDF of Allocations in all Graphs", save=True, path=dh.get_general_figure_path())
-
+'''
 
 # Group figures zoo
 # Cover by diameter box
@@ -723,6 +731,5 @@ make_alloc_cdf(data, f"CDF of Allocations in all Graphs", save=True, path=dh.get
 # Alloc cdf
 # Cover cdf
 
-'''
 
 
