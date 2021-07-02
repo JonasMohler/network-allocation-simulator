@@ -125,8 +125,8 @@ def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, p
         plt.yscale('log')
 
     fig.suptitle(title)
-    h, l = ax.get_legend_handles_labels()
-    ax.legend(handles=h, labels=l, bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.)
+    #h, l = ax.get_legend_handles_labels()
+    #ax.legend(handles=h, labels=l, bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.)
 
     if save:
         plt.savefig(os.path.join(path, name))
@@ -550,7 +550,7 @@ for s in _STRATEGIES:
 for t in ['scatter', 'box']:
     make_fig_single(_XS['pl'], _YS['alloc'], data, f"Allocations by Path Length in {'Core(10000)'}", p_type=t, save=True, path=dh.get_graph_figure_path(g), logy=True)
     make_fig_split(_XS['pl'], _YS['alloc'], data, f"Allocations by Path Length in {'Core(10000)'}", _STRATEGIES, p_type=t, save=True, path=dh.get_graph_figure_path(g), logy=True)
-'''
+
 # Cover plots per strategy
 data = get_covers_as_df(['Core(10000)'], _STRATEGIES)
 for s in _STRATEGIES:
@@ -572,10 +572,10 @@ for t in ['scatter', 'box']:
 # Cover CDF
 data = get_cover_diffs_as_df(['Core(10000)'], _STRATEGIES[0], _STRATEGIES[1:])
 make_cover_cdf(data, f"CDF of Covers in {'Core(10000)'}", save=True, path=dh.get_graph_figure_path('Core(10000)'))
-
+'''
 # Alloc CDF
 data = get_alloc_diffs_as_df(['Core(10000)'], _STRATEGIES[0], _STRATEGIES[1:])
-make_alloc_cdf(data, f"CDF of Allocations in {'Core(10000)'}", save=True, path=dh.get_graph_figure_path('Core(10000)'))
+make_alloc_cdf(data, f"CDF of Allocations in {'Core(10000)'}", save=True, path=dh.get_graph_figure_path('Core(10000)'), logx=True)
 '''
 '''
 '''
