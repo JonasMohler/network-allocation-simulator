@@ -47,53 +47,29 @@ print('Starting Group plots: All Graphs')
 # Group figures all graphs
 print('Starting Allocation plots')
 data = get_allocs_as_df(_ALL_GRAPHS, _STRATEGIES, [0.1])
-# Allocation plots per strategy
-for s in _STRATEGIES:
-    dat = data[data["Strategy"] == _STOL[s]]
-    for t in ['scatter', 'box']:
-        make_fig_single(_XS['pl'], _YS['alloc'], dat, f"{_STOL[s]} Allocations by Path Length in all Graphs", p_type=t,
-                        save=True, path=dh.get_general_figure_path(), strat=s, logy=True)
-
     # TODO: Heatmap src-dst alloc
 # Allocation plots all strategies
-for t in ['scatter', 'box']:
-    make_fig_single(_XS['pl'], _YS['alloc'], data, f"Allocations by Path Length in all Graphs", p_type=t, save=True,
-                    path=dh.get_general_figure_path(), logy=True)
-    make_fig_split(_XS['pl'], _YS['alloc'], data, f"Allocations by Path Length in all Graphs", _STRATEGIES, p_type=t,
-                   save=True, path=dh.get_general_figure_path(), logy=True)
+make_fig_single(_XS['pl'], _YS['alloc'], data[data["Strategy"] == _STOL['GMAImproved']], f"Allocations by Path Length in all graphs", p_type='box', save=True, path=dh.get_general_figure_path(), logy=True, strat='GMA')
+make_fig_split(_XS['pl'], _YS['alloc'], data, f"Allocations by Path Length in all graphs", _STRATEGIES[1:], p_type='box', save=True, path=dh.get_general_figure_path(), logy=True)
+
 
 # Cover plots per strategy
 print('Starting Cover Plots')
 data = get_covers_as_df(_ALL_GRAPHS, _STRATEGIES)
-print(data)
-for s in _STRATEGIES:
-    dat = data[data["Strategy"] == s]
-    for t in ['scatter', 'box']:
-        for xm in ['degree', 'size', 'diameter']:
-            try:
-                make_fig_single(_XS[xm], _YS['cover'], dat, f"{_STOL[s]} Cover by {_XS[xm]} in all Graphs", p_type=t, save=True,
-                            path=dh.get_general_figure_path(), strat=s)
-            except ValueError as e:
-                print(f'Error in plotting for \nstrat: {s}\ntype: {t}\n x metric: {xm}\n Error: {e}')
 
 # Cover plots all strategies
-for t in ['scatter', 'box']:
-    for xm in ['degree', 'size', 'diameter']:
-        make_fig_single(_XS[xm], _YS['cover'], data, f"Cover by {_XS[xm]} in all Graphs", p_type=t, save=True,
+make_fig_single(_XS['degree'], _YS['cover'], data[data["Strategy"] == _STOL["GMAImproved"]], f"Cover by {_XS['degree']} in all graphs", p_type='scatter', save=True,
                         path=dh.get_general_figure_path())
-        make_fig_split(_XS[xm], _YS['cover'], data, f"Cover by {_XS[xm]} in all Graphs", _STRATEGIES, p_type=t, save=True,
-                       path=dh.get_general_figure_path())
+
+make_fig_split(_XS['degree'], _YS['cover'], data, f"Cover by {_XS['degree']} in all graphs", _STRATEGIES[1:], p_type='scatter', save=True,
+                        path=dh.get_general_figure_path())
 
 # CDF plots
-make_cover_cdf_abs(data, f"CDF of Covers in all Graphs", save=True, path = dh.get_general_figure_path())
+make_cover_cdf_abs(data, f"CDF of Covers in all graphs", save=True, path=dh.get_general_figure_path())
 # Cover CDF
-print('Starting Cover CDF')
 data = get_cover_diffs_as_df(_ALL_GRAPHS, _STRATEGIES[0], _STRATEGIES[1:])
-make_cover_cdf(data, f"CDF of Cover Differences in all Graphs", save=True, path=dh.get_general_figure_path())
-
+make_cover_cdf(data, f"CDF of Cover Differences in all graphs", save=True, path=dh.get_general_figure_path())
 
 # Alloc CDF
-print('Starting Alloc CDF')
 data = get_alloc_diffs_as_df(_ALL_GRAPHS, _STRATEGIES[0], _STRATEGIES[1:])
-print('Creating Alloc CDF Plot')
-make_alloc_cdf(data, f"CDF of Allocations in all Graphs", save=True, path=dh.get_general_figure_path())
+make_alloc_cdf(data, f"CDF of Allocation Differences in all graphs", save=True, path=dh.get_general_figure_path())

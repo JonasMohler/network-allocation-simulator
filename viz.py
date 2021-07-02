@@ -481,13 +481,14 @@ def get_allocs_with_deg_as_df(graphs, strategies, ratios=[0.1]):
 
     all_g = len(graphs)
     j = 0
+    small_dfs = []
     for g in graphs:
         print(f"Fetching Allocations for {g}")
         als = []
         pls = []
         src_degs = []
         dst_degs = []
-        small_dfs = []
+
 
         path_lengths = dh.get_pl(g)
         degrees = dh.get_degrees(g)
