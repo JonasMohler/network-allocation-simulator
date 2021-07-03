@@ -367,11 +367,29 @@ def get_covers_as_df(graphs, strategies, ratios=[0.1], threshs=['0.001']):
         for s in strategies:
             for t in threshs:
                 if s in ['sqos_ot', 'sqos_ob']:
-                    print('is sqos o strat')
                     for r in ratios:
-                        print(f'with ratio: {r}')
                         try:
-                            cover = get_cover(g, s, t, r)
+                            if os.path.exists(get_full_path(g, COVER, s, r, t)):
+                                cover = get_cover(g, s, t, r)
+                                c = list(cover.values())
+                                df_small = pd.DataFrame()
+                                df_small[PLOT_Y_LABEL['cover']] = c
+                                df_small[PLOT_X_LABEL['degree']] = degrees
+                                df_small[PLOT_X_LABEL['size']] = size
+                                df_small[PLOT_X_LABEL['diameter']] = diameter
+                                df_small['Strategy'] = STRATEGY_LABEL[s]
+                                df_small["Ratio"] = r
+                                df_small["Cover Threshold"] = t
+
+                                #df = pd.concat([df, df_small])
+                                small_dfs.append(df_small)
+                                #print(f'appended df_small: {df_small} for ratio r: {r}')
+                        except Exception as e:
+                            break
+                else:
+                    try:
+                        if os.path.exists(get_full_path(g, COVER, s, thresh=t)):
+                            cover = get_cover(g, s, t, None)
                             c = list(cover.values())
                             df_small = pd.DataFrame()
                             df_small[PLOT_Y_LABEL['cover']] = c
@@ -379,27 +397,11 @@ def get_covers_as_df(graphs, strategies, ratios=[0.1], threshs=['0.001']):
                             df_small[PLOT_X_LABEL['size']] = size
                             df_small[PLOT_X_LABEL['diameter']] = diameter
                             df_small['Strategy'] = STRATEGY_LABEL[s]
-                            df_small["Ratio"] = r
+                            df_small["Ratio"] = 1
+                            df_small["Cover Threshold"] = t
 
                             #df = pd.concat([df, df_small])
                             small_dfs.append(df_small)
-                            print(f'appended df_small: {df_small} for ratio r: {r}')
-                        except Exception as e:
-                            break
-                else:
-                    try:
-                        cover = get_cover(g, s, t, None)
-                        c = list(cover.values())
-                        df_small = pd.DataFrame()
-                        df_small[PLOT_Y_LABEL['cover']] = c
-                        df_small[PLOT_X_LABEL['degree']] = degrees
-                        df_small[PLOT_X_LABEL['size']] = size
-                        df_small[PLOT_X_LABEL['diameter']] = diameter
-                        df_small['Strategy'] = STRATEGY_LABEL[s]
-                        df_small["Ratio"] = 1
-
-                        #df = pd.concat([df, df_small])
-                        small_dfs.append(df_small)
                     except Exception as e:
                         break
 
@@ -434,7 +436,26 @@ def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
         for s in strategies:
             if s in ['sqos_ot', 'sqos_ob']:
                 for r in ratios:
-                    alloc = get_allocations(g, s, r)
+                    if os.path.exists(get_full_path(g, ALLOCATION, s, r)):
+                        alloc = get_allocations(g, s, r)
+                        for src, dests in alloc.items():
+                            for dst in dests.keys():
+                                als.append(alloc[src][dst][0])
+                                pls.append(path_lengths[src][dst])
+
+                        df_small = pd.DataFrame()
+                        df_small[PLOT_Y_LABEL['alloc']] = als
+                        df_small["Path Length"] = pls
+                        df_small['Strategy'] = STRATEGY_LABEL[s]
+                        df_small["Ratio"] = r
+
+                        #df = pd.concat([df, df_small])
+                        small_dfs.append(df_small)
+
+            else:
+                if os.path.exists(get_full_path(g, ALLOCATION, s)):
+                    alloc = get_allocations(g, s)
+
                     for src, dests in alloc.items():
                         for dst in dests.keys():
                             als.append(alloc[src][dst][0])
@@ -444,27 +465,10 @@ def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
                     df_small[PLOT_Y_LABEL['alloc']] = als
                     df_small["Path Length"] = pls
                     df_small['Strategy'] = STRATEGY_LABEL[s]
-                    df_small["Ratio"] = r
+                    df_small["Ratio"] = 1
 
                     #df = pd.concat([df, df_small])
                     small_dfs.append(df_small)
-
-            else:
-                alloc = get_allocations(g, s)
-
-                for src, dests in alloc.items():
-                    for dst in dests.keys():
-                        als.append(alloc[src][dst][0])
-                        pls.append(path_lengths[src][dst])
-
-                df_small = pd.DataFrame()
-                df_small[PLOT_Y_LABEL['alloc']] = als
-                df_small["Path Length"] = pls
-                df_small['Strategy'] = STRATEGY_LABEL[s]
-                df_small["Ratio"] = 1
-
-                #df = pd.concat([df, df_small])
-                small_dfs.append(df_small)
 
             i = i+1
             print(f'Done with {i*100/all_s}% of strategies for current graph')

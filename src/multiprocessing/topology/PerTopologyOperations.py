@@ -67,41 +67,60 @@ class PathSampling2(TopologyMultiprocessing):
         try:
             # super(PathSampling, self).per_dir_op(cur_dir)
             if not os.path.exists(dh.get_full_path(cur_dir, SHORTEST_PATH, ratio=self.ratio)):
-                sp = dh.get_shortest_paths(cur_dir)
-                deg = dh.get_degrees(cur_dir)
-                nodes = deg['nodes']
-                degrees = deg['degrees']
-                # Calculate the centrality of all nodes
-                s = sum(degrees)
+                if str(self.ratio).startswith('a'):
+                    # Averaged ratio: Nodes select different numbers of destinations (averaging out to ratio)
+                    # Higher degree nodes select more destinations than lower degree nodes
+                    sp = dh.get_shortest_paths(cur_dir)
+                    deg = dh.get_degrees(cur_dir)
+                    nodes = deg['nodes']
+                    degrees = deg['degrees']
+                    # Calculate the centrality of all nodes
+                    s = sum(degrees)
 
-                centrality = [i / s for i in deg['degrees']]
-                r = float(self.ratio)
+                    centrality = [i / s for i in deg['degrees']]
+                    r = float(self.ratio)
 
-                n_nodes = len(nodes)
+                    n_nodes = len(nodes)
 
-                n_samples = int(round(n_nodes * r))
 
-                print('starting sampling')
-                dests = numpy_choice(n_nodes, n_samples, nodes, centrality)
-                print('sampling done')
+                    pass
+                else:
+                    # Standard ratio: All nodes select the same number of destinations
+                    sp = dh.get_shortest_paths(cur_dir)
+                    deg = dh.get_degrees(cur_dir)
+                    nodes = deg['nodes']
+                    degrees = deg['degrees']
+                    # Calculate the centrality of all nodes
+                    s = sum(degrees)
 
-                print('start assigning')
-                all_selected_paths = {}
-                for i in range(len(nodes)):
+                    centrality = [i / s for i in deg['degrees']]
+                    r = float(self.ratio)
 
-                    selected_paths = {}
-                    for d in dests[i]:
-                        if d != nodes[i]:
-                            selected_paths[d] = sp[nodes[i]][d]
+                    n_nodes = len(nodes)
 
-                    all_selected_paths[nodes[i]] = selected_paths
-                    if i == n_nodes:
-                        print(f"{round(100*i/n_nodes, 4)}%")
-                    else:
-                        print(f"{round(100*i/n_nodes, 4)}%", end="\r")
+                    n_samples = int(round(n_nodes * r))
 
-                dh.set_shortest_paths(all_selected_paths, cur_dir, ratio=self.ratio)
-                print('stored')
+                    print('starting sampling')
+                    dests = numpy_choice(n_nodes, n_samples, nodes, centrality)
+                    print('sampling done')
+
+                    print('start assigning')
+                    all_selected_paths = {}
+                    for i in range(len(nodes)):
+
+                        selected_paths = {}
+                        for d in dests[i]:
+                            if d != nodes[i]:
+                                selected_paths[d] = sp[nodes[i]][d]
+
+                        all_selected_paths[nodes[i]] = selected_paths
+                        if i == n_nodes:
+                            print(f"{round(100*i/n_nodes, 4)}%")
+                        else:
+                            print(f"{round(100*i/n_nodes, 4)}%", end="\r")
+
+                    dh.set_shortest_paths(all_selected_paths, cur_dir, ratio=self.ratio)
+                    print('stored')
 
             print(f"{cur_dir}: Done")
         except Exception as e:

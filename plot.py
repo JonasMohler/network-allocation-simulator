@@ -76,61 +76,109 @@ def main(args):
     if args.single:
 
         for g in graphs:
-            # Allocation plots
-            print('Starting Allocation plots')
-            data = dh.get_allocs_as_df([g], STRATEGIES, [0.1])
 
+            degrees = dh.get_degrees(g)
+            ph.make_fig_single('', '', degrees, f"CDF of Node Degrees in {g}", p_type='cdf_d', save=True, path=dh.get_graph_figure_path(g))
+
+            # Load Allocation data
+            print('Loading Allocation data ...')
+            data = dh.get_allocs_as_df([g], STRATEGIES, [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
+
+            # Allocation Plots
+            print('Generating Allocation plots ...')
+
+            # Allocations Over Path Length Box - GMA
             ph.make_fig_single(PLOT_X_LABEL['pl'], PLOT_Y_LABEL['alloc'],
                                data[data["Strategy"] == STRATEGY_LABEL['GMAImproved']],
                                f"Allocations by Path Length in {g}", p_type='box', save=True,
                                path=dh.get_graph_figure_path(g), logy=True, strat='GMA')
 
-            ph.make_fig_split(PLOT_X_LABEL['pl'], PLOT_Y_LABEL['alloc'], data,
+            # Allocations Over Path Length Box - SQOS
+            ph.make_fig_split(PLOT_X_LABEL['pl'], PLOT_Y_LABEL['alloc'], data[(data["Ratio"] == 0.1) | (data["Ratio"] == 1)],
                               f"Allocations by Path Length in {g}", STRATEGIES[1:],
                               p_type='box', save=True, path=dh.get_graph_figure_path(g), logy=True)
 
-            # TODO: Heatmap src-dst alloc
-
-            # Cover plots
-            print('Starting Cover Plots')
-            data = dh.get_covers_as_df([g], STRATEGIES)
-
-            ph.make_fig_single(PLOT_X_LABEL['degree'], PLOT_Y_LABEL['cover'],
-                               data[data["Strategy"] == STRATEGY_LABEL["GMAImproved"]],
-                               f"Cover by {PLOT_X_LABEL['degree']} in {g}", p_type='scatter', save=True,
-                               path=dh.get_graph_figure_path(g))
-
-            ph.make_fig_split(PLOT_X_LABEL['degree'], PLOT_Y_LABEL['cover'], data,
-                              f"Cover by {PLOT_X_LABEL['degree']} in {g}", STRATEGIES[1:],
-                              p_type='scatter', save=True,
-                              path=dh.get_graph_figure_path(g))
-
-            print('Starting CDFs')
-
-            # CDF plots
-            ph.make_fig_single('', '', data, f"CDF of Covers in {g}", save=True, path=dh.get_graph_figure_path(g),
-                               p_type='cdf_c')
-            # Cover CDF
-            data = dh.get_cover_diffs_as_df([g], STRATEGIES[0], STRATEGIES[1:])
-            ph.make_fig_single('', '', data, f"CDF of Cover Differences in {g}", save=True,
-                               path=dh.get_graph_figure_path(g), p_type='cdf_cd')
-
-            data = dh.get_covers_as_df([g], [STRATEGIES[1]], [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
-            ph.make_fig_single('', '', data, f"CDF of Covers for different Opt. SQoS w/ T. Div. Ratios in {g}", save=True,
-                               path=dh.get_graph_figure_path(g), p_type='cdf_cr')
-
-            # Alloc CDF
-            data = dh.get_allocs_as_df([g], STRATEGIES)
-            ph.make_fig_single('', '', data, f"CDF of Allocations in {g}", save=True, path=dh.get_graph_figure_path(g),
+            # Alloc CDF - All Strategies
+            ph.make_fig_single('', '', data[(data["Ratio"] == 0.1) | (data["Ratio"] == 1)], f"CDF of Allocations in {g}", save=True, path=dh.get_graph_figure_path(g),
                                p_type='cdf_a', logx=True)
+
+            # Alloc CDF - Different sampling ratios SQOS OT
+            ph.make_fig_single('', '', data[data["Strategy"] == STRATEGY_LABEL['sqos_ot']], f"CDF of Allocations for different Opt. SQoS w/ T. Div. Ratios in {g}",
+                               save=True,
+                               path=dh.get_graph_figure_path(g), p_type='cdf_ar', logx=True)
+
+            # Alloc CDF - Differences between GMA vs others
             data = dh.get_alloc_diffs_as_df([g], STRATEGIES[0], STRATEGIES[1:])
             ph.make_fig_single('', '', data, f"CDF of Allocation Differences in {g}", save=True,
                                path=dh.get_graph_figure_path(g), p_type='cdf_ad')
 
-            data = dh.get_allocs_as_df([g], [STRATEGIES[1]], [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
-            ph.make_fig_single('', '', data, f"CDF of Allocations for different Opt. SQoS w/ T. Div. Ratios in {g}",
-                               save=True,
-                               path=dh.get_graph_figure_path(g), p_type='cdf_ar', logx=True)
+
+
+            # TODO: Heatmap src-dst alloc
+
+            # Cover plots
+            print('Loading Cover Data')
+            data = dh.get_covers_as_df([g], STRATEGIES, [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9], [1e-2, 1e-3, 1e-4, 1e-5, 1e-6])
+
+            print('Generating Cover Plots')
+            # Cover Scatter - GMA
+            ph.make_fig_single(PLOT_X_LABEL['degree'], PLOT_Y_LABEL['cover'],
+                               data[
+                                   (data["Strategy"] == STRATEGY_LABEL["GMAImproved"]) &
+                                   (data["Cover Threshold"] == 1e-3)
+                               ],
+                               f"Cover by {PLOT_X_LABEL['degree']} in {g}", p_type='scatter', save=True,
+                               path=dh.get_graph_figure_path(g))
+
+            # Cover Scatter - SQOS
+            ph.make_fig_split(PLOT_X_LABEL['degree'], PLOT_Y_LABEL['cover'],
+                              data[
+                                  (data["Cover Threshold"] == 1e-3) &
+                                  ((data["Ratio"] == 0.1) | (data["Ratio"] == 1))
+                              ],
+                              f"Cover by {PLOT_X_LABEL['degree']} in {g}", STRATEGIES[1:],
+                              p_type='scatter', save=True,
+                              path=dh.get_graph_figure_path(g))
+
+            # Cover CDF - All Strategies
+            ph.make_fig_single('', '',
+                               data[
+                                   (data["Cover Threshold"] == 1e-3) &
+                                   ((data["Ratio"] == 0.1) | (data["Ratio"] == 1))
+                               ],
+                               f"CDF of Covers in {g}", save=True, path=dh.get_graph_figure_path(g),
+                               p_type='cdf_c')
+
+            # Covers CDF - Different sampling ratios SQOS OT
+            ph.make_fig_single('', '',
+                               data[
+                                   (data["Strategy"] == STRATEGY_LABEL['sqos_ot']) &
+                                   (data["Cover Threshold"] == 1e-3)
+                               ],
+                               f"CDF of Covers for different Opt. SQoS w/ T. Div. Ratios in {g}", save=True,
+                               path=dh.get_graph_figure_path(g), p_type='cdf_cr')
+
+            # Covers for different Cover Thresholds - GMA
+            ph.make_fig_single('', '',
+                               data[
+                                   (data["Strategy"] == STRATEGY_LABEL['GMAImproved'])
+                               ], f"CDF of Cover for different Cover Thresholds in {g} - GMA", save=True,
+                               path=dh.get_graph_figure_path(g), p_type='cdf_ct')
+
+            ph.make_fig_split('', '',
+                              data[
+                                  (data["Ratio"] == 0.1) |
+                                  (data["Ratio"] == 1)
+                              ],
+                              f"CDF of Cover for different Cover Thresholds in {g} M-Approach flavours", STRATEGIES[1:], save =True,
+                              path=dh.get_graph_figure_path(g), p_type='cdf_ct')
+
+            # Cover CDF - Differences between GMA vs others
+            data = dh.get_cover_diffs_as_df([g], STRATEGIES[0], STRATEGIES[1:])
+            ph.make_fig_single('', '', data, f"CDF of Cover Differences in {g}", save=True,
+                               path=dh.get_graph_figure_path(g), p_type='cdf_cd')
+
+
 
 
 if __name__ == "__main__":

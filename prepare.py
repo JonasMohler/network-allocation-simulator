@@ -1,5 +1,8 @@
 """Main runner for topology preparation."""
 from argparse import ArgumentParser
+
+import fnss
+
 from src.multiprocessing.topology.PerTopologyOperations import *
 
 
@@ -19,6 +22,11 @@ def parse_args():
         "--rand",
         action='store_true',
         help="Prepare a selection of random graphs"
+    )
+    parser.add_argument(
+        "--cw",
+        action='store_true',
+        help="Prepare with constant (1) link capacities (default: degree-weighted)"
     )
 
     args = parser.parse_args()
@@ -62,8 +70,13 @@ def main(args):
                 fnss.write_topology(graph, os.path.join(graph_path, "topology.xml"))
                 topologies.append(name)
 
-        proc = AddDegreeGravityCapacity(topologies, CAPACITY_INTERVALS, 1)
-        proc.run()
+        if args.cw:
+            proc = AddConstantCapacity(topologies, 1, 1)
+            proc.run()
+        else:
+            proc = AddDegreeGravityCapacity(topologies, CAPACITY_INTERVALS, 1)
+            proc.run()
+
 
     if args.core:
 
@@ -104,8 +117,13 @@ def main(args):
 
         print('Adding capacities')
         # Add capactiy to the links and nodes
-        fnss.set_capacities_degree_gravity(topo_bidir, CAPACITY_INTERVALS, capacity_unit=UNIT)
-        topo_bidir = set_internal_cap_max_link(topo_bidir)
+        if args.cw:
+            fnss.set_capacities_constant(topo_bidir, 1, capacity_unit=UNIT)
+            topo_bidir = set_internal_cap_const(topo_bidir, 1)
+        else:
+            fnss.set_capacities_degree_gravity(topo_bidir, CAPACITY_INTERVALS, capacity_unit=UNIT)
+            topo_bidir = set_internal_cap_max_link(topo_bidir)
+
         # Add reverse edges with inverted business relation
         for s, e in topo_bidir.edges():
             rel = topo_bidir[s][e]["type"]
@@ -136,8 +154,12 @@ def main(args):
         name = make_barabasi_albert(2500, 20, 50)
         rand_ts.append(name)
 
-        proc = AddDegreeGravityCapacity(rand_ts, CAPACITY_INTERVALS, 1)
-        proc.run()
+        if args.cw:
+            proc = AddConstantCapacity(rand_ts, 1, 1)
+            proc.run()
+        else:
+            proc = AddDegreeGravityCapacity(rand_ts, CAPACITY_INTERVALS, 1)
+            proc.run()
 
 
 if __name__ == "__main__":

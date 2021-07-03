@@ -8,6 +8,7 @@ import matplotlib
 matplotlib.use(MATPLOTLIB_BACKEND)
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
 sns.set_theme(style="ticks", palette=PALETTE)
 C_MAP = dict(zip(STRATEGY_LABEL.values(), sns.color_palette(PALETTE, 5)))
@@ -40,7 +41,6 @@ def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, p
         d_min = data[PLOT_Y_LABEL['cover']].min()
         d_max = data[PLOT_Y_LABEL['cover']].max()
 
-        fig, ax = plt.subplots()
         sns.ecdfplot(data=data, x=PLOT_Y_LABEL['cover'], hue="Strategy", ax=ax)
         ax.set_xlim(d_min, d_max)
         ax.grid(b=True)
@@ -52,7 +52,6 @@ def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, p
         d_min = data['Cover Difference'].min()
         d_max = data['Cover Difference'].max()
 
-        fig, ax = plt.subplots()
         sns.ecdfplot(data=data, x=f"Cover Difference", hue="Strategies", ax=ax)
         ax.set_xlim(d_min, d_max)
         ax.grid(b=True)
@@ -65,7 +64,6 @@ def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, p
         d_min = data[PLOT_Y_LABEL['alloc']].min()
         d_max = data[PLOT_Y_LABEL['alloc']].max()
 
-        fig, ax = plt.subplots()
         sns.ecdfplot(data=data, x=PLOT_Y_LABEL['alloc'], hue="Strategy", ax=ax)
         ax.set_xlim(d_min, d_max)
         ax.grid(b=True)
@@ -78,12 +76,7 @@ def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, p
         d_min = data['Allocation Difference [Gbps]'].min()
         d_max = data['Allocation Difference [Gbps]'].max()
 
-        #print('Start plotting')
-
-        fig, ax = plt.subplots()
         sns.ecdfplot(data=data, x=PLOT_Y_LABEL['alloc_d'], hue="Strategies", ax=ax)
-
-        #print('Plot cleanup')
 
         ax.set_xlim(d_min, d_max)
         ax.grid(b=True)
@@ -96,7 +89,6 @@ def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, p
         d_min = data[PLOT_Y_LABEL['alloc']].min()
         d_max = data[PLOT_Y_LABEL['alloc']].max()
 
-        fig, ax = plt.subplots()
         sns.ecdfplot(data=data, x=PLOT_Y_LABEL['alloc'], hue="Ratio", ax=ax)
         ax.set_xlim(d_min, d_max)
         ax.grid(b=True)
@@ -108,8 +100,27 @@ def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, p
         d_min = data[PLOT_Y_LABEL['cover']].min()
         d_max = data[PLOT_Y_LABEL['cover']].max()
 
-        fig, ax = plt.subplots()
         sns.ecdfplot(data=data, x=PLOT_Y_LABEL['cover'], hue="Ratio", ax=ax)
+        ax.set_xlim(d_min, d_max)
+        ax.grid(b=True)
+
+    elif p_type == 'cdf_d':
+        name = f"deg_cdf.{PLOT_FORMAT}"
+
+        d_min = np.min(data['degrees'])
+        d_max = np.max(data['degrees'])
+
+        sns.ecdfplot(data=data, ax=ax)
+        ax.set_xlim(d_min, d_max)
+        ax.grid(b=True)
+
+    elif p_type == 'cdf_ct':
+        name = f"cov_t_cdf.{PLOT_FORMAT}"
+
+        d_min = data[PLOT_Y_LABEL['cover']].min()
+        d_max = data[PLOT_Y_LABEL['cover']].max()
+
+        sns.ecdfplot(data=data, x=PLOT_Y_LABEL['cover'], hue="Cover Threshold", ax=ax)
         ax.set_xlim(d_min, d_max)
         ax.grid(b=True)
 
@@ -174,6 +185,20 @@ def make_fig_split(x_name, y_name, data, title, strategies, p_type='scatter', sa
             if s in ['sqos_ob', 'sqos_ot']:
                 sns.lmplot(data=data[(data["Strategy"] == STRATEGY_LABEL[s])], x=x_name, y=y_name, hue="Strategy",
                            ax=axs[i], palette=C_MAP)
+            i = i + 1
+
+    elif p_type == 'cdf_ct':
+        name = f"cov_t_cdf_s.{PLOT_FORMAT}"
+
+        d_min = data[PLOT_Y_LABEL['cover']].min()
+        d_max = data[PLOT_Y_LABEL['cover']].max()
+
+        i = 0
+        for s in strategies:
+            sns.ecdfplot(data=data[(data["Strategy"] == STRATEGY_LABEL[s])], x=PLOT_Y_LABEL['cover'], hue="Cover Threshold", ax=axs[i])
+            axs[i].set_xlim(d_min, d_max)
+            axs[i].grid(b=True)
+            axs[i].set_title([STRATEGY_LABEL[s]])
             i = i + 1
 
     # TODO: Implement
