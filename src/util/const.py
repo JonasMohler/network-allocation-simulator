@@ -78,8 +78,8 @@ CAPACITY_INTERVALS = [10, 40, 100]
 ###################################################
 # Plotting
 ###################################################
-PLOT_FORMAT = 'pdf'
-# PLOT_FORMAT = 'png'
+# PLOT_FORMAT = 'pdf'
+PLOT_FORMAT = 'png'
 
 MATPLOTLIB_BACKEND = 'Agg'
 # MATPLOTLIB_BACKEND = 'qt4'
