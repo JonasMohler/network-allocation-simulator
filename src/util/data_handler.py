@@ -5,9 +5,10 @@ import json
 import os
 import pickle
 import numpy as np
-
+import pandas as pd
 import fnss
 
+from src.util.utility import *
 from src.util.naming import *
 from src.util.const import *
 
@@ -168,3 +169,340 @@ def get_shortest_paths(graph, ratio=None):
 def set_shortest_paths(data, graph, ratio=None):
     _store(data, graph, SHORTEST_PATH, ratio=ratio)
 
+
+def get_alloc_diffs_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1]):
+
+    small_dfs = []
+
+    print(f"Fetching Allocation differences for {len(graphs)} graphs")
+
+    all_g = len(graphs)
+    j = 0
+    for g in graphs:
+        print(f"Fetching Allocation differences for {g}")
+        a1 = get_allocations(g, s1)
+
+        all_s = len(s2s)
+        i = 0
+        print(f"Fetching Allocation differences for {all_s} Strategies")
+        for s2 in s2s:
+            if s2 in ['sqos_ot', 'sqos_ob']:
+                for r in ratios:
+                    a2 = get_allocations(g, s2, r)
+                    diff = alloc_difference_list(a1, a2)
+                    df_small = pd.DataFrame()
+                    df_small[f"Allocation Difference [{UNIT}]"] = diff
+                    df_small['Strategies'] = f"{STRATEGY_LABEL[s1]} vs. {STRATEGY_LABEL[s2]}"
+
+                    #df = pd.concat([df, df_small], axis=0)
+                    small_dfs.append(df_small)
+            else:
+                a2 = get_allocations(g, s2)
+                diff = alloc_difference_list(a1, a2)
+                df_small = pd.DataFrame()
+                df_small[f"Allocation Difference [{UNIT}]"] = diff
+                df_small['Strategies'] = f"{STRATEGY_LABEL[s1]} vs. {STRATEGY_LABEL[s2]}"
+
+                #df = pd.concat([df, df_small], axis=0)
+                small_dfs.append(df_small)
+
+            i = i + 1
+            print(f'Done with {i * 100 / all_s}% of strategies for current graph')
+
+        j = j + 1
+        print(f"Donw with {j * 100 / all_g}% of graphs")
+
+    print("Concatenating single results")
+
+    df = pd.concat(small_dfs)
+    return df
+
+
+def get_allocs_with_deg_as_df(graphs, strategies, ratios=[0.1]):
+
+    df = pd.DataFrame(columns=[PLOT_Y_LABEL['alloc'], "Path Length", "Source Degree", "Destination Degree", "Strategy", "Ratio"])
+
+    print(f"Fetching Allocations for {len(graphs)} graphs")
+
+    all_g = len(graphs)
+    j = 0
+    small_dfs = []
+    for g in graphs:
+        print(f"Fetching Allocations for {g}")
+        als = []
+        pls = []
+        src_degs = []
+        dst_degs = []
+
+        path_lengths = get_pl(g)
+        degrees = get_degrees(g)
+
+        all_s = len(strategies)
+        i=0
+        print(f"Fetching Allocations for {all_s} Strategies")
+        for s in strategies:
+            if s in ['sqos_ot', 'sqos_ob']:
+                for r in ratios:
+                    alloc = get_allocations(g, s, r)
+                    for src, dests in alloc.items():
+                        src_deg = degrees['degrees'][degrees['nodes'].index(src)]
+                        for dst in dests.keys():
+                            als.append(alloc[src][dst][0])
+                            pls.append(path_lengths[src][dst])
+                            src_degs.append(src_deg)
+                            dst_degs.append(degrees['degrees'][degrees['nodes'].index(dst)])
+
+                    df_small = pd.DataFrame()
+                    df_small[PLOT_Y_LABEL['alloc']] = als
+                    df_small["Path Length"] = pls
+                    df_small["Source Degree"] = src_degs
+                    df_small["Destination Degree"] = dst_degs
+                    df_small['Strategy'] = STRATEGY_LABEL[s]
+                    df_small["Ratio"] = r
+
+                    #df = pd.concat([df, df_small])
+                    small_dfs.append(df_small)
+
+            else:
+                alloc = get_allocations(g, s)
+
+                for src, dests in alloc.items():
+                    src_deg = degrees['degrees'][degrees['nodes'].index(src)]
+                    for dst in dests.keys():
+                        als.append(alloc[src][dst][0])
+                        pls.append(path_lengths[src][dst])
+                        src_degs.append(src_deg)
+                        dst_degs.append(degrees['degrees'][degrees['nodes'].index(dst)])
+
+                df_small = pd.DataFrame()
+                df_small[PLOT_Y_LABEL['alloc']] = als
+                df_small["Path Length"] = pls
+                df_small["Source Degree"] = src_degs
+                df_small["Destination Degree"] = dst_degs
+                df_small['Strategy'] = STRATEGY_LABEL[s]
+                df_small["Ratio"] = 1
+
+                #df = pd.concat([df, df_small])
+                small_dfs.append(df_small)
+
+            i = i+1
+            print(f'Done with {i*100/all_s}% of strategies for current graph')
+
+        j = j+1
+        print(f"Donw with {j*100/all_g}% of graphs")
+    print("Concatenating single results")
+    df = pd.concat(small_dfs)
+    return df
+
+
+def get_cover_diffs_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1], threshs=['0.001']):
+
+    all_g = len(graphs)
+    print(f"Fetching Cover differences for {all_g} graphs")
+    small_dfs = []
+
+    j = 0
+    for g in graphs:
+        print(f"Fetching Cover differences for {g}")
+        for t in threshs:
+            c1 = get_cover(g, s1, t)
+            all_s = len(s2s)
+            i = 0
+            print(f"Fetching Covers for {all_s} Strategies")
+            for s2 in s2s:
+                if s2 in ['sqos_ot','sqos_ob']:
+                    for r in ratios:
+                        c2 = get_cover(g, s2, t, r)
+                        diff = cover_difference_list(c1, c2)
+                        df_small = pd.DataFrame()
+                        df_small["Cover Difference"] = diff
+                        df_small['Strategies'] = f"{STRATEGY_LABEL[s1]} vs. {r*100}% {STRATEGY_LABEL[s2]}"
+                        df_small["Cover Threshold"] = t
+
+                        #df = pd.concat([df, df_small], axis=0)
+                        small_dfs.append(df_small)
+                else:
+                    c2 = get_cover(g, s2, t)
+                    diff = cover_difference_list(c1, c2)
+                    df_small = pd.DataFrame()
+                    df_small["Cover Difference"] = diff
+                    df_small['Strategies'] = f"{STRATEGY_LABEL[s1]} vs. {r * 100}% {STRATEGY_LABEL[s2]}"
+                    df_small["Cover Threshold"] = t
+
+                    #df = pd.concat([df, df_small], axis=0)
+                    small_dfs.append((df_small))
+                i = i + 1
+                print(f'Done with {i * 100 / all_s}% of strategies for current graph')
+
+        j = j + 1
+        print(f"Done with {j * 100 / all_g}% of graphs")
+
+    print("Concatenating results")
+
+    df = pd.concat(small_dfs)
+
+    return df
+
+
+def get_covers_as_df(graphs, strategies, ratios=[0.1], threshs=['0.001']):
+
+    all_g = len(graphs)
+    print(f"Fetching Covers for {all_g} graphs")
+
+    small_dfs = []
+
+    j = 0
+    for g in graphs:
+        print(f"Fetching Covers for {g}")
+
+        deg = get_degrees(g)
+        degrees = [float(x) for x in deg['degrees']]
+        size = float(sfname(g))
+        diameter = float(get_diameter(g))
+
+        all_s = len(strategies)
+        i = 0
+        print(f"Fetching Covers for {all_s} Strategies")
+        print(f"Strategies: {strategies}")
+        for s in strategies:
+            for t in threshs:
+                if s in ['sqos_ot', 'sqos_ob']:
+                    print('is sqos o strat')
+                    for r in ratios:
+                        print(f'with ratio: {r}')
+                        try:
+                            cover = get_cover(g, s, t, r)
+                            c = list(cover.values())
+                            df_small = pd.DataFrame()
+                            df_small[PLOT_Y_LABEL['cover']] = c
+                            df_small[PLOT_X_LABEL['degree']] = degrees
+                            df_small[PLOT_X_LABEL['size']] = size
+                            df_small[PLOT_X_LABEL['diameter']] = diameter
+                            df_small['Strategy'] = STRATEGY_LABEL[s]
+                            df_small["Ratio"] = r
+
+                            #df = pd.concat([df, df_small])
+                            small_dfs.append(df_small)
+                            print(f'appended df_small: {df_small} for ratio r: {r}')
+                        except Exception as e:
+                            break
+                else:
+                    try:
+                        cover = get_cover(g, s, t, None)
+                        c = list(cover.values())
+                        df_small = pd.DataFrame()
+                        df_small[PLOT_Y_LABEL['cover']] = c
+                        df_small[PLOT_X_LABEL['degree']] = degrees
+                        df_small[PLOT_X_LABEL['size']] = size
+                        df_small[PLOT_X_LABEL['diameter']] = diameter
+                        df_small['Strategy'] = STRATEGY_LABEL[s]
+                        df_small["Ratio"] = 1
+
+                        #df = pd.concat([df, df_small])
+                        small_dfs.append(df_small)
+                    except Exception as e:
+                        break
+
+            i = i + 1
+            print(f'Done with {i * 100 / all_s}% of strategies for current graph')
+
+        j = j + 1
+        print(f"Done with {j * 100 / all_g}% of graphs")
+    print("Concatenating results")
+    df = pd.concat(small_dfs)
+
+    return df
+
+
+def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
+
+    all_g = len(graphs)
+    print(f"Fetching Allocations for {all_g} graphs")
+    small_dfs = []
+
+    j = 0
+    for g in graphs:
+        print(f"Fetching Allocations for {g}")
+        als = []
+        pls = []
+
+        path_lengths = get_pl(g)
+
+        all_s = len(strategies)
+        i=0
+        print(f"Fetching Allocations for {all_s} Strategies")
+        for s in strategies:
+            if s in ['sqos_ot', 'sqos_ob']:
+                for r in ratios:
+                    alloc = get_allocations(g, s, r)
+                    for src, dests in alloc.items():
+                        for dst in dests.keys():
+                            als.append(alloc[src][dst][0])
+                            pls.append(path_lengths[src][dst])
+
+                    df_small = pd.DataFrame()
+                    df_small[PLOT_Y_LABEL['alloc']] = als
+                    df_small["Path Length"] = pls
+                    df_small['Strategy'] = STRATEGY_LABEL[s]
+                    df_small["Ratio"] = r
+
+                    #df = pd.concat([df, df_small])
+                    small_dfs.append(df_small)
+
+            else:
+                alloc = get_allocations(g, s)
+
+                for src, dests in alloc.items():
+                    for dst in dests.keys():
+                        als.append(alloc[src][dst][0])
+                        pls.append(path_lengths[src][dst])
+
+                df_small = pd.DataFrame()
+                df_small[PLOT_Y_LABEL['alloc']] = als
+                df_small["Path Length"] = pls
+                df_small['Strategy'] = STRATEGY_LABEL[s]
+                df_small["Ratio"] = 1
+
+                #df = pd.concat([df, df_small])
+                small_dfs.append(df_small)
+
+            i = i+1
+            print(f'Done with {i*100/all_s}% of strategies for current graph')
+
+        j = j+1
+        print(f"Done with {j*100/all_g}% of graphs")
+    print("Concatenating single results")
+    df = pd.concat(small_dfs)
+    return df
+
+
+def sfname(graph):
+    size = int(graph.split('(')[1].split(')')[0])
+    return size
+
+
+    diffs = {}
+    for src, dests in a1.items():
+        for dst in dests.keys():
+            if src in a2 .keys() and dst in a2[src].keys():
+                if src not in diffs.keys():
+                    diffs[src] = {}
+                diffs[src][dst] = a1[src][dst][0] - a2[src][dst][0]
+    return diffs
+
+
+def alloc_difference_list(a1,a2):
+    diffs = []
+    for src, dests in a1.items():
+        for dst in dests.keys():
+            if src in a2 .keys() and dst in a2[src].keys():
+                diffs.append(a1[src][dst][0] - a2[src][dst][0])
+    return diffs
+
+
+def cover_difference_list(c1, c2):
+    diffs = []
+    for node, cover in c1.items():
+        if node in c2.keys():
+            diffs.append(c1[node]-c2[node])
+    return diffs

@@ -1,6 +1,15 @@
 import networkx as nx
 import numpy as np
 
+import numpy as np
+import fnss
+from src.util.utility import *
+import src.util.data_handler as dh
+from fnss.topologies.simplemodels import ring_topology, star_topology
+from fnss.topologies.randmodels import barabasi_albert_topology, erdos_renyi_topology
+import xml.etree.ElementTree as ET
+
+
 from src.util.const import *
 #from gma.gma_const import *
 from src.types import PCList
@@ -26,7 +35,7 @@ def dict_from_list(lst):
 
 def all_allocation_matrices(G, use_bgp=False):
     allocation_matrices = {}
-    i=0
+    i = 0
     alln = len(G.nodes())
     for cur in G.nodes():
         # print("-")
@@ -352,3 +361,87 @@ def shortest_to_diameter(shortest):
             print(f"{round(100 * i / alln, 4)}%", end="\r")
     return max_l
 
+
+def sfname(graph):
+    size = int(graph.split('(')[1].split(')')[0])
+    return size
+
+
+def alloc_difference(a1, a2):
+
+    diffs = {}
+    for src, dests in a1.items():
+        for dst in dests.keys():
+            if src in a2 .keys() and dst in a2[src].keys():
+                if src not in diffs.keys():
+                    diffs[src] = {}
+                diffs[src][dst] = a1[src][dst][0] - a2[src][dst][0]
+    return diffs
+
+
+def alloc_difference_list(a1,a2):
+    diffs = []
+    for src, dests in a1.items():
+        for dst in dests.keys():
+            if src in a2 .keys() and dst in a2[src].keys():
+                diffs.append(a1[src][dst][0] - a2[src][dst][0])
+    return diffs
+
+
+def cover_difference_list(c1, c2):
+    diffs = []
+    for node, cover in c1.items():
+        if node in c2.keys():
+            diffs.append(c1[node]-c2[node])
+    return diffs
+
+
+def make_barabasi_albert(n_nodes, add_links, init_links):
+    # Create random (barabasi albert) topology
+    name = f"Barabasi_Albert_{add_links}_{init_links}_({n_nodes})"
+    graph = barabasi_albert_topology(n_nodes, add_links, init_links)
+    fnss.set_capacities_constant(graph, 1)
+    graph = set_internal_cap_const(graph, 1)
+    dh.set_graph(graph, name)
+
+    # change id types to strings
+    path = dh.get_full_path(name, TOPOLOGY)
+    tree = ET.parse(path)
+    root = tree.getroot()
+
+    for child in root:
+        if child.tag == 'node':
+            child.attrib['id.type'] = "string"
+        if child.tag == "link":
+            for grandchild in child:
+                if grandchild.tag == "from" or grandchild.tag == "to":
+                    grandchild.attrib['type'] = 'string'
+
+    tree.write(path)
+
+    return name
+
+
+def make_erdos_reniy(n_nodes, prob):
+    name = f"Erdos_Renyi_{prob}_({n_nodes})"
+    graph = erdos_renyi_topology(n_nodes, prob)
+    fnss.set_capacities_constant(graph, 1)
+    graph = set_internal_cap_const(graph, 1)
+    dh.set_graph(graph, name)
+
+    # change id types to strings
+    path = dh.get_full_path(name, TOPOLOGY)
+    tree = ET.parse(path)
+    root = tree.getroot()
+
+    for child in root:
+        if child.tag == 'node':
+            child.attrib['id.type'] = "string"
+        if child.tag == "link":
+            for grandchild in child:
+                if grandchild.tag == "from" or grandchild.tag == "to":
+                    grandchild.attrib['type'] = 'string'
+
+    tree.write(path)
+
+    return name

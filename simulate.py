@@ -5,47 +5,7 @@ from src.path_algorithms.gma_improved import GMAImproved
 from src.path_algorithms.gma_original import GMAOriginal
 from src.path_algorithms.sqos_algorithm import ScaledQoSAlgorithmOT, ScaledQoSAlgorithmPT, ScaledQoSAlgorithmPB, ScaledQoSAlgorithmOB
 from src.multiprocessing.topology.PerTopologyOperations import *
-from src.util.const import COVER_THRESHOLD
-
-'''
-from gma.path_algorithms.gma_improved import GMAImproved
-from gma.path_algorithms.gma_original import GMAOriginal
-from gma.path_algorithms.sqos_algorithm import ScaledQoSAlgorithm
-from gma.path_algorithms.sqos_algorithm import ScaledQoSAlgorithm2
-#from simulation.metrics_computation import *
-from simulation.simulation_const import COVER_THRESHOLD
-
-from simulation.PerTopologyOperations import *
-'''
-
-'''
-def strategy_picker(strat_name):
-    if strat_name == "original":
-        strategy = GMAOriginal
-    elif strat_name == "improved":
-        strategy = GMAImproved
-    elif strat_name == "sqs":
-        strategy = ScaledQoSAlgorithm
-    elif strat_name == "sqs2":
-        strategy = ScaledQoSAlgorithm2
-    else:
-        raise ValueError("Strategy must be in {original, improved, sqs, sqs2}")
-    return strategy
-
-
-def strategy_namer(strat_name):
-    if strat_name == "original":
-        name = 'GMAOriginal'
-    elif strat_name == "improved":
-        name = 'GMAImproved'
-    elif strat_name == "sqs":
-        name = 'ScaledQoSAlgorithm'
-    elif strat_name == "sqs2":
-        name = 'ScaledQoSAlgorithm2'
-    else:
-        raise ValueError("Strategy must be in {original, improved, sqs, sqs2}")
-    return name
-'''
+from src.util.const import COVER_THRESHOLD, STRATEGIES
 
 
 def parse_args():
@@ -94,16 +54,6 @@ def parse_args():
         action="store_true",
         help="Force recomputation of all intermediate steps"
     )
-    parser.add_argument(
-        "--agg",
-        action="store_true",
-        help="Perform Aggregation Steps"
-    )
-    parser.add_argument(
-        "--viz",
-        action="store_true",
-        help="Visualize Results"
-    )
 
     args = parser.parse_args()
     return args
@@ -117,12 +67,6 @@ def main(args):
     cores = args.cores
     force = args.fr
     thresh = args.thrs
-
-    strategies = ['GMAImproved', 'sqos_ot', 'sqos_ob', 'sqos_pt', 'sqos_pb']
-
-    # Preprocessing:
-    # - Create topologies from zoo / rand topologies, add capacities
-    # TODO
 
     # - Compute Degrees, Diameters, shortest paths, traffic matrices, shortest path sampling, path lengths
 
@@ -186,8 +130,7 @@ def main(args):
         s21.run()
 
 '''
-    # Covers: TODO
-    for s in strategies:
+    for s in STRATEGIES:
         if s == 'sqos_ob' or s == 'sqos_ot':
             for r in ratios:
                 c = CoverageComputation(dirs, cores, s, force, thresh, r)
@@ -196,17 +139,6 @@ def main(args):
             c = CoverageComputation(dirs, cores, s, force, thresh)
             c.run()
 
-    # Aggregations: TODO
-    if args.agg:
-        pass
-
-
-    # Vizualizations: TODO
-    if args.viz:
-        pass
-
-    '''
-    '''
 
 if __name__ == "__main__":
     args = parse_args()
