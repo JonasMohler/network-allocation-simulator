@@ -108,7 +108,7 @@ def main(args):
             print('Starting CDFs')
 
             # CDF plots
-            ph.make_fig_single('', '', data, f"CDF of Covers in all graphs", save=True, path=dh.get_graph_figure_path(g),
+            ph.make_fig_single('', '', data, f"CDF of Covers in {g}", save=True, path=dh.get_graph_figure_path(g),
                                p_type='cdf_c')
             # Cover CDF
             data = dh.get_cover_diffs_as_df([g], STRATEGIES[0], STRATEGIES[1:])
