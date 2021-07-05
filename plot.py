@@ -1,10 +1,14 @@
 from argparse import ArgumentParser
+
+import matplotlib.pyplot as plt
+
 from src.multiprocessing.topology.PerTopologyOperations import *
 
 from src.util.utility import *
 from src.util.const import *
 import src.util.data_handler as dh
 import src.util.plot_handler as ph
+import seaborn as sns
 
 
 def parse_args():
@@ -25,6 +29,12 @@ def parse_args():
         "--single",
         action='store_true',
         help="Create Plots for all specified Graphs individually"
+    )
+    parser.add_argument(
+        "--r",
+        nargs="+",
+        default=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+        help="Sampling ratios",
     )
 
     args = parser.parse_args()
@@ -82,60 +92,110 @@ def main(args):
 
             # Load Allocation data
             print('Loading Allocation data ...')
-            data = dh.get_allocs_as_df([g], STRATEGIES, [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
+            print(args.r)
+            data = dh.get_allocs_as_df([g], STRATEGIES, args.r)
+            print(data)
+            dbg = data[data["Strategy"] == STRATEGY_LABEL['GMAImproved']].compute()
+            print(dbg)
+            dbs = data[(data["Ratio"] == '0.1') | (data["Ratio"] == 1)].compute()
+            print(dbs)
+            dbr = data[data["Strategy"] == STRATEGY_LABEL['sqos_ot']].compute()
+            print(dbr)
+            '''
+            sqos_ot_01 = data[(data["Strategy"] == STRATEGY_LABEL['sqos_ot']) & (data["Ratio"] == 'u0.1')].compute()
+            sqos_ot_05 = data[(data["Strategy"] == STRATEGY_LABEL['sqos_ot']) & (data["Ratio"] == 'u0.5')].compute()
+            sqos_ob_01 = data[(data["Strategy"] == STRATEGY_LABEL['sqos_ob']) & (data["Ratio"] == 'u0.1')].compute()
+            sqos_ob_05 = data[(data["Strategy"] == STRATEGY_LABEL['sqos_ob']) & (data["Ratio"] == 'u0.5')].compute()
+            sqos_pt = data[(data["Strategy"] == STRATEGY_LABEL['sqos_pt'])].compute()
+            sqos_pb = data[(data["Strategy"] == STRATEGY_LABEL['sqos_pb'])].compute()
 
+            data = dh.get_alloc_diffs_as_df([g], 'sqos_pt', ratios=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
+
+            ax = plt.subplot()
+            d_min = data['Allocation Difference [Gbps]'].min()
+            d_max = data['Allocation Difference [Gbps]'].max()
+
+            sns.ecdfplot(data=data, x=PLOT_Y_LABEL['alloc_d'], hue="Ratio", ax=ax)
+
+            ax.set_xlim(d_min, d_max)
+            plt.show()
+            ph.make_fig_single('','', data, f"alloc diff over ratios sqos_pt - sqos_ot", p_type='cdf_ad', path=dh.get_graph_figure_path(g))
+
+            print(sqos_ot_01.shape())
+            ax = plt.subplot()
+            ax.hist(sqos_ot_01['Allocations Gbps'], bins = 5000)
+            plt.xscale('log')
+            plt.show()
+
+            print(sqos_ot_05.shape())
+            ax = plt.subplot()
+            ax.hist(sqos_ot_05['Allocations Gbps'], bins=5000)
+            plt.xscale('log')
+            plt.show()
+
+
+            print(sqos_ot_01.median())
+            print(sqos_ot_05.median())
+            print(sqos_ob_01.median())
+            print(sqos_ob_05.median())
+            print(sqos_pt.median())
+            print(sqos_pb.median())
+'''
             # Allocation Plots
             print('Generating Allocation plots ...')
 
             # Allocations Over Path Length Box - GMA
-            ph.make_fig_single(PLOT_X_LABEL['pl'], PLOT_Y_LABEL['alloc'],
-                               data[data["Strategy"] == STRATEGY_LABEL['GMAImproved']],
+            ph.make_fig_single(PLOT_X_LABEL['pl'], PLOT_Y_LABEL['alloc'], dbg
+                               ,
                                f"Allocations by Path Length in {g}", p_type='box', save=True,
                                path=dh.get_graph_figure_path(g), logy=True, strat='GMA')
 
             # Allocations Over Path Length Box - SQOS
-            ph.make_fig_split(PLOT_X_LABEL['pl'], PLOT_Y_LABEL['alloc'], data[(data["Ratio"] == 0.1) | (data["Ratio"] == 1)],
+            ph.make_fig_split(PLOT_X_LABEL['pl'], 'Allocations Gbps', dbs,
                               f"Allocations by Path Length in {g}", STRATEGIES[1:],
                               p_type='box', save=True, path=dh.get_graph_figure_path(g), logy=True)
 
             # Alloc CDF - All Strategies
-            ph.make_fig_single('', '', data[(data["Ratio"] == 0.1) | (data["Ratio"] == 1)], f"CDF of Allocations in {g}", save=True, path=dh.get_graph_figure_path(g),
+            ph.make_fig_single('', '', dbs, f"CDF of Allocations in {g}", save=True, path=dh.get_graph_figure_path(g),
                                p_type='cdf_a', logx=True)
 
             # Alloc CDF - Different sampling ratios SQOS OT
-            ph.make_fig_single('', '', data[data["Strategy"] == STRATEGY_LABEL['sqos_ot']], f"CDF of Allocations for different Opt. SQoS w/ T. Div. Ratios in {g}",
+            ph.make_fig_single('', '', dbr, f"CDF of Allocations for different Opt. SQoS w/ T. Div. Ratios in {g}",
                                save=True,
                                path=dh.get_graph_figure_path(g), p_type='cdf_ar', logx=True)
 
+
             # Alloc CDF - Differences between GMA vs others
-            data = dh.get_alloc_diffs_as_df([g], STRATEGIES[0], STRATEGIES[1:])
+            data = dh.get_alloc_diffs_as_df([g], STRATEGIES[0], [STRATEGIES[1]])
             ph.make_fig_single('', '', data, f"CDF of Allocation Differences in {g}", save=True,
                                path=dh.get_graph_figure_path(g), p_type='cdf_ad')
 
-
+            # Alloc Ratios CDF - GMA vs others (DEF TAKE IN)
+            data = dh.get_alloc_quots_as_df([g], STRATEGIES[0], STRATEGIES[1:])
+            ph.make_fig_single('', '', data, f"CDF of Allocation Ratios in {g}", save=True, path=dh.get_graph_figure_path(g), p_type='cdf_adr', logx=True)
 
             # TODO: Heatmap src-dst alloc
 
             # Cover plots
             print('Loading Cover Data')
-            data = dh.get_covers_as_df([g], STRATEGIES, [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9], [1e-2, 1e-3, 1e-4, 1e-5, 1e-6])
+            data = dh.get_covers_as_df([g], STRATEGIES, args.r, [1e-2, 1e-3, 1e-4, 1e-5, 1e-6])
 
             print('Generating Cover Plots')
             # Cover Scatter - GMA
             ph.make_fig_single(PLOT_X_LABEL['degree'], PLOT_Y_LABEL['cover'],
                                data[
                                    (data["Strategy"] == STRATEGY_LABEL["GMAImproved"]) &
-                                   (data["Cover Threshold"] == 1e-3)
-                               ],
+                                   (data["Cover Threshold"] == 1e-6)
+                               ].compute(),
                                f"Cover by {PLOT_X_LABEL['degree']} in {g}", p_type='scatter', save=True,
                                path=dh.get_graph_figure_path(g))
 
             # Cover Scatter - SQOS
             ph.make_fig_split(PLOT_X_LABEL['degree'], PLOT_Y_LABEL['cover'],
                               data[
-                                  (data["Cover Threshold"] == 1e-3) &
-                                  ((data["Ratio"] == 0.1) | (data["Ratio"] == 1))
-                              ],
+                                  (data["Cover Threshold"] == 1e-6) &
+                                  ((data["Ratio"] == '0.1') | (data["Ratio"] == 1))
+                              ].compute(),
                               f"Cover by {PLOT_X_LABEL['degree']} in {g}", STRATEGIES[1:],
                               p_type='scatter', save=True,
                               path=dh.get_graph_figure_path(g))
@@ -143,9 +203,9 @@ def main(args):
             # Cover CDF - All Strategies
             ph.make_fig_single('', '',
                                data[
-                                   (data["Cover Threshold"] == 1e-3) &
-                                   ((data["Ratio"] == 0.1) | (data["Ratio"] == 1))
-                               ],
+                                   (data["Cover Threshold"] == 1e-6) &
+                                   ((data["Ratio"] == '0.1') | (data["Ratio"] == 1))
+                               ].compute(),
                                f"CDF of Covers in {g}", save=True, path=dh.get_graph_figure_path(g),
                                p_type='cdf_c')
 
@@ -153,8 +213,8 @@ def main(args):
             ph.make_fig_single('', '',
                                data[
                                    (data["Strategy"] == STRATEGY_LABEL['sqos_ot']) &
-                                   (data["Cover Threshold"] == 1e-3)
-                               ],
+                                   (data["Cover Threshold"] == 1e-6)
+                               ].compute(),
                                f"CDF of Covers for different Opt. SQoS w/ T. Div. Ratios in {g}", save=True,
                                path=dh.get_graph_figure_path(g), p_type='cdf_cr')
 
@@ -162,14 +222,14 @@ def main(args):
             ph.make_fig_single('', '',
                                data[
                                    (data["Strategy"] == STRATEGY_LABEL['GMAImproved'])
-                               ], f"CDF of Cover for different Cover Thresholds in {g} - GMA", save=True,
+                               ].compute(), f"CDF of Cover for different Cover Thresholds in {g} - GMA", save=True,
                                path=dh.get_graph_figure_path(g), p_type='cdf_ct')
 
             ph.make_fig_split('', '',
                               data[
-                                  (data["Ratio"] == 0.1) |
+                                  (data["Ratio"] == '0.1') |
                                   (data["Ratio"] == 1)
-                              ],
+                              ].compute(),
                               f"CDF of Cover for different Cover Thresholds in {g} M-Approach flavours", STRATEGIES[1:], save =True,
                               path=dh.get_graph_figure_path(g), p_type='cdf_ct')
 

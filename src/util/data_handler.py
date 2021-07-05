@@ -7,6 +7,8 @@ import pickle
 import numpy as np
 import pandas as pd
 import fnss
+import dask
+import dask.dataframe as dd
 
 from src.util.utility import *
 from src.util.naming import *
@@ -193,6 +195,7 @@ def get_alloc_diffs_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1
                     df_small = pd.DataFrame()
                     df_small[f"Allocation Difference [{UNIT}]"] = diff
                     df_small['Strategies'] = f"{STRATEGY_LABEL[s1]} vs. {STRATEGY_LABEL[s2]}"
+                    df_small["Ratio"] = r
 
                     #df = pd.concat([df, df_small], axis=0)
                     small_dfs.append(df_small)
@@ -202,6 +205,62 @@ def get_alloc_diffs_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1
                 df_small = pd.DataFrame()
                 df_small[f"Allocation Difference [{UNIT}]"] = diff
                 df_small['Strategies'] = f"{STRATEGY_LABEL[s1]} vs. {STRATEGY_LABEL[s2]}"
+                df_small["Ratio"] = 1
+
+                #df = pd.concat([df, df_small], axis=0)
+                small_dfs.append(df_small)
+
+            i = i + 1
+            print(f'Done with {i * 100 / all_s}% of strategies for current graph')
+
+        j = j + 1
+        print(f"Donw with {j * 100 / all_g}% of graphs")
+
+    print("Concatenating single results")
+
+    df = pd.concat(small_dfs)
+    return df
+
+
+def get_alloc_quots_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1]):
+
+    small_dfs = []
+
+    print(f"Fetching Allocation ratios for {len(graphs)} graphs")
+
+    all_g = len(graphs)
+    j = 0
+    for g in graphs:
+        print(f"Fetching Allocation ratios for {g}")
+        if s1 in ['sqos_ot', 'sqos_ob']:
+            a1 = get_allocations(g, s1, 0.1)
+        else:
+            a1 = get_allocations(g, s1)
+
+        all_s = len(s2s)
+        i = 0
+        print(f"Fetching Allocation ratios for {all_s} Strategies")
+        for s2 in s2s:
+            if s2 in ['sqos_ot', 'sqos_ob']:
+                for r in ratios:
+                    a2 = get_allocations(g, s2, r)
+                    print('quots1')
+                    quots = alloc_quotients_list(a1, a2)
+                    df_small = pd.DataFrame()
+                    df_small[f"Allocation Ratio"] = quots
+                    df_small['Strategies'] = f"{STRATEGY_LABEL[s1]} vs. {STRATEGY_LABEL[s2]}"
+                    df_small["Ratio"] = r
+
+                    #df = pd.concat([df, df_small], axis=0)
+                    small_dfs.append(df_small)
+            else:
+                a2 = get_allocations(g, s2)
+                print('quots2')
+                quots = alloc_quotients_list(a1, a2)
+                df_small = pd.DataFrame()
+                df_small[f"Allocation Ratio"] = quots
+                df_small['Strategies'] = f"{STRATEGY_LABEL[s1]} vs. {STRATEGY_LABEL[s2]}"
+                df_small["Ratio"] = 1
 
                 #df = pd.concat([df, df_small], axis=0)
                 small_dfs.append(df_small)
@@ -345,7 +404,8 @@ def get_cover_diffs_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1
 
 
 def get_covers_as_df(graphs, strategies, ratios=[0.1], threshs=['0.001']):
-
+    df = pd.DataFrame(columns=[PLOT_Y_LABEL['cover'], PLOT_X_LABEL['degree'], PLOT_X_LABEL['size'], PLOT_X_LABEL['diameter'], "Strategy", "Ratio", "Cover Threshold"])
+    dask_df_l = dd.from_pandas(df, chunksize=4000)
     all_g = len(graphs)
     print(f"Fetching Covers for {all_g} graphs")
 
@@ -382,9 +442,12 @@ def get_covers_as_df(graphs, strategies, ratios=[0.1], threshs=['0.001']):
                                 df_small["Cover Threshold"] = t
 
                                 #df = pd.concat([df, df_small])
-                                small_dfs.append(df_small)
+                                dask_df = dd.from_pandas(df_small, chunksize=4000)
+                                dask_df_l = dd.concat([dask_df_l, dask_df])
+                                #small_dfs.append(df_small)
                                 #print(f'appended df_small: {df_small} for ratio r: {r}')
                         except Exception as e:
+                            print(f"Error in cover assembling: {e}")
                             break
                 else:
                     try:
@@ -401,8 +464,11 @@ def get_covers_as_df(graphs, strategies, ratios=[0.1], threshs=['0.001']):
                             df_small["Cover Threshold"] = t
 
                             #df = pd.concat([df, df_small])
-                            small_dfs.append(df_small)
+                            dask_df = dd.from_pandas(df_small, chunksize=4000)
+                            dask_df_l = dd.concat([dask_df_l, dask_df])
+                            #small_dfs.append(df_small)
                     except Exception as e:
+                        print(f"Error in cover assembling: {e}")
                         break
 
             i = i + 1
@@ -411,12 +477,15 @@ def get_covers_as_df(graphs, strategies, ratios=[0.1], threshs=['0.001']):
         j = j + 1
         print(f"Done with {j * 100 / all_g}% of graphs")
     print("Concatenating results")
-    df = pd.concat(small_dfs)
-
+    #df = pd.concat(small_dfs)
+    df = dask_df_l
     return df
 
 
 def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
+    print(ratios)
+    df = pd.DataFrame(columns=[PLOT_Y_LABEL['alloc'], "Path Length", "Strategy", "Ratio"])
+    dask_df_l = dd.from_pandas(df, chunksize=4000)
 
     all_g = len(graphs)
     print(f"Fetching Allocations for {all_g} graphs")
@@ -425,8 +494,6 @@ def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
     j = 0
     for g in graphs:
         print(f"Fetching Allocations for {g}")
-        als = []
-        pls = []
 
         path_lengths = get_pl(g)
 
@@ -436,39 +503,63 @@ def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
         for s in strategies:
             if s in ['sqos_ot', 'sqos_ob']:
                 for r in ratios:
+                    #print(r)
+                    #print(f'fetching: {get_full_path(g, ALLOCATION, s, r)}')
                     if os.path.exists(get_full_path(g, ALLOCATION, s, r)):
                         alloc = get_allocations(g, s, r)
+
+                        als = []
+                        pls = []
+                        srcs = []
+                        dsts = []
                         for src, dests in alloc.items():
                             for dst in dests.keys():
                                 als.append(alloc[src][dst][0])
                                 pls.append(path_lengths[src][dst])
+                                srcs.append(src)
+                                dsts.append(dst)
 
                         df_small = pd.DataFrame()
                         df_small[PLOT_Y_LABEL['alloc']] = als
                         df_small["Path Length"] = pls
                         df_small['Strategy'] = STRATEGY_LABEL[s]
                         df_small["Ratio"] = r
+                        df_small["Source"] = srcs
+                        df_small["Dest"] = dsts
 
                         #df = pd.concat([df, df_small])
-                        small_dfs.append(df_small)
+                        dask_df = dd.from_pandas(df_small, chunksize = 4000)
+                        dask_df_l = dd.concat([dask_df_l, dask_df])
+                        #small_dfs.append(df_small)
 
             else:
+
                 if os.path.exists(get_full_path(g, ALLOCATION, s)):
                     alloc = get_allocations(g, s)
 
+                    als = []
+                    pls = []
+                    srcs = []
+                    dsts = []
                     for src, dests in alloc.items():
                         for dst in dests.keys():
                             als.append(alloc[src][dst][0])
                             pls.append(path_lengths[src][dst])
+                            srcs.append(src)
+                            dsts.append(dst)
 
                     df_small = pd.DataFrame()
                     df_small[PLOT_Y_LABEL['alloc']] = als
                     df_small["Path Length"] = pls
                     df_small['Strategy'] = STRATEGY_LABEL[s]
                     df_small["Ratio"] = 1
+                    df_small["Source"] = srcs
+                    df_small["Dest"] = dsts
 
                     #df = pd.concat([df, df_small])
-                    small_dfs.append(df_small)
+                    dask_df = dd.from_pandas(df_small, chunksize=4000)
+                    dask_df_l = dd.concat([dask_df_l, dask_df])
+                    #small_dfs.append(df_small)
 
             i = i+1
             print(f'Done with {i*100/all_s}% of strategies for current graph')
@@ -476,7 +567,8 @@ def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
         j = j+1
         print(f"Done with {j*100/all_g}% of graphs")
     print("Concatenating single results")
-    df = pd.concat(small_dfs)
+    #df = pd.concat(small_dfs)
+    df = dask_df_l
     return df
 
 
@@ -502,6 +594,19 @@ def alloc_difference_list(a1,a2):
             if src in a2 .keys() and dst in a2[src].keys():
                 diffs.append(a1[src][dst][0] - a2[src][dst][0])
     return diffs
+
+
+def alloc_quotients_list(a1,a2):
+    quots = []
+    print(f"A1: {a1}")
+    print(f"A2: {a2}")
+    for src, dests in a1.items():
+        for dst in dests.keys():
+            if src in a2 .keys() and dst in a2[src].keys():
+                print(f"A1 alloc at {src} to {dst}: {a1[src][dst][0]}")
+                print(f"A2 alloc at {src} to {dst}: {a2[src][dst][0]}")
+                quots.append(a1[src][dst][0] / a2[src][dst][0])
+    return quots
 
 
 def cover_difference_list(c1, c2):

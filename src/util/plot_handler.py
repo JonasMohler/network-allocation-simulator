@@ -63,7 +63,7 @@ def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, p
 
         d_min = data[PLOT_Y_LABEL['alloc']].min()
         d_max = data[PLOT_Y_LABEL['alloc']].max()
-
+        print(data)
         sns.ecdfplot(data=data, x=PLOT_Y_LABEL['alloc'], hue="Strategy", ax=ax)
         ax.set_xlim(d_min, d_max)
         ax.grid(b=True)
@@ -75,12 +75,33 @@ def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, p
         print('Getting min/max')
         d_min = data['Allocation Difference [Gbps]'].min()
         d_max = data['Allocation Difference [Gbps]'].max()
+        med = data['Allocation Difference [Gbps]'].median()
+        mean = data['Allocation Difference [Gbps]'].mean()
 
         sns.ecdfplot(data=data, x=PLOT_Y_LABEL['alloc_d'], hue="Strategies", ax=ax)
 
         ax.set_xlim(d_min, d_max)
         ax.grid(b=True)
-        ax.axvline(c='r', linestyle='--', alpha=0.3)
+        ax.axvline(x=med, c='b', linestyle='--', alpha=0.3, label='Median')
+        ax.axvline(x=mean, c='y', linestyle='--', alpha=0.3, label='Mean')
+
+    elif p_type == 'cdf_adr':
+
+        name = f"alloc_rat_cdf.{PLOT_FORMAT}"
+
+        print('Getting min/max')
+        d_min = data['Allocation Ratio'].min()
+        d_max = data['Allocation Ratio'].max()
+        med = data['Allocation Ratio'].median()
+        mean = data['Allocation Ratio'].mean()
+
+        sns.ecdfplot(data=data, x='Allocation Ratio', hue="Strategies", ax=ax)
+
+        ax.set_xlim(d_min, d_max)
+        ax.grid(b=True)
+        #ax.axvline(x=med, c='b', linestyle='--', alpha=0.3, label='Median')
+        #ax.axvline(x=mean, c='m', linestyle='--', alpha=0.3, label='Mean')
+        ax.axvline(x=1, c='r', linestyle='--', alpha=0.3, label='One')
 
     elif p_type == 'cdf_ar':
 
@@ -229,7 +250,7 @@ def make_fig_split(x_name, y_name, data, title, strategies, p_type='scatter', sa
         h, l = axs[i].get_legend_handles_labels()
         hs.extend(h)
         ls.extend(l)
-        axs[i].get_legend().remove()
+        #axs[i].get_legend().remove()
         i = i+1
 
     lgd = fig.legend(handles=hs, labels=ls)

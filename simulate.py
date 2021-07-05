@@ -29,7 +29,7 @@ def parse_args():
         "-r",
         "--sampling_ratios",
         nargs="+",
-        default=["0.1"],
+        default=[0.1],
         help="Ratios to sample topologies down to for M-Approach"
     )
     parser.add_argument(
@@ -69,7 +69,6 @@ def main(args):
     thresh = args.thrs
 
     # - Compute Degrees, Diameters, shortest paths, traffic matrices, shortest path sampling, path lengths
-
     '''
     degs = DegreesComputation(dirs, cores, force)
     degs.run()
@@ -104,32 +103,29 @@ def main(args):
         count = PathCounting2(dirs, cores, force, r)
         count.run()
 
-
-
-    
     lengths = PathLengthComputation2(dirs, cores, force)
     lengths.run()
 
-    
     gma = GMAAllocationComputation(dirs, cores, force)
     gma.run()
 
-    
     s10 = SQoSPTComputation(dirs, cores, force)
     s10.run()
 
+    
     s11 = SQoSPBComputation(dirs, cores, force)
     s11.run()
-
+    
     for r in ratios:
         s20 = SQoSOTComputation(dirs, cores, force, r)
         s20.run()
-
+    '''
     for r in ratios:
         s21 = SQoSOBComputation(dirs, cores, force, r)
         s21.run()
+    '''
 
-'''
+
     for s in STRATEGIES:
         if s == 'sqos_ob' or s == 'sqos_ot':
             for r in ratios:
@@ -138,8 +134,7 @@ def main(args):
         else:
             c = CoverageComputation(dirs, cores, s, force, thresh)
             c.run()
-
-
+    '''
 if __name__ == "__main__":
     args = parse_args()
     main(args)

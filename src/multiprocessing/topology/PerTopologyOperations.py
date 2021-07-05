@@ -78,12 +78,46 @@ class PathSampling2(TopologyMultiprocessing):
                     s = sum(degrees)
 
                     centrality = [i / s for i in deg['degrees']]
-                    r = float(self.ratio)
+                    r = float(self.ratio[1:])
 
                     n_nodes = len(nodes)
 
 
                     pass
+                elif str(self.ratio).startswith('u'):
+                    r = float(self.ratio[1:])
+                    sp = dh.get_shortest_paths(cur_dir)
+                    deg = dh.get_degrees(cur_dir)
+                    nodes = deg['nodes']
+
+                    n_nodes = len(nodes)
+                    node_is = range(n_nodes)
+                    n_samples = int(round(n_nodes * r))
+
+                    print('start assigning')
+                    all_selected_paths = {}
+                    for i in range(len(nodes)):
+
+                        print('starting sampling')
+                        dest_is = np.random.choice(node_is, n_samples, replace=False)
+                        print('sampling done')
+
+                        selected_paths = {}
+                        for d in dest_is:
+                            if nodes[d] != nodes[i]:
+                                selected_paths[nodes[d]] = sp[nodes[i]][nodes[d]]
+
+                        all_selected_paths[nodes[i]] = selected_paths
+                        if i == n_nodes:
+                            print(f"{round(100 * (i-1) / n_nodes, 4)}%")
+                        else:
+                            print(f"{round(100 * (i-1) / n_nodes, 4)}%", end="\r")
+
+                    dh.set_shortest_paths(all_selected_paths, cur_dir, ratio=self.ratio)
+                    print('stored')
+
+                    pass
+
                 else:
                     # Standard ratio: All nodes select the same number of destinations
                     sp = dh.get_shortest_paths(cur_dir)
@@ -472,7 +506,7 @@ class SQoSOTComputation(TopologyMultiprocessing):
             tm = dh.get_tm(cur_dir)
             counts = dh.get_pc(cur_dir, self.ratio)
 
-            strat = ScaledQoSAlgorithmOT(graph, tm, path_counts=counts)
+            strat = ScaledQoSAlgorithmOT(graph, tm, path_counts=counts, node_count=dh.sfname(cur_dir))
             alloc = strat.compute_for_all_single_paths(sps)
 
             dh.set_allocations(alloc, cur_dir, self.strategy, self.ratio)
@@ -504,7 +538,7 @@ class SQoSOBComputation(TopologyMultiprocessing):
             tm = dh.get_tm(cur_dir)
             counts = dh.get_pc(cur_dir, self.ratio)
 
-            strat = ScaledQoSAlgorithmOB(graph, tm, path_count=counts)
+            strat = ScaledQoSAlgorithmOB(graph, tm, path_count=counts, node_count=dh.sfname(cur_dir))
             alloc = strat.compute_for_all_single_paths(sps)
 
             dh.set_allocations(alloc, cur_dir, self.strategy, self.ratio)

@@ -19,7 +19,7 @@ class ScaledQoSAlgorithm(PathAlgorithm):
         self.path_counts = path_count
 
     @abstractmethod
-    def calculate_norm(self, node, src):
+    def calculate_norm(self, node, src, prev_node, next_node):
         raise NotImplementedError
 
     def compute_for_path(self, path: Path) -> float:
@@ -45,7 +45,10 @@ class ScaledQoSAlgorithm(PathAlgorithm):
             next_node = next_node if next_node is not None else cur_node
             norm = self.calculate_norm(path[idx], path[0], prev_node, next_node)
 
+            print(f'Cap: {cap}')
+            print(f"norm: {norm}")
             t_vals.append((cap/norm))
+            print(f"t_val: {cap/norm}")
 
         t_vals = np.asarray(t_vals)
 
@@ -59,10 +62,11 @@ class ScaledQoSAlgorithmPT(ScaledQoSAlgorithm):
 
     Has as additional instance variables the graph, the allocation matrices."""
 
-    def __init__(self, graph: nx.Graph, allocation_matrices: AllocationMatrices, node_count):
-        super(ScaledQoSAlgorithmPT, self).__init__(graph, allocation_matrices, node_count=node_count)
+    def __init__(self, graph: nx.Graph, allocation_matrices: AllocationMatrices, path_count=None, node_count=None):
+        super(ScaledQoSAlgorithmPT, self).__init__(graph, allocation_matrices, path_count=path_count, node_count=node_count)
 
     def calculate_norm(self, node, src, n_prev, n_next):
+        print(f"Node Count: {self.node_count}")
         return self.node_count
 
 
@@ -71,12 +75,15 @@ class ScaledQoSAlgorithmOT(ScaledQoSAlgorithm):
 
     Has as additional instance variables the graph, the allocation matrices."""
 
-    def __init__(self, graph: nx.Graph, allocation_matrices: AllocationMatrices, path_counts):
-        super(ScaledQoSAlgorithmOT, self).__init__(graph, allocation_matrices)
+    def __init__(self, graph: nx.Graph, allocation_matrices: AllocationMatrices, path_counts, node_count=None):
+        super(ScaledQoSAlgorithmOT, self).__init__(graph, allocation_matrices, path_count=path_counts, node_count=node_count)
         self.path_counts = path_counts
 
     def calculate_norm(self, node, src, n_prev, n_next):
         ases = get_as_count_by_iface_pair(self.path_counts, node, n_prev, n_next)
+        #print(f"Node Count: {self.node_count}")
+        #print(f"Active As Count: {ases}")
+
         return ases
 
 
@@ -90,6 +97,8 @@ class ScaledQoSAlgorithmPB(ScaledQoSAlgorithm):
 
     def calculate_norm(self, node, src, n_prev, n_next):
         src_paths = get_per_src_traversing_path_count(self.path_counts, node, src, n_prev, n_next)
+        #print(f"Node Count: {self.node_count}")
+        #print(f"Per source count: {src_paths}")
         return src_paths*self.node_count
 
 
@@ -104,6 +113,9 @@ class ScaledQoSAlgorithmOB(ScaledQoSAlgorithm):
     def calculate_norm(self, node, src, n_prev, n_next):
         ases = get_as_count_by_iface_pair(self.path_counts, node, n_prev, n_next)
         per_src_count = get_per_src_traversing_path_count(self.path_counts, node, src, n_prev, n_next)
+        print(f"Node Count: {self.node_count}")
+        print(f"Active As Count: {ases}")
+        print(f"Per source count: {per_src_count}")
         return ases*per_src_count
 
 '''
@@ -152,7 +164,7 @@ def get_entry_cap(
     cur_node: int,
     prev_node: Union[int, None],
     next_node: Union[int, None],
-) -> Tuple[float, float, float]:
+) -> float:
 
     if prev_node is None and next_node is None:
         raise ValueError("1-node paths are not permitted")
