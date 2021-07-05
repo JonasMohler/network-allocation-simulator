@@ -92,15 +92,16 @@ def main(args):
 
             # Load Allocation data
             print('Loading Allocation data ...')
+            ''''''
             print(args.r)
             data = dh.get_allocs_as_df([g], STRATEGIES, args.r)
-            print(data)
+            #print(data)
             dbg = data[data["Strategy"] == STRATEGY_LABEL['GMAImproved']].compute()
-            print(dbg)
+            #print(dbg)
             dbs = data[(data["Ratio"] == '0.1') | (data["Ratio"] == 1)].compute()
-            print(dbs)
+            #print(dbs)
             dbr = data[data["Strategy"] == STRATEGY_LABEL['sqos_ot']].compute()
-            print(dbr)
+            #print(dbr)
             '''
             sqos_ot_01 = data[(data["Strategy"] == STRATEGY_LABEL['sqos_ot']) & (data["Ratio"] == 'u0.1')].compute()
             sqos_ot_05 = data[(data["Strategy"] == STRATEGY_LABEL['sqos_ot']) & (data["Ratio"] == 'u0.5')].compute()
