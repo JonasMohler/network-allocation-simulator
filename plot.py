@@ -99,7 +99,7 @@ def main(args):
             dbg = data[data["Strategy"] == STRATEGY_LABEL['GMAImproved']].compute()
             #print(dbg)
             dbs = data[(data["Ratio"] == '0.1') | (data["Ratio"] == 1)].compute()
-            #print(dbs)
+            print(dbs)
             dbr = data[data["Strategy"] == STRATEGY_LABEL['sqos_ot']].compute()
             #print(dbr)
             '''
