@@ -141,7 +141,7 @@ def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, p
         d_min = data[PLOT_Y_LABEL['cover']].min()
         d_max = data[PLOT_Y_LABEL['cover']].max()
 
-        sns.ecdfplot(data=data, x=PLOT_Y_LABEL['cover'], hue="Cover Threshold", ax=ax)
+        sns.ecdfplot(data=data, x=PLOT_Y_LABEL['cover'], hue="Cover Threshold", ax=ax, palette=sns.color_palette('Accent', 5))
         ax.set_xlim(d_min, d_max)
         ax.grid(b=True)
 
@@ -193,7 +193,9 @@ def make_fig_split(x_name, y_name, data, title, strategies, p_type='scatter', sa
 
         i = 0
         for s in strategies:
-
+            print(f'Strat Label: {s}')
+            print(f"Strat Column: {s}")
+            print(f"Data: {data[(data['Strategy'] == STRATEGY_LABEL[s])][['Allocations Gbps', 'Strategy']]}")
             sns.boxplot(data=data[(data["Strategy"] == STRATEGY_LABEL[s])], x=x_name, y=y_name, hue="Strategy",
                             ax=axs[i], palette=C_MAP)
             i = i + 1
@@ -216,7 +218,7 @@ def make_fig_split(x_name, y_name, data, title, strategies, p_type='scatter', sa
 
         i = 0
         for s in strategies:
-            sns.ecdfplot(data=data[(data["Strategy"] == STRATEGY_LABEL[s])], x=PLOT_Y_LABEL['cover'], hue="Cover Threshold", ax=axs[i])
+            sns.ecdfplot(data=data[(data["Strategy"] == STRATEGY_LABEL[s])], x=PLOT_Y_LABEL['cover'], hue="Cover Threshold", ax=axs[i], palette=sns.color_palette('Accent', 5))
             axs[i].set_xlim(d_min, d_max)
             axs[i].grid(b=True)
             axs[i].set_title([STRATEGY_LABEL[s]])
