@@ -54,8 +54,13 @@ def main(args):
                         f"KEEPING only largest connected component of size: {len(graph.nodes())}"
                     )
                 # Save at xml
-                name = filename.rsplit(".", maxsplit=1)[0]
-                name = f"{name}{suffix}({len(graph.nodes())})"
+                if args.cw:
+                    name = filename.rsplit(".", maxsplit=1)[0]
+                    name = f"c_{name}{suffix}({len(graph.nodes())})"
+                else:
+                    name = filename.rsplit(".", maxsplit=1)[0]
+                    name = f"{name}{suffix}({len(graph.nodes())})"
+
                 print(name)
 
                 topo = os.path.join(DATA_PATH, name)
@@ -119,7 +124,7 @@ def main(args):
         # Add capactiy to the links and nodes
         if args.cw:
             fnss.set_capacities_constant(topo_bidir, 1, capacity_unit=UNIT)
-            topo_bidir = set_internal_cap_const(topo_bidir, 1)
+            topo_bidir = set_internal_cap_max_link(topo_bidir)
         else:
             fnss.set_capacities_degree_gravity(topo_bidir, CAPACITY_INTERVALS, capacity_unit=UNIT)
             topo_bidir = set_internal_cap_max_link(topo_bidir)
@@ -138,7 +143,10 @@ def main(args):
                 raise ValueError()
 
         # Save like other topos
-        dh.set_graph(topo_bidir, 'Core')
+        if args.cw:
+            dh.set_graph(topo_bidir, 'c_Core')
+        else:
+            dh.set_graph(topo_bidir, 'Core')
 
     if args.rand:
         rand_ts = []
@@ -152,6 +160,8 @@ def main(args):
             rand_ts.append(name)
 
         name = make_barabasi_albert(2500, 20, 50)
+        if args.cw:
+            name = f"c_{name}"
         rand_ts.append(name)
 
         if args.cw:

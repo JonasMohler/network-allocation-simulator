@@ -19,7 +19,9 @@ VERBOSITY = 2
 # Data
 ###################################################
 DATA_PATH = os.path.join(os.getcwd(), 'dat/topologies/')
+CONST_DATA_PATH = os.path.join(os.getcwd(), 'dat/c_topologies/')
 FIGURE_PATH = os.path.join(os.getcwd(), 'dat/figures/')
+CONST_FIGURE_PATH = os.path.join(os.getcwd(), 'dat/c_figures/')
 TOPOLOGYZOO = "dat/topologyzoo"
 
 # DATA TYPE CONSTANTS

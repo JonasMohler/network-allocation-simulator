@@ -1,3 +1,4 @@
+import os
 from argparse import ArgumentParser
 
 import matplotlib.pyplot as plt
@@ -43,6 +44,10 @@ def parse_args():
 
 def main(args):
     graphs = args.dirs
+
+    for g in args.dirs:
+        if not os.path.exists(dh.get_graph_figure_path(g)):
+            os.mkdir(dh.get_graph_figure_path(g))
 
     if args.multi:
 

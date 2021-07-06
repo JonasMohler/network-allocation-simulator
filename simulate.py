@@ -69,7 +69,7 @@ def main(args):
     thresh = args.thrs
 
     # - Compute Degrees, Diameters, shortest paths, traffic matrices, shortest path sampling, path lengths
-    '''
+
     degs = DegreesComputation(dirs, cores, force)
     degs.run()
 
@@ -119,11 +119,11 @@ def main(args):
     for r in ratios:
         s20 = SQoSOTComputation(dirs, cores, force, r)
         s20.run()
-    '''
+
     for r in ratios:
         s21 = SQoSOBComputation(dirs, cores, force, r)
         s21.run()
-    '''
+
 
 
     for s in STRATEGIES:
@@ -134,7 +134,7 @@ def main(args):
         else:
             c = CoverageComputation(dirs, cores, s, force, thresh)
             c.run()
-    '''
+
 if __name__ == "__main__":
     args = parse_args()
     main(args)

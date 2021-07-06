@@ -193,10 +193,10 @@ def make_fig_split(x_name, y_name, data, title, strategies, p_type='scatter', sa
 
         i = 0
         for s in strategies:
-            print(f'Strat Label: {s}')
-            print(f"Strat Column: {s}")
-            print(f"Data: {data[(data['Strategy'] == STRATEGY_LABEL[s])][['Allocations Gbps', 'Strategy']]}")
-            sns.boxplot(data=data[(data["Strategy"] == STRATEGY_LABEL[s])], x=x_name, y=y_name, hue="Strategy",
+            #print(f'Strat Label: {s}')
+            #print(f"Strat Column: {data['Strategy']}")
+            print(f"Data: {data[(data['Strategy'] == s)][['Allocations Gbps', 'Strategy']]}")
+            sns.boxplot(data=data[(data["Strategy"] == s)], x=x_name, y=y_name, hue="Strategy",
                             ax=axs[i], palette=C_MAP)
             i = i + 1
 
