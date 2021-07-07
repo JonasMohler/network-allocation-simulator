@@ -52,41 +52,109 @@ def main(args):
     if args.multi:
 
         print('Starting Group plots: All Graphs')
+        data = dh.get_allocs_as_df(args.dirs, STRATEGIES, args.r)
+        # print(data)
+        dbg = data[data["Strategy"] == STRATEGY_LABEL['GMAImproved']].compute()
+        # print(dbg)
+        dbs = data[(data["Ratio"] == '0.1') | (data["Ratio"] == 0.1) | (data["Ratio"] == 1)].compute()
+        print(dbs)
+        dbr = data[data["Strategy"] == STRATEGY_LABEL['sqos_ot']].compute()
 
         # Allocation plots
         print('Starting Allocation plots')
-        data = dh.get_allocs_as_df(graphs, STRATEGIES, [0.1])
-        ph.make_fig_single(PLOT_X_LABEL['pl'], PLOT_Y_LABEL['alloc'], data[data["Strategy"] == STRATEGY_LABEL['GMAImproved']],
-                    f"Allocations by Path Length in all graphs", p_type='box', save=True,
-                    path=dh.get_general_figure_path(), logy=True, strat='GMA')
-        ph.make_fig_split(PLOT_X_LABEL['pl'], PLOT_Y_LABEL['alloc'], data, f"Allocations by Path Length in all graphs", STRATEGIES[1:],
-                   p_type='box', save=True, path=dh.get_general_figure_path(), logy=True)
+        # Allocations Over Path Length Box - SQOS
+        ph.make_fig_split(PLOT_X_LABEL['pl'], 'Allocations Gbps', dbs,
+                          f"Allocations by Path Length in Zoo graphs", STRATEGIES[1:],
+                          p_type='box', save=True, path=dh.get_general_figure_path(), logy=True)
+
+        # Alloc CDF - All Strategies
+        ph.make_fig_single('', '', dbs, f"CDF of Allocations in Zoo graphs", save=True, path=dh.get_general_figure_path(),
+                           p_type='cdf_a', logx=True)
+
+        # Alloc CDF - Different sampling ratios SQOS OT
+        ph.make_fig_single('', '', dbr, f"CDF of Allocations for different Opt. SQoS w/ T. Div. Ratios in Zoo graphs",
+                           save=True,
+                           path=dh.get_general_figure_path(), p_type='cdf_ar', logx=True)
+
+        # Alloc CDF - Differences between GMA vs others
+        data = dh.get_alloc_diffs_as_df([g], STRATEGIES[0], [STRATEGIES[1]])
+        ph.make_fig_single('', '', data, f"CDF of Allocation Differences in Zoo graphs", save=True,
+                           path=dh.get_general_figure_path(), p_type='cdf_ad')
+
+        # Alloc Ratios CDF - GMA vs others (DEF TAKE IN)
+        data = dh.get_alloc_quots_as_df([g], STRATEGIES[0], STRATEGIES[1:])
+        ph.make_fig_single('', '', data, f"CDF of Allocation Ratios in Zoo graphs", save=True,
+                           path=dh.get_general_figure_path(), p_type='cdf_adr', logx=True)
 
         # TODO: Heatmap src-dst alloc
 
         # Cover plots
         print('Starting Cover Plots')
-        data = dh.get_covers_as_df(graphs, STRATEGIES)
+        data = dh.get_covers_as_df(args.dirs, STRATEGIES, args.r, [1e-2, 1e-3, 1e-4, 1e-5, 1e-6])
 
-        ph.make_fig_single(PLOT_X_LABEL['degree'], PLOT_Y_LABEL['cover'], data[data["Strategy"] == STRATEGY_LABEL["GMAImproved"]],
-                        f"Cover by {PLOT_X_LABEL['degree']} in all graphs", p_type='scatter', save=True,
-                        path=dh.get_general_figure_path())
+        print('Generating Cover Plots')
+        # Cover Scatter - GMA
+        ph.make_fig_single(PLOT_X_LABEL['degree'], PLOT_Y_LABEL['cover'],
+                           data[
+                               (data["Strategy"] == STRATEGY_LABEL["GMAImproved"]) &
+                               (data["Cover Threshold"] == 1e-6)
+                               ].compute(),
+                           f"Cover by {PLOT_X_LABEL['degree']} in Zoo graphs", p_type='scatter', save=True,
+                           path=dh.get_general_figure_path())
 
-        ph.make_fig_split(PLOT_X_LABEL['degree'], PLOT_Y_LABEL['cover'], data, f"Cover by {PLOT_X_LABEL['degree']} in all graphs", STRATEGIES[1:],
-                       p_type='scatter', save=True,
-                       path=dh.get_general_figure_path())
+        # Cover Scatter - SQOS
+        ph.make_fig_split(PLOT_X_LABEL['degree'], PLOT_Y_LABEL['cover'],
+                          data[
+                              (data["Cover Threshold"] == 1e-6) &
+                              ((data["Ratio"] == '0.1') |
+                               (data["Ratio"] == 0.1) |
+                               (data["Ratio"] == 1))
+                              ].compute(),
+                          f"Cover by {PLOT_X_LABEL['degree']} in Zoo graphs", STRATEGIES[1:],
+                          p_type='scatter', save=True,
+                          path=dh.get_general_figure_path())
 
-        print('Starting CDFs')
+        # Cover CDF - All Strategies
+        ph.make_fig_single('', '',
+                           data[
+                               (data["Cover Threshold"] == 1e-6) &
+                               ((data["Ratio"] == '0.1') |
+                                (data["Ratio"] == 0.1) |
+                                (data["Ratio"] == 1))
+                               ].compute(),
+                           f"CDF of Covers in Zoo graphs", save=True, path=dh.get_general_figure_path(),
+                           p_type='cdf_c')
 
-        # CDF plots
-        ph.make_fig_single('', '', data, f"CDF of Covers in all {g}", save=True, path=dh.get_general_figure_path(), p_type='cdf_c')
-        # Cover CDF
-        data = dh.get_cover_diffs_as_df(graphs, STRATEGIES[0], STRATEGIES[1:])
-        ph.make_fig_single('', '', data, f"CDF of Cover Differences in {g}", save=True, path=dh.get_general_figure_path(), p_type='cdf_cd')
+        # Covers CDF - Different sampling ratios SQOS OT
+        ph.make_fig_single('', '',
+                           data[
+                               (data["Strategy"] == STRATEGY_LABEL['sqos_ot']) &
+                               (data["Cover Threshold"] == 1e-6)
+                               ].compute(),
+                           f"CDF of Covers for different Opt. SQoS w/ T. Div. Ratios in Zoo graphs", save=True,
+                           path=dh.get_general_figure_path(), p_type='cdf_cr')
 
-        # Alloc CDF
-        data = dh.get_alloc_diffs_as_df(graphs, STRATEGIES[0], STRATEGIES[1:])
-        ph.make_fig_single('', '', data, f"CDF of Allocation Differences in {g}", save=True, path=dh.get_general_figure_path(), p_type='cdf_ad')
+        # Covers for different Cover Thresholds - GMA
+        ph.make_fig_single('', '',
+                           data[
+                               (data["Strategy"] == STRATEGY_LABEL['GMAImproved'])
+                           ].compute(), f"CDF of Cover for different Cover Thresholds in Zoo graphs - GMA", save=True,
+                           path=dh.get_general_figure_path(), p_type='cdf_ct')
+
+        ph.make_fig_split('', '',
+                          data[
+                              (data["Ratio"] == '0.1') |
+                              (data["Ratio"] == 0.1) |
+                              (data["Ratio"] == 1)
+                              ].compute(),
+                          f"CDF of Cover for different Cover Thresholds in Zoo graphs M-Approach flavours", STRATEGIES[1:],
+                          save=True,
+                          path=dh.get_general_figure_path(), p_type='cdf_ct')
+
+        # Cover CDF - Differences between GMA vs others
+        data = dh.get_cover_diffs_as_df([g], STRATEGIES[0], STRATEGIES[1:])
+        ph.make_fig_single('', '', data, f"CDF of Cover Differences in Zoo graphs", save=True,
+                           path=dh.get_general_figure_path(), p_type='cdf_cd')
 
     if args.single:
 
@@ -155,7 +223,7 @@ def main(args):
                                ,
                                f"Allocations by Path Length in {g}", p_type='box', save=True,
                                path=dh.get_graph_figure_path(g), logy=True, strat='GMA')
-            '''
+            
             # Allocations Over Path Length Box - SQOS
             ph.make_fig_split(PLOT_X_LABEL['pl'], 'Allocations Gbps', dbs,
                               f"Allocations by Path Length in {g}", STRATEGIES[1:],
@@ -164,17 +232,18 @@ def main(args):
             # Alloc CDF - All Strategies
             ph.make_fig_single('', '', dbs, f"CDF of Allocations in {g}", save=True, path=dh.get_graph_figure_path(g),
                                p_type='cdf_a', logx=True)
-
+            '''
             # Alloc CDF - Different sampling ratios SQOS OT
             ph.make_fig_single('', '', dbr, f"CDF of Allocations for different Opt. SQoS w/ T. Div. Ratios in {g}",
                                save=True,
                                path=dh.get_graph_figure_path(g), p_type='cdf_ar', logx=True)
 
-
+            '''
             # Alloc CDF - Differences between GMA vs others
             data = dh.get_alloc_diffs_as_df([g], STRATEGIES[0], [STRATEGIES[1]])
             ph.make_fig_single('', '', data, f"CDF of Allocation Differences in {g}", save=True,
                                path=dh.get_graph_figure_path(g), p_type='cdf_ad')
+            '''
 
             # Alloc Ratios CDF - GMA vs others (DEF TAKE IN)
             data = dh.get_alloc_quots_as_df([g], STRATEGIES[0], STRATEGIES[1:])
