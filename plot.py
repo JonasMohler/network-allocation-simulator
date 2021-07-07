@@ -149,13 +149,13 @@ def main(args):
 '''
             # Allocation Plots
             print('Generating Allocation plots ...')
-
+            '''
             # Allocations Over Path Length Box - GMA
             ph.make_fig_single(PLOT_X_LABEL['pl'], PLOT_Y_LABEL['alloc'], dbg
                                ,
                                f"Allocations by Path Length in {g}", p_type='box', save=True,
                                path=dh.get_graph_figure_path(g), logy=True, strat='GMA')
-
+            '''
             # Allocations Over Path Length Box - SQOS
             ph.make_fig_split(PLOT_X_LABEL['pl'], 'Allocations Gbps', dbs,
                               f"Allocations by Path Length in {g}", STRATEGIES[1:],
