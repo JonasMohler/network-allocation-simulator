@@ -34,7 +34,7 @@ def _load(graph, data_type, strategy=None, ratio=None, thresh=None):
             data = pickle.load(infile)
 
     elif FILE_TYPE[data_type] == "csv":
-        data = np.genfromtxt(full_path, delimiter=',')
+        data = pd.read_csv(full_path)
 
     elif FILE_TYPE[data_type] == "xml":
         data = fnss.read_topology(full_path)
@@ -85,8 +85,9 @@ def _store(data, graph, data_type, strategy=None, ratio=None, thresh=None):
             pickle.dump(data, outfile)
 
     elif FILE_TYPE[data_type] == "csv":
-        with open(full_path, "w+") as outfile:
-            np.savetxt(outfile, data, delimiter=',')
+        #with open(full_path, "w+") as outfile:
+        print(f"Writing csv to: {full_path}")
+        data.to_csv(full_path, index=False)
     elif FILE_TYPE[data_type] == "xml":
         fnss.write_topology(data, full_path)
 
@@ -160,6 +161,7 @@ def get_pc(graph, ratio=None):
 
 
 def set_pc(data, graph, ratio=None):
+    print(f"Writing path counts for {graph} with ratio {ratio}")
     _store(data, graph, PATH_COUNTS, ratio=ratio)
 
 

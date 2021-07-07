@@ -2,6 +2,7 @@
 import os.path
 
 import numpy as np
+import pandas as pd
 
 from src.util.utility import *
 from src.multiprocessing.topology.TopolgyMultiprocessing import TopologyMultiprocessing
@@ -268,6 +269,73 @@ class PathCounting2(TopologyMultiprocessing):
             print(f"{cur_dir}: Done")
         except Exception as e:
             print(f"Error occured in Path Counting: {e}")
+
+
+class PathCounting3(TopologyMultiprocessing):
+    description = 'Counting of Paths'
+
+    def __init__(self, dirs, n_proc, force_recompute, ratio=None):
+        super(PathCounting3, self).__init__(dirs, n_proc, PATH_COUNTS, force_recompute, ratio=ratio)
+
+    def find_or_compute_precursors(self, cur_dir):
+        # Needs Sampled shortest paths
+        pass
+
+    def per_dir_op(self, cur_dir):
+
+        try:
+            super(PathCounting3, self).per_dir_op(cur_dir)
+            res = {}
+            deg = dh.get_degrees(cur_dir)
+            sp = dh.get_shortest_paths(cur_dir, self.ratio)
+            nodes = deg['nodes']
+
+            cols = ['in_node', 'src_interface', 'dst_interface', 'src_node', 'count']
+            df = pd.DataFrame(columns=cols)
+
+            c = 0
+            alln = len(nodes)
+
+            for n in sp:
+                for n2 in sp[n]:
+
+                    path = sp[n][n2]
+                    if len(path) > 1:
+                        for cur_node in path:
+
+                            src = n
+                            id = path.index(cur_node)
+
+                            if id == 0:
+                                # node is first on path
+                                i_in = cur_node
+                                i_out = path[id + 1]
+                            elif id == len(path) - 1:
+                                # node is last on path
+                                i_in = path[id - 1]
+                                i_out = cur_node
+                            else:
+                                i_in = path[id - 1]
+                                i_out = path[id + 1]
+
+                            idx = df.index[((df['in_node'] == cur_node) & (df['src_interface'] == i_in) & (df['dst_interface'] == i_out) & (df['src_node'] == src))]
+                            #print(f"ids found: {idx}")
+                            if len(idx) > 0:
+                            #    print('updating')
+                                df.at[idx[0], 'count'] += 1
+                            else:
+                            #    print('first insert')
+                                s = pd.Series([cur_node, i_in, i_out, src, 1], index=cols)
+                            #    print(f'SERIES: {s}')
+                                df = df.append(s, ignore_index=True)
+                            #    print(f"DF: {df}")
+
+            dh.set_pc(df, cur_dir, self.ratio)
+
+            print(f"{cur_dir}: Done")
+        except Exception as e:
+            print(f"Error occured in Path Counting: {e}")
+
 
 
 class ShortestPathsComputation(TopologyMultiprocessing):

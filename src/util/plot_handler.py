@@ -189,17 +189,22 @@ def make_fig_split(x_name, y_name, data, title, strategies, p_type='scatter', sa
             i = i + 1
 
     elif p_type == 'box':
+
         name = f"{name}_b_split.{PLOT_FORMAT}"
 
         i = 0
         print(f"Strat Column: {data['Strategy']}")
         for s in strategies:
-            #print(f'Strat Label: {s}')
+            print(f"Strategy: {s}\nLabel: {STRATEGY_LABEL[s]}")
             print(f"Strat Column selected: {data[data['Strategy'] == STRATEGY_LABEL[s]]}")
             print(f"Data: {data[(data['Strategy'] == s)][['Allocations Gbps', 'Strategy']]}")
-            sns.boxplot(data=data[(data["Strategy"] == s)], x=x_name, y=y_name, hue="Strategy",
-                            ax=axs[i], palette=C_MAP)
-            i = i + 1
+            try:
+                sns.boxplot(data=data[(data["Strategy"] == s)], x=x_name, y=y_name, hue="Strategy",
+                                ax=axs[i], palette=C_MAP)
+                i = i + 1
+            except Exception as e:
+                print(f"Error in box plot: {e}")
+                break
 
     elif p_type == 'lm':
         name = f"{name}_l_split.{PLOT_FORMAT}"

@@ -2,19 +2,19 @@ import os
 from src.util.const import *
 
 # File names
-SP_FILE_NAME = "shortest_paths.json"
-DIAMETER_FILE_NAME = "diameter.txt"
-DEGREE_FILE_NAME = "degree.json"
+SP_FILE_NAME = f"shortest_paths.{FILE_TYPE[SHORTEST_PATH]}"
+DIAMETER_FILE_NAME = f"diameter.{FILE_TYPE[DIAMETER]}"
+DEGREE_FILE_NAME = f"degree.{FILE_TYPE[DEGREE]}"
 REACH_FILE_NAME = "reach.json"
-COVER_FILE_NAME = "cover.json"
-TM_FILE_NAME = "allocation_matrix.pkl"
+COVER_FILE_NAME = f"cover.{FILE_TYPE[COVER]}"
+TM_FILE_NAME = f"allocation_matrix.{FILE_TYPE[ALLOCATION_MATRIX]}"
 TM_COVER_FILE_NAME = "tm_cover.json"
-PC_FILE_NAME = "path_counts.pkl"
-PL_FILE_NAME = "path_lengths.csv"
-TOPOLOGY_FILE_NAME = "topology.xml"
+PC_FILE_NAME = f"path_counts.{FILE_TYPE[PATH_COUNTS]}"
+PL_FILE_NAME = f"path_lengths.{FILE_TYPE[PATH_LENGTHS]}"
+TOPOLOGY_FILE_NAME = f"topology.{FILE_TYPE[TOPOLOGY]}]"
 
 # Allocations
-ALLOC_FILE_NAME = "allocations.json"
+ALLOC_FILE_NAME = f"allocations.{FILE_TYPE[ALLOCATION]}"
 ALLOC_SUM_FILE_NAME = "alloc_sum.json"
 TM_ALLOC_FILE_NAME = "alloc_traffic_mat.json"
 TM_ALLOC_SUM_FILE_NAME = "tm_alloc_sum.json"
