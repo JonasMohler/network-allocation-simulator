@@ -103,7 +103,7 @@ def main(args):
             #print(data)
             dbg = data[data["Strategy"] == STRATEGY_LABEL['GMAImproved']].compute()
             #print(dbg)
-            dbs = data[(data["Ratio"] == '0.1') | (data["Ratio"] == 1)].compute()
+            dbs = data[(data["Ratio"] == '0.1') | (data["Ratio"] == 0.1) | (data["Ratio"] == 1)].compute()
             print(dbs)
             dbr = data[data["Strategy"] == STRATEGY_LABEL['sqos_ot']].compute()
             #print(dbr)
@@ -200,7 +200,9 @@ def main(args):
             ph.make_fig_split(PLOT_X_LABEL['degree'], PLOT_Y_LABEL['cover'],
                               data[
                                   (data["Cover Threshold"] == 1e-6) &
-                                  ((data["Ratio"] == '0.1') | (data["Ratio"] == 1))
+                                  ((data["Ratio"] == '0.1') |
+                                   (data["Ratio"] == 0.1) |
+                                   (data["Ratio"] == 1))
                               ].compute(),
                               f"Cover by {PLOT_X_LABEL['degree']} in {g}", STRATEGIES[1:],
                               p_type='scatter', save=True,
@@ -210,7 +212,9 @@ def main(args):
             ph.make_fig_single('', '',
                                data[
                                    (data["Cover Threshold"] == 1e-6) &
-                                   ((data["Ratio"] == '0.1') | (data["Ratio"] == 1))
+                                   ((data["Ratio"] == '0.1') |
+                                    (data["Ratio"] == 0.1) |
+                                    (data["Ratio"] == 1))
                                ].compute(),
                                f"CDF of Covers in {g}", save=True, path=dh.get_graph_figure_path(g),
                                p_type='cdf_c')
@@ -234,6 +238,7 @@ def main(args):
             ph.make_fig_split('', '',
                               data[
                                   (data["Ratio"] == '0.1') |
+                                  (data["Ratio"] == 0.1) |
                                   (data["Ratio"] == 1)
                               ].compute(),
                               f"CDF of Cover for different Cover Thresholds in {g} M-Approach flavours", STRATEGIES[1:], save =True,

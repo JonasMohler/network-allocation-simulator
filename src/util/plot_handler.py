@@ -193,13 +193,14 @@ def make_fig_split(x_name, y_name, data, title, strategies, p_type='scatter', sa
         name = f"{name}_b_split.{PLOT_FORMAT}"
 
         i = 0
-        print(f"Strat Column: {data['Strategy']}")
+        #print(f"Strat Column: {data['Strategy']}")
+        #print(f"Unique Strat values: {data['Strategy'].unique()}")
         for s in strategies:
-            print(f"Strategy: {s}\nLabel: {STRATEGY_LABEL[s]}")
-            print(f"Strat Column selected: {data[data['Strategy'] == STRATEGY_LABEL[s]]}")
-            print(f"Data: {data[(data['Strategy'] == s)][['Allocations Gbps', 'Strategy']]}")
+            #print(f"Strategy: {s}\nLabel: {STRATEGY_LABEL[s]}")
+            #print(f"Strat Column selected: {data[data['Strategy'] == STRATEGY_LABEL[s]]}")
+            #print(f"Data: {data[(data['Strategy'] == STRATEGY_LABEL[s])][['Allocations Gbps', 'Strategy']]}")
             try:
-                sns.boxplot(data=data[(data["Strategy"] == s)], x=x_name, y=y_name, hue="Strategy",
+                sns.boxplot(data=data[(data["Strategy"] == STRATEGY_LABEL[s])], x=x_name, y=y_name, hue="Strategy",
                                 ax=axs[i], palette=C_MAP)
                 i = i + 1
             except Exception as e:
@@ -223,6 +224,7 @@ def make_fig_split(x_name, y_name, data, title, strategies, p_type='scatter', sa
         d_max = data[PLOT_Y_LABEL['cover']].max()
 
         i = 0
+
         for s in strategies:
             sns.ecdfplot(data=data[(data["Strategy"] == STRATEGY_LABEL[s])], x=PLOT_Y_LABEL['cover'], hue="Cover Threshold", ax=axs[i], palette=sns.color_palette('Accent', 5))
             axs[i].set_xlim(d_min, d_max)

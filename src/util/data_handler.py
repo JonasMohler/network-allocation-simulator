@@ -603,13 +603,13 @@ def alloc_difference_list(a1,a2):
 
 def alloc_quotients_list(a1,a2):
     quots = []
-    print(f"A1: {a1}")
-    print(f"A2: {a2}")
+    #print(f"A1: {a1}")
+    #print(f"A2: {a2}")
     for src, dests in a1.items():
         for dst in dests.keys():
             if src in a2 .keys() and dst in a2[src].keys():
-                print(f"A1 alloc at {src} to {dst}: {a1[src][dst][0]}")
-                print(f"A2 alloc at {src} to {dst}: {a2[src][dst][0]}")
+                #print(f"A1 alloc at {src} to {dst}: {a1[src][dst][0]}")
+                #print(f"A2 alloc at {src} to {dst}: {a2[src][dst][0]}")
                 quots.append(a1[src][dst][0] / a2[src][dst][0])
     return quots
 
