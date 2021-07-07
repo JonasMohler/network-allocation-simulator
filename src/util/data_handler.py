@@ -35,7 +35,7 @@ def _load(graph, data_type, strategy=None, ratio=None, thresh=None):
 
     elif FILE_TYPE[data_type] == "csv":
         with open(full_path) as outfile:
-            np.genfromtxt(outfile, delimiter=',')
+            data = np.genfromtxt(outfile, delimiter=',')
         #data = pd.read_csv(full_path)
 
     elif FILE_TYPE[data_type] == "xml":
