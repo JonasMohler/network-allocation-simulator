@@ -42,7 +42,7 @@ FILE_TYPE = [
     'json',
     'json',
     'pkl',
-    'json',
+    'csv',
     'pkl',
     'xml',
     'txt',
