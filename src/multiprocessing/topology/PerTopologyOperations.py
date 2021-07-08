@@ -69,23 +69,49 @@ class PathSampling2(TopologyMultiprocessing):
             # super(PathSampling, self).per_dir_op(cur_dir)
             if not os.path.exists(dh.get_full_path(cur_dir, SHORTEST_PATH, ratio=self.ratio)):
                 if str(self.ratio).startswith('a'):
-                    # Averaged ratio: Nodes select different numbers of destinations (averaging out to ratio)
+                    # Degree-weighted number, uniform dsts
                     # Higher degree nodes select more destinations than lower degree nodes
+                    # High degree nodes more likely to be picked as destination
                     sp = dh.get_shortest_paths(cur_dir)
                     deg = dh.get_degrees(cur_dir)
                     nodes = deg['nodes']
                     degrees = deg['degrees']
-                    # Calculate the centrality of all nodes
-                    s = sum(degrees)
-
-                    centrality = [i / s for i in deg['degrees']]
+                    # Calculate the weight
                     r = float(self.ratio[1:])
+                    s = sum(degrees)
+                    num_n = len(nodes)
+                    node_is = range(num_n)
+                    sample_sizes = [int(round(x*num_n*float(r)/s)) for x in degrees]
 
-                    n_nodes = len(nodes)
+                    print('start assigning')
+                    all_selected_paths = {}
+                    for i in range(len(nodes)):
+
+                        print('starting sampling')
+                        dest_is = np.random.choice(node_is, sample_sizes[i], replace=False)
+                        print('sampling done')
+
+                        selected_paths = {}
+                        for d in dest_is:
+                            if nodes[d] != nodes[i]:
+                                selected_paths[nodes[d]] = sp[nodes[i]][nodes[d]]
+
+                        all_selected_paths[nodes[i]] = selected_paths
+                        if i == num_n:
+                            print(f"{round(100 * (i - 1) / num_n, 4)}%")
+                        else:
+                            print(f"{round(100 * (i - 1) / num_n, 4)}%", end="\r")
+
+                    dh.set_shortest_paths(all_selected_paths, cur_dir, ratio=self.ratio)
+                    print('stored')
+
 
 
                     pass
                 elif str(self.ratio).startswith('u'):
+                    # Uniform number, uniform dsts
+                    # Every node selects #nodes * ratio destinations
+                    # Every node as likely to be picked as destination
                     r = float(self.ratio[1:])
                     sp = dh.get_shortest_paths(cur_dir)
                     deg = dh.get_degrees(cur_dir)
@@ -120,7 +146,9 @@ class PathSampling2(TopologyMultiprocessing):
                     pass
 
                 else:
-                    # Standard ratio: All nodes select the same number of destinations
+                    # Uniform number, degree-weighted dsts
+                    # Every node selects #nodes * ratio destinations
+                    # High degree nodes more likely to be picked as destination
                     sp = dh.get_shortest_paths(cur_dir)
                     deg = dh.get_degrees(cur_dir)
                     nodes = deg['nodes']

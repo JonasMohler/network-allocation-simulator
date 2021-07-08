@@ -11,7 +11,7 @@ TM_FILE_NAME = f"allocation_matrix.{FILE_TYPE[ALLOCATION_MATRIX]}"
 TM_COVER_FILE_NAME = "tm_cover.json"
 PC_FILE_NAME = f"path_counts.{FILE_TYPE[PATH_COUNTS]}"
 PL_FILE_NAME = f"path_lengths.{FILE_TYPE[PATH_LENGTHS]}"
-TOPOLOGY_FILE_NAME = f"topology.{FILE_TYPE[TOPOLOGY]}]"
+TOPOLOGY_FILE_NAME = f"topology.{FILE_TYPE[TOPOLOGY]}"
 
 # Allocations
 ALLOC_FILE_NAME = f"allocations.{FILE_TYPE[ALLOCATION]}"

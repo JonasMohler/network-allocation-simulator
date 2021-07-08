@@ -37,6 +37,14 @@ def parse_args():
         default=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
         help="Sampling ratios",
     )
+    '''
+    parser.add_argument(
+        "--r",
+        nargs="+",
+        default=[''],
+        help="Sampling ratios",
+    )
+    '''
 
     args = parser.parse_args()
     return args
@@ -166,13 +174,13 @@ def main(args):
             # Load Allocation data
             print('Loading Allocation data ...')
             ''''''
-            print(args.r)
+            # print(args.r)
             data = dh.get_allocs_as_df([g], STRATEGIES, args.r)
             #print(data)
             dbg = data[data["Strategy"] == STRATEGY_LABEL['GMAImproved']].compute()
             #print(dbg)
             dbs = data[(data["Ratio"] == '0.1') | (data["Ratio"] == 0.1) | (data["Ratio"] == 1)].compute()
-            print(dbs)
+            # print(dbs)
             dbr = data[data["Strategy"] == STRATEGY_LABEL['sqos_ot']].compute()
             #print(dbr)
             '''
@@ -217,18 +225,18 @@ def main(args):
 '''
             # Allocation Plots
             print('Generating Allocation plots ...')
-            '''
+
             # Allocations Over Path Length Box - GMA
             ph.make_fig_single(PLOT_X_LABEL['pl'], PLOT_Y_LABEL['alloc'], dbg
                                ,
                                f"Allocations by Path Length in {g}", p_type='box', save=True,
                                path=dh.get_graph_figure_path(g), logy=True, strat='GMA')
-            
+
             # Allocations Over Path Length Box - SQOS
             ph.make_fig_split(PLOT_X_LABEL['pl'], 'Allocations Gbps', dbs,
                               f"Allocations by Path Length in {g}", STRATEGIES[1:],
                               p_type='box', save=True, path=dh.get_graph_figure_path(g), logy=True)
-
+            '''
             # Alloc CDF - All Strategies
             ph.make_fig_single('', '', dbs, f"CDF of Allocations in {g}", save=True, path=dh.get_graph_figure_path(g),
                                p_type='cdf_a', logx=True)
@@ -245,10 +253,29 @@ def main(args):
                                path=dh.get_graph_figure_path(g), p_type='cdf_ad')
             '''
 
-            # Alloc Ratios CDF - GMA vs others (DEF TAKE IN)
+            # Alloc Ratios CDF - GMA vs others
             data = dh.get_alloc_quots_as_df([g], STRATEGIES[0], STRATEGIES[1:])
             ph.make_fig_single('', '', data, f"CDF of Allocation Ratios in {g}", save=True, path=dh.get_graph_figure_path(g), p_type='cdf_adr', logx=True)
 
+            # Alloc Ratios CDF - Const vs Degree weighted Model
+            data = dh.get_alloc_graph_quot_as_df('Barabasi_Albert_10_25_(500)', 'c_Barabasi_Albert_10_25_(500)', STRATEGIES)
+            ph.make_fig_single('','', data, "Const vs. Degree Weighted Capacity Model: Allocations in Barabasi-Albert(500) (10,25)",p_type='cdf_cm', save=True, path=dh.get_general_figure_path(), logx=True)
+
+            '''
+            # Alloc Ratios CDF - Uniform vs degree weighted n-dest
+            data = dh.get_alloc_quots_sstrat_as_df('Barabasi_Albert_10_25_(500)', 'u', '')
+            ph.make_fig_single('', '', data, "Sampling Strategy Comparison - Uniform vs Degree Weighted Destinations Pick Probability: Allocations in Barabasi-Albert(500) (10,25)", p_type='cdf_ss', save=True, path=dh.get_general_figure_path(), logx=True)
+
+
+            # Alloc Ratios CDF - Uniform vs degree weighted n-dest
+            data = dh.get_alloc_quots_sstrat_as_df('Barabasi_Albert_10_25_(500)', 'u', 'a')
+            ph.make_fig_single('', '', data, "Sampling Strategy Comparison - Uniform vs Degree Weighted Number of Destinations: Allocations in Barabasi-Albert(500) (10,25)", p_type='cdf_ss', save=True, path=dh.get_general_figure_path(), logx=True)
+
+
+            # Alloc Ratios CDF - Uniform vs degree weighted n-dest
+            data = dh.get_alloc_quots_sstrat_as_df('Barabasi_Albert_10_25_(500)', '', 'a')
+            ph.make_fig_single('', '', data, "Sampling Strategy Comparison - Degree weighted Pick Probability vs Degree Weighted Number of Destinations: Allocations in Barabasi-Albert(500) (10,25)", p_type='cdf_ss', save=True, path=dh.get_general_figure_path(), logx=True)
+            '''
             # TODO: Heatmap src-dst alloc
 
             # Cover plots
@@ -256,6 +283,7 @@ def main(args):
             data = dh.get_covers_as_df([g], STRATEGIES, args.r, [1e-2, 1e-3, 1e-4, 1e-5, 1e-6])
 
             print('Generating Cover Plots')
+            '''
             # Cover Scatter - GMA
             ph.make_fig_single(PLOT_X_LABEL['degree'], PLOT_Y_LABEL['cover'],
                                data[
@@ -287,7 +315,7 @@ def main(args):
                                ].compute(),
                                f"CDF of Covers in {g}", save=True, path=dh.get_graph_figure_path(g),
                                p_type='cdf_c')
-
+            
             # Covers CDF - Different sampling ratios SQOS OT
             ph.make_fig_single('', '',
                                data[
@@ -296,6 +324,8 @@ def main(args):
                                ].compute(),
                                f"CDF of Covers for different Opt. SQoS w/ T. Div. Ratios in {g}", save=True,
                                path=dh.get_graph_figure_path(g), p_type='cdf_cr')
+
+            '''
 
             # Covers for different Cover Thresholds - GMA
             ph.make_fig_single('', '',
@@ -312,13 +342,12 @@ def main(args):
                               ].compute(),
                               f"CDF of Cover for different Cover Thresholds in {g} M-Approach flavours", STRATEGIES[1:], save =True,
                               path=dh.get_graph_figure_path(g), p_type='cdf_ct')
-
+            '''
             # Cover CDF - Differences between GMA vs others
             data = dh.get_cover_diffs_as_df([g], STRATEGIES[0], STRATEGIES[1:])
             ph.make_fig_single('', '', data, f"CDF of Cover Differences in {g}", save=True,
                                path=dh.get_graph_figure_path(g), p_type='cdf_cd')
-
-
+            '''
 
 
 if __name__ == "__main__":

@@ -11,7 +11,11 @@ import seaborn as sns
 import numpy as np
 
 sns.set_theme(style="ticks", palette=PALETTE)
-C_MAP = dict(zip(STRATEGY_LABEL.values(), sns.color_palette(PALETTE, 5)))
+p = sns.color_palette(PALETTE, 5)
+pd = p[1:]
+s_dif = STRATEGIES[1:]
+C_MAP = dict(zip(STRATEGY_LABEL.values(), p))
+DIFF_C_MAP = dict(zip(['GMA vs. ' + STRATEGY_LABEL[x] for x in s_dif], pd))
 
 
 def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, path='', logy=False, logx=False,
@@ -63,8 +67,30 @@ def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, p
 
         d_min = data[PLOT_Y_LABEL['alloc']].min()
         d_max = data[PLOT_Y_LABEL['alloc']].max()
-        print(data)
+        #print(data)
         sns.ecdfplot(data=data, x=PLOT_Y_LABEL['alloc'], hue="Strategy", ax=ax)
+        ax.set_xlim(d_min, d_max)
+        ax.grid(b=True)
+
+    elif p_type == 'cdf_cm':
+
+        name = f"alloc_cdf_cm.{PLOT_FORMAT}"
+
+        d_min = data["Allocation Ratio"].min()
+        d_max = data["Allocation Ratio"].max()
+        #print(data)
+        sns.ecdfplot(data=data, x="Allocation Ratio", hue="Strategy", ax=ax)
+        ax.set_xlim(d_min, d_max)
+        ax.grid(b=True)
+
+    elif p_type == 'cdf_ss':
+
+        name = f"alloc_cdf_ss.{PLOT_FORMAT}"
+
+        d_min = data["Allocation Ratio"].min()
+        d_max = data["Allocation Ratio"].max()
+        #print(data)
+        sns.ecdfplot(data=data, x="Allocation Ratio", hue="Ratio", ax=ax)
         ax.set_xlim(d_min, d_max)
         ax.grid(b=True)
 
@@ -95,7 +121,7 @@ def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, p
         med = data['Allocation Ratio'].median()
         mean = data['Allocation Ratio'].mean()
 
-        sns.ecdfplot(data=data, x='Allocation Ratio', hue="Strategies", ax=ax)
+        sns.ecdfplot(data=data, x='Allocation Ratio', hue="Strategies", ax=ax, palette=DIFF_C_MAP)
 
         ax.set_xlim(d_min, d_max)
         ax.grid(b=True)
@@ -141,7 +167,7 @@ def make_fig_single(x_name, y_name, data, title, p_type='scatter', save=False, p
         d_min = data[PLOT_Y_LABEL['cover']].min()
         d_max = data[PLOT_Y_LABEL['cover']].max()
 
-        sns.ecdfplot(data=data, x=PLOT_Y_LABEL['cover'], hue="Cover Threshold", ax=ax, palette=sns.color_palette('Accent', 5))
+        sns.ecdfplot(data=data, x=PLOT_Y_LABEL['cover'], hue="Cover Threshold", ax=ax, palette=sns.color_palette('PRGn', 5))
         ax.set_xlim(d_min, d_max)
         ax.grid(b=True)
 
@@ -226,7 +252,7 @@ def make_fig_split(x_name, y_name, data, title, strategies, p_type='scatter', sa
         i = 0
 
         for s in strategies:
-            sns.ecdfplot(data=data[(data["Strategy"] == STRATEGY_LABEL[s])], x=PLOT_Y_LABEL['cover'], hue="Cover Threshold", ax=axs[i], palette=sns.color_palette('Accent', 5))
+            sns.ecdfplot(data=data[(data["Strategy"] == STRATEGY_LABEL[s])], x=PLOT_Y_LABEL['cover'], hue="Cover Threshold", ax=axs[i], palette=sns.color_palette('PRGn', 5))
             axs[i].set_xlim(d_min, d_max)
             axs[i].grid(b=True)
             axs[i].set_title([STRATEGY_LABEL[s]])

@@ -577,6 +577,40 @@ def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
     return df
 
 
+def get_alloc_graph_quot_as_df(grapha, graphb, strategies=['GMAImproved'], ratio=0.1):
+    small_dfs = []
+
+    #print(f"Fetching Allocation ratios for {len(graphs)} graphs")
+    for s in strategies:
+        if s in['sqos_ot', 'sqos_ob']:
+            a1 = get_allocations(grapha, s, ratio)
+            a2 = get_allocations(graphb, s, ratio)
+        else:
+            a1 = get_allocations(grapha, s)
+            a2 = get_allocations(graphb, s)
+        quots = alloc_quotients_list(a1, a2)
+        df_small = pd.DataFrame()
+        df_small[f"Allocation Ratio"] = quots
+        df_small['Strategy'] = f"{STRATEGY_LABEL[s]}"
+        small_dfs.append(df_small)
+    df = pd.concat(small_dfs)
+
+    return df
+
+
+def get_alloc_quots_sstrat_as_df(graph, m1, m2):
+    small_dfs = []
+    for r in [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]:
+        a1 = get_allocations(graph, 'sqos_ot', f"{m1}{r}")
+        a2 = get_allocations(graph, 'sqos_ot', f"{m2}{r}")
+        quots = alloc_quotients_list(a1, a2)
+        df_small = pd.DataFrame()
+        df_small["Allocation Ratio"] = quots
+        df_small["Ratio"] = r
+        small_dfs.append(df_small)
+    df = pd.concat(small_dfs)
+    return df
+
 def sfname(graph):
     size = int(graph.split('(')[1].split(')')[0])
     return size
