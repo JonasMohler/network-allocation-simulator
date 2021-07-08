@@ -225,7 +225,7 @@ def main(args):
 '''
             # Allocation Plots
             print('Generating Allocation plots ...')
-
+            '''
             # Allocations Over Path Length Box - GMA
             ph.make_fig_single(PLOT_X_LABEL['pl'], PLOT_Y_LABEL['alloc'], dbg
                                ,
@@ -236,17 +236,17 @@ def main(args):
             ph.make_fig_split(PLOT_X_LABEL['pl'], 'Allocations Gbps', dbs,
                               f"Allocations by Path Length in {g}", STRATEGIES[1:],
                               p_type='box', save=True, path=dh.get_graph_figure_path(g), logy=True)
-            '''
+
             # Alloc CDF - All Strategies
             ph.make_fig_single('', '', dbs, f"CDF of Allocations in {g}", save=True, path=dh.get_graph_figure_path(g),
                                p_type='cdf_a', logx=True)
-            '''
+
             # Alloc CDF - Different sampling ratios SQOS OT
             ph.make_fig_single('', '', dbr, f"CDF of Allocations for different Opt. SQoS w/ T. Div. Ratios in {g}",
                                save=True,
                                path=dh.get_graph_figure_path(g), p_type='cdf_ar', logx=True)
 
-            '''
+
             # Alloc CDF - Differences between GMA vs others
             data = dh.get_alloc_diffs_as_df([g], STRATEGIES[0], [STRATEGIES[1]])
             ph.make_fig_single('', '', data, f"CDF of Allocation Differences in {g}", save=True,
@@ -257,11 +257,12 @@ def main(args):
             data = dh.get_alloc_quots_as_df([g], STRATEGIES[0], STRATEGIES[1:])
             ph.make_fig_single('', '', data, f"CDF of Allocation Ratios in {g}", save=True, path=dh.get_graph_figure_path(g), p_type='cdf_adr', logx=True)
 
+            '''
             # Alloc Ratios CDF - Const vs Degree weighted Model
             data = dh.get_alloc_graph_quot_as_df('Barabasi_Albert_10_25_(500)', 'c_Barabasi_Albert_10_25_(500)', STRATEGIES)
             ph.make_fig_single('','', data, "Const vs. Degree Weighted Capacity Model: Allocations in Barabasi-Albert(500) (10,25)",p_type='cdf_cm', save=True, path=dh.get_general_figure_path(), logx=True)
 
-            '''
+            
             # Alloc Ratios CDF - Uniform vs degree weighted n-dest
             data = dh.get_alloc_quots_sstrat_as_df('Barabasi_Albert_10_25_(500)', 'u', '')
             ph.make_fig_single('', '', data, "Sampling Strategy Comparison - Uniform vs Degree Weighted Destinations Pick Probability: Allocations in Barabasi-Albert(500) (10,25)", p_type='cdf_ss', save=True, path=dh.get_general_figure_path(), logx=True)
