@@ -152,7 +152,7 @@ def main(args):
         for n_nodes in RAND_N_NODES:
             for adl in RAND_ADD_LINKS:
                 for init_n in RAND_INIT_NODES:
-                    name = make_barabasi_albert(RAND_N_NODES, adl, init_n)
+                    name = make_barabasi_albert(n_nodes, adl, init_n)
                     rand_ts.append(name)
 
         '''
