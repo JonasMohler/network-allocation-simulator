@@ -63,11 +63,12 @@ class TopologyMultiprocessing:
             print(f"\n{dir}: Start")
             self.per_dir_op(dir)
         '''
-        r_dirs = random.shuffle(self.dirs)
-        dirs_per_split = len(self.dirs) // self.n_proc + 1
+        r_dirs = self.dirs
+        random.shuffle(r_dirs)
+        dirs_per_split = len(r_dirs) // self.n_proc + 1
         splits = [
             r_dirs[i : i + dirs_per_split]
-            for i in range(0, len(self.dirs), dirs_per_split)
+            for i in range(0, len(r_dirs), dirs_per_split)
         ]
         st = time.time()
 
