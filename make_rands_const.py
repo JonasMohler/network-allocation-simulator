@@ -9,7 +9,7 @@ TOPO = '/data2/jmohler/dat/topologies'
 
 for dir in os.listdir(TOPO):
     if dir.startswith('Barabasi'):
-        cp_dir(dir, f"c_{dir}")
+        cp_dir(os.path.join(TOPO, dir), os.path.join(TOPO, f"c_{dir}"))
 
 tops = []
 for dir in os.listdir(TOPO):
