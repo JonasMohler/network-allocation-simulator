@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 from multiprocessing.pool import Pool
 import src.util.data_handler as dh
 from src.util.const import VERBOSITY
+import random
 
 
 class TopologyMultiprocessing:
@@ -62,9 +63,10 @@ class TopologyMultiprocessing:
             print(f"\n{dir}: Start")
             self.per_dir_op(dir)
         '''
+        r_dirs = random.shuffle(self.dirs)
         dirs_per_split = len(self.dirs) // self.n_proc + 1
         splits = [
-            self.dirs[i : i + dirs_per_split]
+            r_dirs[i : i + dirs_per_split]
             for i in range(0, len(self.dirs), dirs_per_split)
         ]
         st = time.time()
@@ -86,5 +88,5 @@ if __name__ == "__main__":
         help="Number of cores to be used in the computation.",
     )
     args = parser.parse_args()
-    proc = SubdirMultiprocessing(args.dirs, args.cores)
+    proc = TopologyMultiprocessing(args.dirs, args.cores)
     proc.run()
