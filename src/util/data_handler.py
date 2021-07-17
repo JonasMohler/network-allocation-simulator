@@ -15,9 +15,10 @@ from src.util.naming import *
 from src.util.const import *
 
 
-def _load(graph, data_type, strategy=None, ratio=None, thresh=None):
+def _load(graph, data_type, strategy=None, ratio=None, thresh=None, num_sp=None):
 
-    full_path = get_full_path(graph, data_type, strategy, ratio, thresh)
+    full_path = get_full_path(graph, data_type, strategy=strategy, ratio=ratio, thresh=thresh, num_sp=num_sp)
+    #print(f'loading {full_path}')
 
     # Load file
 
@@ -44,7 +45,7 @@ def _load(graph, data_type, strategy=None, ratio=None, thresh=None):
     return data
 
 
-def _store(data, graph, data_type, strategy=None, ratio=None, thresh=None):
+def _store(data, graph, data_type, strategy=None, ratio=None, thresh=None, num_sp=None):
 
     # Build parent directory and make if they don't yet exist and is allowed
     topology_path = get_topo_path(graph)
@@ -70,11 +71,14 @@ def _store(data, graph, data_type, strategy=None, ratio=None, thresh=None):
         os.mkdir(graph_path)
 
     # Get file name
-    full_path = get_full_path(graph, data_type, strategy, ratio, thresh)
+    full_path = get_full_path(graph, data_type, strategy=strategy, ratio=ratio, thresh=thresh, num_sp=num_sp)
+
+    #print(f'storing at: {full_path}')
 
     # Store
 
     if FILE_TYPE[data_type] == "json":
+        #print(f'writing to: {full_path}')
         with open(full_path, "w+") as outfile:
             json.dump(data, outfile)
 
@@ -104,13 +108,13 @@ def set_graph(data, graph):
     _store(data, graph, TOPOLOGY)
 
 
-def get_allocations(graph, strategy, ratio=None):
-    data = _load(graph, ALLOCATION, strategy=strategy, ratio=ratio)
+def get_allocations(graph, strategy, ratio=None, num_sp=None):
+    data = _load(graph, ALLOCATION, strategy=strategy, ratio=ratio, num_sp=num_sp)
     return data
 
 
-def set_allocations(data, graph, strategy, ratio=None):
-    _store(data, graph, ALLOCATION, strategy=strategy, ratio=ratio)
+def set_allocations(data, graph, strategy, ratio=None, num_sp=None):
+    _store(data, graph, ALLOCATION, strategy=strategy, ratio=ratio, num_sp=num_sp)
 
 
 def get_diameter(graph):
@@ -131,13 +135,13 @@ def set_degrees(data, graph):
     _store(data, graph, DEGREE)
 
 
-def get_cover(graph, strategy, thresh, ratio=None):
-    data = _load(graph, COVER, strategy=strategy, ratio=ratio, thresh=thresh)
+def get_cover(graph, strategy, thresh, ratio=None, num_sp=None):
+    data = _load(graph, COVER, strategy=strategy, ratio=ratio, thresh=thresh, num_sp=num_sp)
     return data
 
 
-def set_cover(data, graph, strategy, thresh, ratio=None):
-    _store(data, graph, COVER, strategy=strategy, ratio=ratio, thresh=thresh)
+def set_cover(data, graph, strategy, thresh, ratio=None, num_sp=None):
+    _store(data, graph, COVER, strategy=strategy, ratio=ratio, thresh=thresh, num_sp=num_sp)
 
 
 def get_tm(graph):
@@ -158,14 +162,13 @@ def set_pl(data, graph):
     _store(data, graph, PATH_LENGTHS)
 
 
-def get_pc(graph, ratio=None):
-    data = _load(graph, PATH_COUNTS, ratio=ratio)
+def get_pc(graph, ratio=None, num_sp=None):
+    data = _load(graph, PATH_COUNTS, ratio=ratio, num_sp=num_sp)
     return data
 
 
-def set_pc(data, graph, ratio=None):
-    print(f"Writing path counts for {graph} with ratio {ratio}")
-    _store(data, graph, PATH_COUNTS, ratio=ratio)
+def set_pc(data, graph, ratio=None, num_sp=None):
+    _store(data, graph, PATH_COUNTS, ratio=ratio, num_sp=num_sp)
 
 
 def get_shortest_paths(graph, ratio=None):
@@ -177,21 +180,31 @@ def set_shortest_paths(data, graph, ratio=None):
     _store(data, graph, SHORTEST_PATH, ratio=ratio)
 
 
+def get_k_shortest_paths(graph, k, ratio=None):
+    #print('PRE LOAD')
+    data = _load(graph, SHORTEST_PATH, num_sp=k, ratio=ratio)
+    return data
+
+
+def set_k_shortest_paths(data, graph, k, ratio=None):
+    _store(data, graph, SHORTEST_PATH, num_sp=k, ratio=ratio)
+
+
 def get_alloc_diffs_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1]):
 
     small_dfs = []
 
-    print(f"Fetching Allocation differences for {len(graphs)} graphs")
+    #print(f"Fetching Allocation differences for {len(graphs)} graphs")
 
     all_g = len(graphs)
     j = 0
     for g in graphs:
-        print(f"Fetching Allocation differences for {g}")
+        #print(f"Fetching Allocation differences for {g}")
         a1 = get_allocations(g, s1)
 
         all_s = len(s2s)
         i = 0
-        print(f"Fetching Allocation differences for {all_s} Strategies")
+        #print(f"Fetching Allocation differences for {all_s} Strategies")
         for s2 in s2s:
             if s2 in ['sqos_ot', 'sqos_ob']:
                 for r in ratios:
@@ -231,12 +244,12 @@ def get_alloc_quots_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1
 
     small_dfs = []
 
-    print(f"Fetching Allocation ratios for {len(graphs)} graphs")
+    #print(f"Fetching Allocation ratios for {len(graphs)} graphs")
 
     all_g = len(graphs)
     j = 0
     for g in graphs:
-        print(f"Fetching Allocation ratios for {g}")
+        #print(f"Fetching Allocation ratios for {g}")
         if s1 in ['sqos_ot', 'sqos_ob']:
             a1 = get_allocations(g, s1, 0.1)
         else:
@@ -244,12 +257,12 @@ def get_alloc_quots_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1
 
         all_s = len(s2s)
         i = 0
-        print(f"Fetching Allocation ratios for {all_s} Strategies")
+        #print(f"Fetching Allocation ratios for {all_s} Strategies")
         for s2 in s2s:
             if s2 in ['sqos_ot', 'sqos_ob']:
                 for r in ratios:
                     a2 = get_allocations(g, s2, r)
-                    print('quots1')
+                    #print('quots1')
                     quots = alloc_quotients_list(a1, a2)
                     df_small = pd.DataFrame()
                     df_small[f"Allocation Ratio"] = quots
@@ -260,7 +273,7 @@ def get_alloc_quots_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1
                     small_dfs.append(df_small)
             else:
                 a2 = get_allocations(g, s2)
-                print('quots2')
+                #print('quots2')
                 quots = alloc_quotients_list(a1, a2)
                 df_small = pd.DataFrame()
                 df_small[f"Allocation Ratio"] = quots
@@ -654,3 +667,45 @@ def cover_difference_list(c1, c2):
         if node in c2.keys():
             diffs.append(c1[node]-c2[node])
     return diffs
+
+
+def _ser_to_stats(series):
+    quantiles = series.quantile([0.25, 0.5, 0.75])
+    #print(f'quantiles: {quantiles}')
+    min = series.min()
+    q1 = quantiles[0.25]
+    median = quantiles[0.5]
+    mean = series.mean()
+    q3 = quantiles[0.75]
+    max = series.max()
+
+    return [min, q1, median, mean, q3, max]
+
+
+def get_alloc_dist(graph, strategy, ratio=None, num_sp=None):
+    allocs = get_allocations(graph, strategy, ratio, num_sp)
+    #print(f"graph: {graph}, strat: {strategy}, ratio: {ratio}, num_sp: {num_sp}")
+    a_list = []
+    #print(allocs)
+    for dsts in allocs.values():
+        for alloc in dsts.values():
+            #print(alloc)
+            if num_sp is None:
+                a_list.append(alloc[0])
+            else:
+                a_list.append(alloc)
+    #print(f"a list: {a_list}")
+    series = pd.Series(data=a_list)
+    #print(f"series: {series}")
+    stats = _ser_to_stats(series)
+    #print(f"stats: {stats}")
+    return stats
+
+
+def get_cover_dist(graph, strategy, threshold, ratio=None, num_sp=None):
+    covers = get_cover(graph, strategy, threshold, ratio, num_sp)
+    c_list = []
+    for cover in covers.values():
+        c_list.append(cover)
+
+    return _ser_to_stats(pd.Series(data=c_list))

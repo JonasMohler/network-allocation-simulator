@@ -24,8 +24,24 @@ def sampled_alloc_file_name(ratio):
     return f"{ratio}_{ALLOC_FILE_NAME}"
 
 
+def sampled_k_alloc_file_name(ratio, num_sp):
+    return f"{ratio}_{num_sp}_{ALLOC_FILE_NAME}"
+
+
+def k_alloc_file_name(num_sp):
+    return f"{num_sp}_{ALLOC_FILE_NAME}"
+
+
 def sampled_sp_file_name(ratio):
     return f"{ratio}_{SP_FILE_NAME}"
+
+
+def sampled_ksp_file_name(ratio, k):
+    return f"{ratio}_{k}_{SP_FILE_NAME}"
+
+
+def ksp_file_name(k):
+    return f"{k}_{SP_FILE_NAME}"
 
 
 def sampled_cover_file_name(ratio, thresh):
@@ -36,12 +52,28 @@ def cover_file_name(thresh):
     return f"{thresh}_{COVER_FILE_NAME}"
 
 
+def sampled_multi_cover_file_name(ratio, thresh, num_sp):
+    return f"{thresh}_{ratio}_{num_sp}_{COVER_FILE_NAME}"
+
+
+def multi_cover_file_name(thresh, num_sp):
+    return f"{thresh}_{num_sp}_{COVER_FILE_NAME}"
+
+
 def sampled_degree_file_name(ratio):
     return f"{ratio}_{DEGREE_FILE_NAME}"
 
 
 def sampled_pc_file_name(ratio):
     return f"{ratio}_{PC_FILE_NAME}"
+
+
+def sampled_k_pc_file_name(num_sp, ratio):
+    return f"{ratio}_{num_sp}_{PC_FILE_NAME}"
+
+
+def k_pc_file_name(num_sp):
+    return f"{num_sp}_{PC_FILE_NAME}"
 
 
 def get_topo_path(graph):
@@ -64,7 +96,7 @@ def get_general_figure_path():
     return os.path.join(FIGURE_PATH, 'general/')
 
 
-def get_full_path(graph, data_type, strategy=None, ratio=None, thresh=None, fig_name=None, gen_fig=False):
+def get_full_path(graph, data_type, strategy=None, ratio=None, thresh=None, fig_name=None, gen_fig=False, num_sp=None):
 
     strategies_path = get_strategies_path(graph)
     graph_path = get_graph_path(graph)
@@ -74,11 +106,16 @@ def get_full_path(graph, data_type, strategy=None, ratio=None, thresh=None, fig_
     if data_type == ALLOCATION:
 
         if strategy is not None:
-
-            if ratio is not None:
-                name = sampled_alloc_file_name(ratio)
+            if num_sp is not None:
+                if ratio is not None:
+                    name = sampled_k_alloc_file_name(ratio, num_sp)
+                else:
+                    name = k_alloc_file_name(num_sp)
             else:
-                name = ALLOC_FILE_NAME
+                if ratio is not None:
+                    name = sampled_alloc_file_name(ratio)
+                else:
+                    name = ALLOC_FILE_NAME
         else:
             raise ValueError(f"No strategy provided")
 
@@ -87,11 +124,16 @@ def get_full_path(graph, data_type, strategy=None, ratio=None, thresh=None, fig_
     if data_type == COVER:
 
         if strategy is not None:
-
-            if ratio is not None:
-                name = sampled_cover_file_name(ratio, thresh)
+            if num_sp is not None:
+                if ratio is not None:
+                    name = sampled_multi_cover_file_name(ratio, thresh, num_sp)
+                else:
+                    name = multi_cover_file_name(thresh, num_sp)
             else:
-                name = cover_file_name(thresh)
+                if ratio is not None:
+                    name = sampled_cover_file_name(ratio, thresh)
+                else:
+                    name = cover_file_name(thresh)
 
             full_path = os.path.join(f"{strategies_path}{strategy}", name)
 
@@ -106,10 +148,16 @@ def get_full_path(graph, data_type, strategy=None, ratio=None, thresh=None, fig_
 
     if data_type == SHORTEST_PATH:
 
-        if ratio is not None:
-            name = sampled_sp_file_name(ratio)
+        if num_sp is None:
+            if ratio is not None:
+                name = sampled_sp_file_name(ratio)
+            else:
+                name = SP_FILE_NAME
         else:
-            name = SP_FILE_NAME
+            if ratio is not None:
+                name = sampled_ksp_file_name(num_sp, ratio)
+            else:
+                name = ksp_file_name(num_sp)
 
         full_path = os.path.join(graph_path, name)
 
@@ -122,10 +170,17 @@ def get_full_path(graph, data_type, strategy=None, ratio=None, thresh=None, fig_
         full_path = os.path.join(graph_path, name)
 
     if data_type == PATH_COUNTS:
-        if ratio is not None:
-            name = sampled_pc_file_name(ratio)
+        if num_sp is None:
+            if ratio is not None:
+                name = sampled_pc_file_name(ratio)
+            else:
+                name = PC_FILE_NAME
         else:
-            name = PC_FILE_NAME
+            if ratio is not None:
+                name = sampled_k_pc_file_name(num_sp, ratio)
+            else:
+                name = k_pc_file_name(num_sp)
+
         full_path = os.path.join(graph_path, name)
 
     if data_type == TOPOLOGY:

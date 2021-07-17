@@ -64,6 +64,21 @@ class PathAlgorithm:
                 print(f"{round(100 * i / alln, 4)}%", end="\r")
         return result
 
+    def compute_for_all_multipaths(self, paths):
+
+        result: PathsResult = defaultdict(dict)
+        #print('IN MULTIPATH')
+        for src, dests in paths.items():
+            for dst, d_paths in dests.items():
+                rs = 0
+                for p in d_paths:
+                    if src!=dst:
+                        res = self.compute_for_path(p)
+                        rs = rs+np.round(res, decimals=PRECISION)
+                result[src][dst] = rs
+        #print('PRE RETURN MULTIPATH')
+        return result
+
 
 class GMAPathAlgorithm(PathAlgorithm):
     """A `PathAlgorithm` for GMA-style algorithms.

@@ -33,10 +33,15 @@ class TopologyMultiprocessing:
         except Exception as e:
             print(f"Error occured: {e}")
 
+    def parallel_graph_ops(self, dirs_list):
+        for cur_dir in dirs_list:
+            self.per_dir_op(cur_dir)
+            print(f"Completed {cur_dir}")
+
     def run(self):
         """Run `per_dir_op` on all the directories, split by core."""
         if VERBOSITY >= 2: print(f"START: {self.description}...")
-        st = time.time()
+
 
         '''
 
@@ -52,9 +57,21 @@ class TopologyMultiprocessing:
         with Pool(self.n_proc) as p:
             p.map(self.per_dir_op, self.dirs)
         '''
+        '''
         for dir in self.dirs:
             print(f"\n{dir}: Start")
             self.per_dir_op(dir)
+        '''
+        dirs_per_split = len(self.dirs) // self.n_proc + 1
+        splits = [
+            self.dirs[i : i + dirs_per_split]
+            for i in range(0, len(self.dirs), dirs_per_split)
+        ]
+        st = time.time()
+
+        with Pool(self.n_proc) as pool:
+            pool.map(self.parallel_graph_ops, splits)
+
 
         if VERBOSITY >= 2: print(f"END: {self.description}; completed in {time.time() - st}")
 

@@ -226,17 +226,23 @@ def all_k_shortest_paths(graph, num_sp):
     return ksps
 
 
-def alloc_to_cover(alloc, thresh, sps):
+def alloc_to_cover(alloc, thresh, sps, is_mp):
     """Compute the _cover_ of a graph, starting from allocations."""
     cover = {}
     i = 0
     alln = len(alloc.items())
+
     for src, src_paths in alloc.items():
         num_covered = 0
         num_destinations = len(sps[src])
         for dst, data in src_paths.items():
             if dst in sps[src]:
-                pall = data[0]
+                #print(data)
+                if is_mp:
+                    pall = data#[0]
+                else:
+                    pall = data[0]
+                #print('THERE')
                 if pall > thresh:
                     # The allocation is larger than the threshold.
                     # Update the cover.
@@ -396,9 +402,12 @@ def cover_difference_list(c1, c2):
     return diffs
 
 
-def make_barabasi_albert(n_nodes, add_links, init_links):
+def make_barabasi_albert(n_nodes, add_links, init_links, const=False):
     # Create random (barabasi albert) topology
-    name = f"Barabasi_Albert_{add_links}_{init_links}_({n_nodes})"
+    if const:
+        name = f"c_Barabasi_Albert_{add_links}_{init_links}_({n_nodes})"
+    else:
+        name = f"Barabasi_Albert_{add_links}_{init_links}_({n_nodes})"
     graph = barabasi_albert_topology(n_nodes, add_links, init_links)
     fnss.set_capacities_constant(graph, 1)
     graph = set_internal_cap_const(graph, 1)

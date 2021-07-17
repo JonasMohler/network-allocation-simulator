@@ -70,6 +70,16 @@ def parse_args():
         help="Compute shortest paths"
     )
     parser.add_argument(
+        "--ksp",
+        action="store_true",
+        help="Compute k-shortest paths"
+    )
+    parser.add_argument(
+        "--n_ksp",
+        default=1,
+        help="Number of shortest paths to compute"
+    )
+    parser.add_argument(
         "--dias",
         action="store_true",
         help="Compute diameters"
@@ -132,6 +142,10 @@ def main(args):
         shortest_paths = AllShortestPathsComputation(dirs, cores, force)
         shortest_paths.run()
 
+    if (args.ksp or args.all) and not args.n_ksp == 1:
+        k_shortest_paths = AllKShortestPathsComputation(dirs, cores, force, args.n_ksp)
+        k_shortest_paths.run()
+
     if args.dias or args.all:
         diameters = DiameterComputation(dirs, cores, force)
         diameters.run()
@@ -147,17 +161,31 @@ def main(args):
     #
 
     if args.samp or args.all:
-        for r in ratios:
-            sample = PathSampling2(dirs, cores, force, r)
-            sample.run()
+        if not args.n_ksp == 1:
+            for r in ratios:
+                sample = PathSampling2(dirs, cores, force, r, args.n_ksp)
+                sample.run()
+
+        else:
+            for r in ratios:
+                sample = PathSampling2(dirs, cores, force, r, None)
+                sample.run()
     
     if args.count or args.all:
-        count = PathCounting2(dirs, cores, force)
-        count.run()
+        if not args.n_ksp == 1:
+            count = PathCounting2(dirs, cores, force, num_sp=args.n_ksp)
+            count.run()
+        else:
+            count = PathCounting2(dirs, cores, force)
+            count.run()
 
         for r in ratios:
-            count = PathCounting2(dirs, cores, force, r)
-            count.run()
+            if not args.n_ksp == 1:
+                count = PathCounting2(dirs, cores, force, ratio=r, num_sp=args.n_ksp)
+                count.run()
+            else:
+                count = PathCounting2(dirs, cores, force, ratio=r)
+                count.run()
     '''
 
     if args.count or args.all:
@@ -175,32 +203,61 @@ def main(args):
 
     if args.sim or args.all:
 
-        gma = GMAAllocationComputation(dirs, cores, force)
-        gma.run()
+        if not args.n_ksp == 1:
 
-        s10 = SQoSPTComputation(dirs, cores, force)
-        s10.run()
+            gma = GMAAllocationComputation(dirs, cores, force, args.n_ksp)
+            gma.run()
 
-        s11 = SQoSPBComputation(dirs, cores, force)
-        s11.run()
-    
-        for r in ratios:
-            s20 = SQoSOTComputation(dirs, cores, force, r)
-            s20.run()
+            s10 = SQoSPTComputation(dirs, cores, force, num_sp=args.n_ksp)
+            s10.run()
 
-        for r in ratios:
-            s21 = SQoSOBComputation(dirs, cores, force, r)
-            s21.run()
+            s11 = SQoSPBComputation(dirs, cores, force, num_sp=args.n_ksp)
+            s11.run()
+
+            for r in ratios:
+                s20 = SQoSOTComputation(dirs, cores, force, r, args.n_ksp)
+                s20.run()
+
+            for r in ratios:
+                s21 = SQoSOBComputation(dirs, cores, force, r, args.n_ksp)
+                s21.run()
+        else:
+            gma = GMAAllocationComputation(dirs, cores, force)
+            gma.run()
+
+            s10 = SQoSPTComputation(dirs, cores, force)
+            s10.run()
+
+            s11 = SQoSPBComputation(dirs, cores, force)
+            s11.run()
+
+            for r in ratios:
+                s20 = SQoSOTComputation(dirs, cores, force, r)
+                s20.run()
+
+            for r in ratios:
+                s21 = SQoSOBComputation(dirs, cores, force, r)
+                s21.run()
 
     if args.cov or args.all:
-        for s in STRATEGIES:
-            if s == 'sqos_ob' or s == 'sqos_ot':
-                for r in ratios:
-                    c = CoverageComputation(dirs, cores, s, force, thresh, r)
+        if not args.n_ksp == 1:
+            for s in STRATEGIES:
+                if s == 'sqos_ob' or s == 'sqos_ot':
+                    for r in ratios:
+                        c = CoverageComputation(dirs, cores, s, force, thresh, ratio=r, num_sp=args.n_ksp)
+                        c.run()
+                else:
+                    c = CoverageComputation(dirs, cores, s, force, thresh, num_sp=args.n_ksp)
                     c.run()
-            else:
-                c = CoverageComputation(dirs, cores, s, force, thresh)
-                c.run()
+        else:
+            for s in STRATEGIES:
+                if s == 'sqos_ob' or s == 'sqos_ot':
+                    for r in ratios:
+                        c = CoverageComputation(dirs, cores, s, force, thresh, ratio=r)
+                        c.run()
+                else:
+                    c = CoverageComputation(dirs, cores, s, force, thresh)
+                    c.run()
 
 
 if __name__ == "__main__":

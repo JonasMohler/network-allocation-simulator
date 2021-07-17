@@ -83,8 +83,8 @@ CAPACITY_INTERVALS = [10, 40, 100]
 # PLOT_FORMAT = 'pdf'
 PLOT_FORMAT = 'png'
 
-MATPLOTLIB_BACKEND = 'Agg'
-# MATPLOTLIB_BACKEND = 'Qt5Cairo'
+# MATPLOTLIB_BACKEND = 'Agg'
+MATPLOTLIB_BACKEND = 'Qt5Cairo'
 
 STRATEGIES = [
     'GMAImproved',
@@ -93,6 +93,13 @@ STRATEGIES = [
     'sqos_ob',
     'sqos_pb'
 ]
+THRESH_LABEL = {
+    0.01 : '10Mbps',
+    0.001 : '1Mbps',
+    0.0001 : '100Kbps',
+    0.00001 : '10Kbps',
+    0.000001 : '1Kbps'
+}
 
 PLOT_X_LABEL = {
     'degree': 'Node Degree',
@@ -116,7 +123,7 @@ STRATEGY_LABEL = {
     'sqos_pb': 'Pessimistic M-Approach w/ Bandwidth Division'
 }
 
-PALETTE = "Accent"
+PALETTE = "Set1"
 
 PLOT_THRESH = 1e-3
 ###################################################
@@ -152,6 +159,16 @@ RAND_P_LINK_CREATE = [
     0.9
 ]
 
-RAND_N_NODES = 500
+RAND_N_NODES = [
+    150,
+    200,
+    250,
+    500,
+    750,
+    1000,
+    1250,
+    1500,
+    2000
+]
 ###################################################
 ###################################################

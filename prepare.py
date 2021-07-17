@@ -76,12 +76,11 @@ def main(args):
                 topologies.append(name)
 
         if args.cw:
-            proc = AddConstantCapacity(topologies, 1, 1)
+            proc = AddConstantCapacity(topologies, 1, 15)
             proc.run()
         else:
             proc = AddDegreeGravityCapacity(topologies, CAPACITY_INTERVALS, 1)
             proc.run()
-
 
     if args.core:
 
@@ -123,7 +122,7 @@ def main(args):
         print('Adding capacities')
         # Add capactiy to the links and nodes
         if args.cw:
-            fnss.set_capacities_constant(topo_bidir, 1, capacity_unit=UNIT)
+            fnss.set_capacities_constant(topo_bidir, 15, capacity_unit=UNIT)
             topo_bidir = set_internal_cap_max_link(topo_bidir)
         else:
             fnss.set_capacities_degree_gravity(topo_bidir, CAPACITY_INTERVALS, capacity_unit=UNIT)
@@ -150,22 +149,25 @@ def main(args):
 
     if args.rand:
         rand_ts = []
-        for adl in RAND_ADD_LINKS:
-            for init_n in RAND_INIT_NODES:
-                name = make_barabasi_albert(RAND_N_NODES, adl, init_n)
-                rand_ts.append(name)
+        for n_nodes in RAND_N_NODES:
+            for adl in RAND_ADD_LINKS:
+                for init_n in RAND_INIT_NODES:
+                    name = make_barabasi_albert(RAND_N_NODES, adl, init_n)
+                    rand_ts.append(name)
 
+        '''
         for p in RAND_P_LINK_CREATE:
             name = make_erdos_reniy(RAND_N_NODES, p)
             rand_ts.append(name)
+        '''
 
-        name = make_barabasi_albert(2500, 20, 50)
+        #name = make_barabasi_albert(2500, 20, 50)
         if args.cw:
             name = f"c_{name}"
         rand_ts.append(name)
 
         if args.cw:
-            proc = AddConstantCapacity(rand_ts, 1, 1)
+            proc = AddConstantCapacity(rand_ts, 1, 15)
             proc.run()
         else:
             proc = AddDegreeGravityCapacity(rand_ts, CAPACITY_INTERVALS, 1)
