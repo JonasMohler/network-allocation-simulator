@@ -5,7 +5,7 @@ from subprocess import call
 def cp_dir(source, target):
     call(['cp', '-a', source, target])
 
-TOPO = 'data2/jmohler/dat/topologies'
+TOPO = '/data2/jmohler/dat/topologies'
 
 for dir in os.listdir(TOPO):
     if dir.startswith('Barabasi'):
