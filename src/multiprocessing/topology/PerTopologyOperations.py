@@ -68,11 +68,8 @@ class PathSampling2(TopologyMultiprocessing):
 
     def per_dir_op(self, cur_dir):
         try:
-            print('sampling')
             # super(PathSampling, self).per_dir_op(cur_dir)
-            print(dh.get_full_path(cur_dir, SHORTEST_PATH, ratio=self.ratio, num_sp=self.num_sp))
             if not os.path.exists(dh.get_full_path(cur_dir, SHORTEST_PATH, ratio=self.ratio, num_sp=self.num_sp)):
-                print('not here')
                 if self.num_sp is not None:
                     sp = dh.get_k_shortest_paths(cur_dir, self.num_sp)
                 else:
@@ -80,7 +77,6 @@ class PathSampling2(TopologyMultiprocessing):
 
 
                 if str(self.ratio).startswith('a'):
-                    print('in a')
                     # Degree-weighted number, uniform dsts
                     # Higher degree nodes select more destinations than lower degree nodes
                     # High degree nodes more likely to be picked as destination
