@@ -58,7 +58,7 @@ class PathAlgorithm:
                     #if sampled:
                     #    res = self.compute_for_path(src_dst_path)
                     #else:
-                        res = self.compute_for_path(src_dst_path)
+                    res = self.compute_for_path(src_dst_path)
                     result[src][dst] = [np.round(res, decimals=PRECISION)]
             i=i+1
             if i == alln:
