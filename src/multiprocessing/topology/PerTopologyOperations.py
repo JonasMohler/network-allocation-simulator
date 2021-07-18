@@ -113,7 +113,6 @@ class PathSampling2(TopologyMultiprocessing):
                                     selected_paths[nodes[d]] = tmp
                                 else:
                                     selected_paths[nodes[d]] = sp[nodes[i]][nodes[d]]
-                        print(f'Selected Paths: {selected_paths}')
                         all_selected_paths[nodes[i]] = selected_paths
                         if i == num_n:
                             print(f"{round(100 * (i - 1) / num_n, 4)}%")
