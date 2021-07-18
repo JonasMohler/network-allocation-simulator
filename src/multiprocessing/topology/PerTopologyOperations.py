@@ -10,6 +10,7 @@ import src.multiprocessing.node.PerNodeOperations as pno
 from src.util.const import *
 import src.util.data_handler as dh
 import fnss
+import math
 #from multiprocessing import Array, shared_memory
 from multiprocessing.managers import SyncManager
 
@@ -67,9 +68,11 @@ class PathSampling2(TopologyMultiprocessing):
 
     def per_dir_op(self, cur_dir):
         try:
+            print('sampling')
             # super(PathSampling, self).per_dir_op(cur_dir)
+            print(dh.get_full_path(cur_dir, SHORTEST_PATH, ratio=self.ratio, num_sp=self.num_sp))
             if not os.path.exists(dh.get_full_path(cur_dir, SHORTEST_PATH, ratio=self.ratio, num_sp=self.num_sp)):
-
+                print('not here')
                 if self.num_sp is not None:
                     sp = dh.get_k_shortest_paths(cur_dir, self.num_sp)
                 else:
@@ -77,6 +80,7 @@ class PathSampling2(TopologyMultiprocessing):
 
 
                 if str(self.ratio).startswith('a'):
+                    print('in a')
                     # Degree-weighted number, uniform dsts
                     # Higher degree nodes select more destinations than lower degree nodes
                     # High degree nodes more likely to be picked as destination
@@ -84,15 +88,16 @@ class PathSampling2(TopologyMultiprocessing):
                     deg = dh.get_degrees(cur_dir)
                     nodes = deg['nodes']
                     degrees = deg['degrees']
+
                     # Calculate the weight
                     r = float(self.ratio[1:])
                     s = sum(degrees)
                     num_n = len(nodes)
                     node_is = range(num_n)
-                    sample_sizes = [int(round(x*num_n*float(r)/s)) for x in degrees]
-
+                    sample_sizes = [int(math.ceil(x*num_n*r/s)) for x in degrees]
                     all_selected_paths = {}
                     for i in range(len(nodes)):
+
 
                         dest_is = np.random.choice(node_is, sample_sizes[i], replace=False)
 
@@ -108,7 +113,7 @@ class PathSampling2(TopologyMultiprocessing):
                                     selected_paths[nodes[d]] = tmp
                                 else:
                                     selected_paths[nodes[d]] = sp[nodes[i]][nodes[d]]
-
+                        print(f'Selected Paths: {selected_paths}')
                         all_selected_paths[nodes[i]] = selected_paths
                         if i == num_n:
                             print(f"{round(100 * (i - 1) / num_n, 4)}%")
@@ -666,7 +671,7 @@ class GMAAllocationComputation(TopologyMultiprocessing):
                 dh.set_allocations(allocs, cur_dir, self.strategy, num_sp=self.num_sp)
             else:
                 sp = dh.get_shortest_paths(cur_dir)
-                allocs = strat.compute_for_all_single_paths(sp)
+                allocs = strat.compute_for_all_single_paths(sp, False)
                 dh.set_allocations(allocs, cur_dir, self.strategy)
 
             print(f"{cur_dir}: Done")
@@ -705,7 +710,7 @@ class SQoSOTComputation(TopologyMultiprocessing):
                 dh.set_allocations(allocs, cur_dir, self.strategy, ratio=self.ratio, num_sp=self.num_sp)
             else:
                 sp = dh.get_shortest_paths(cur_dir, self.ratio)
-                alloc = strat.compute_for_all_single_paths(sp)
+                alloc = strat.compute_for_all_single_paths(sp, True)
                 dh.set_allocations(alloc, cur_dir, self.strategy, ratio=self.ratio)
 
             print(f"{cur_dir}: Done")
@@ -743,7 +748,7 @@ class SQoSOBComputation(TopologyMultiprocessing):
                 dh.set_allocations(allocs, cur_dir, self.strategy, ratio=self.ratio, num_sp=self.num_sp)
             else:
                 sp = dh.get_shortest_paths(cur_dir, self.ratio)
-                alloc = strat.compute_for_all_single_paths(sp)
+                alloc = strat.compute_for_all_single_paths(sp, True)
                 dh.set_allocations(alloc, cur_dir, self.strategy, ratio=self.ratio)
 
             print(f"{cur_dir}: Done")
@@ -782,7 +787,7 @@ class SQoSPTComputation(TopologyMultiprocessing):
                 dh.set_allocations(allocs, cur_dir, self.strategy, num_sp=self.num_sp)
             else:
                 sp = dh.get_shortest_paths(cur_dir)
-                allocs = strat.compute_for_all_single_paths(sp)
+                allocs = strat.compute_for_all_single_paths(sp, False)
                 dh.set_allocations(allocs, cur_dir, self.strategy)
 
             print(f"{cur_dir}: Done")
@@ -819,7 +824,7 @@ class SQoSPBComputation(TopologyMultiprocessing):
                 dh.set_allocations(allocs, cur_dir, self.strategy, num_sp=self.num_sp)
             else:
                 sp = dh.get_shortest_paths(cur_dir)
-                allocs = strat.compute_for_all_single_paths(sp)
+                allocs = strat.compute_for_all_single_paths(sp, False)
                 dh.set_allocations(allocs, cur_dir, self.strategy)
 
             print(f"{cur_dir}: Done")

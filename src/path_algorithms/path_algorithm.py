@@ -45,7 +45,7 @@ class PathAlgorithm:
         return result
     '''
 
-    def compute_for_all_single_paths(self, paths: SinglePathsDict) -> PathsResult:
+    def compute_for_all_single_paths(self, paths: SinglePathsDict, sampled) -> PathsResult:
         """Compute the algorithm for all the paths provided."""
 
         i=0
@@ -55,7 +55,10 @@ class PathAlgorithm:
         for src, src_paths in paths.items():
             for dst, src_dst_path in src_paths.items():
                 if src != dst:
-                    res = self.compute_for_path(src_dst_path)
+                    if sampled:
+                        res = self.compute_for_path(src_dst_path)
+                    else:
+                        res = self.compute_for_path(src_dst_path[0])
                     result[src][dst] = [np.round(res, decimals=PRECISION)]
             i=i+1
             if i == alln:
