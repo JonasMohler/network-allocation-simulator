@@ -204,13 +204,13 @@ def main(args):
     if args.sim or args.all:
 
         if not args.n_ksp == 1:
-
+            '''
             gma = GMAAllocationComputation(dirs, cores, force, args.n_ksp)
             gma.run()
 
             s10 = SQoSPTComputation(dirs, cores, force, num_sp=args.n_ksp)
             s10.run()
-
+            '''
             s11 = SQoSPBComputation(dirs, cores, force, num_sp=args.n_ksp)
             s11.run()
 
@@ -222,12 +222,13 @@ def main(args):
                 s21 = SQoSOBComputation(dirs, cores, force, r, args.n_ksp)
                 s21.run()
         else:
+            '''
             gma = GMAAllocationComputation(dirs, cores, force)
             gma.run()
 
             s10 = SQoSPTComputation(dirs, cores, force)
             s10.run()
-
+            '''
             s11 = SQoSPBComputation(dirs, cores, force)
             s11.run()
 
