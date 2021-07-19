@@ -213,11 +213,11 @@ def main(args):
             
             s11 = SQoSPBComputation(dirs, cores, force, num_sp=args.n_ksp)
             s11.run()
-            '''
+            
             for r in ratios:
                 s20 = SQoSOTComputation(dirs, cores, force, r, args.n_ksp)
                 s20.run()
-
+            '''
             for r in ratios:
                 s21 = SQoSOBComputation(dirs, cores, force, r, args.n_ksp)
                 s21.run()
@@ -231,11 +231,11 @@ def main(args):
 
             s11 = SQoSPBComputation(dirs, cores, force)
             s11.run()
-            '''
+            
             for r in ratios:
                 s20 = SQoSOTComputation(dirs, cores, force, r)
                 s20.run()
-
+            '''
             for r in ratios:
                 s21 = SQoSOBComputation(dirs, cores, force, r)
                 s21.run()

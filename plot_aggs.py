@@ -41,7 +41,7 @@ def main(args):
     graphs = args.dirs
 
     # Cover plots
-
+    '''
     with open(os.path.join(args.which, 'aggregate_covers.csv'), "r+") as f:
         df_cover_all = pd.read_csv(f)
 
@@ -90,13 +90,13 @@ def main(args):
             plt.ylim(0,1)
             plt.show()
 
-
+    '''
     # Allocation Plots
 
     with open(os.path.join(args.which, 'aggregate_allocations.csv'), "r+") as f:
         df_alloc_all = pd.read_csv(f)
 
-
+    '''
     # Comparison of different sampling strategies, only 1 shortest path
     df_alloc = df_alloc_all[df_alloc_all['Num Shortest Paths'] == 1]
 
@@ -106,8 +106,38 @@ def main(args):
     dft['Ratio'].replace(r_map, inplace=True)
     sns.boxplot(y='Median-Allocation', hue='Ratio', data=dft)
     plt.show()
+    '''
+    df_alloc_1sp = df_alloc_all[df_alloc_all['Num Shortest Paths'] == 1]
+    df_alloc_const = df_alloc_1sp[df_alloc_1sp.Graph.str.startswith('c_')]
+    df_alloc_const_rand = df_alloc_const[df_alloc_const.Graph.str.startswith('c_Barabasi')]
+    df_alloc_const_zoo = df_alloc_const[~df_alloc_const.Graph.str.startswith('c_Barabasi')]
+
+    df_alloc_dw = df_alloc_1sp[~df_alloc_1sp.Graph.str.startswith('c_')]
+    df_alloc_dw_rand = df_alloc_dw[df_alloc_dw.Graph.str.startswith('Barabasi')]
+    df_alloc_dw_zoo = df_alloc_dw[~df_alloc_dw.Graph.str.startswith('Barabasi')]
+
+    # compare const & dw in rand:
+    fig, axs = plt.subplots(1, 2, sharey=True)
+
+    df_alloc_dw_zoo['Capacity Model'] = 'Degree-weighted'
+    df_alloc_const_zoo['Capacity Model'] = 'Constant'
+    df_alloc_zoo = pd.concat([df_alloc_dw_zoo, df_alloc_const_zoo])
+
+    sns.scatterplot(x='Size',y='Median-Allocation', hue='Capacity Model', data=df_alloc_zoo, alpha=0.4, style='Capacity Model', ax=axs[0])
 
 
+
+
+    # compare const & dw in zoo:
+    #print(df_alloc_dw_rand)
+    #print(df_alloc_const_rand)
+    df_alloc_dw_rand['Capacity Model'] = 'Degree-weighted'
+    df_alloc_const_rand['Capacity Model'] = 'Constant'
+    df_alloc_rand = pd.concat([df_alloc_const_rand, df_alloc_dw_rand])
+    sns.scatterplot(x='Size', y='Median-Allocation', hue='Capacity Model', data=df_alloc_rand, alpha=0.4, style='Capacity Model', ax=axs[1])
+
+    plt.yscale('log')
+    plt.show()
 
 
 
