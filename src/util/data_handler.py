@@ -18,7 +18,7 @@ from src.util.const import *
 def _load(graph, data_type, strategy=None, ratio=None, thresh=None, num_sp=None):
 
     full_path = get_full_path(graph, data_type, strategy=strategy, ratio=ratio, thresh=thresh, num_sp=num_sp)
-    #print(f'loading {full_path}')
+    print(f'loading {full_path}')
 
     # Load file
 
@@ -611,6 +611,24 @@ def get_alloc_graph_quot_as_df(grapha, graphb, strategies=['GMAImproved'], ratio
     return df
 
 
+def get_alloc_quots_multipath_as_df(graph, strategies=['GMAImproved', 'sqos_ot', 'sqos_ob', 'sqos_pb', 'sqos_pt'], ratio='0.5'):
+    small_dfs = []
+    for strategy in strategies:
+        if strategy in ['sqos_ot', 'sqos_ob']:
+            a1 = get_allocations(graph, strategy, ratio)
+            a2 = get_allocations(graph, strategy, ratio, 3)
+        else:
+            a1 = get_allocations(graph, strategy)
+            a2 = get_allocations(graph, strategy, num_sp=3)
+        quots = alloc_quotients_list(a1, a2)
+        df_small = pd.DataFrame()
+        df_small[f"Allocation Ratio"] = quots
+        df_small['Strategy'] = f"{STRATEGY_LABEL[strategy]}"
+        small_dfs.append(df_small)
+    df = pd.concat(small_dfs)
+
+    return df
+
 def get_alloc_quots_sstrat_as_df(graph, m1, m2):
     small_dfs = []
     for r in [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]:
@@ -655,9 +673,16 @@ def alloc_quotients_list(a1,a2):
     for src, dests in a1.items():
         for dst in dests.keys():
             if src in a2 .keys() and dst in a2[src].keys():
-                #print(f"A1 alloc at {src} to {dst}: {a1[src][dst][0]}")
-                #print(f"A2 alloc at {src} to {dst}: {a2[src][dst][0]}")
-                quots.append(a1[src][dst][0] / a2[src][dst][0])
+                if type(a1[src][dst]) is float:
+                    q1 = a1[src][dst]
+                else:
+                    q1 = a1[src][dst][0]
+                if type(a2[src][dst]) is float:
+                    q2 = a2[src][dst]
+                else:
+                    q2 = a2[src][dst][0]
+
+                quots.append(q2 / q1)
     return quots
 
 
