@@ -18,8 +18,8 @@ VERBOSITY = 2
 ###################################################
 # Data
 ###################################################
-DATA_PATH = os.path.join(os.getcwd(), '/data2/jmohler/dat/topologies/')
-DATA_PATH_LOCAL = os.path.join(os.getcwd(), 'dat/topologies/')
+DATA_PATH_REMOTE = os.path.join(os.getcwd(), '/data2/jmohler/dat/topologies/')
+DATA_PATH = os.path.join(os.getcwd(), 'dat/topologies/')
 CONST_DATA_PATH = os.path.join(os.getcwd(), 'dat/c_topologies/')
 FIGURE_PATH = os.path.join(os.getcwd(), 'dat/figures/')
 CONST_FIGURE_PATH = os.path.join(os.getcwd(), 'dat/c_figures/')
@@ -118,12 +118,12 @@ PLOT_Y_LABEL = {
 
 STRATEGY_LABEL = {
     'GMAImproved': 'GMA',
-    'sqos_ot': 'Optimistic M-Approach w/ Time Division',
-    'sqos_pt': 'Pessimistic M-Approach w/ Time Division',
-    'sqos_ob': 'Optimistic M-Approach w/ Bandwidth Division',
-    'sqos_pb': 'Pessimistic M-Approach w/ Bandwidth Division'
+    'sqos_ot': 'OMA\nMax',
+    'sqos_pt': 'PMA\nMax',
+    'sqos_ob': 'OMA\nConcurrent',
+    'sqos_pb': 'PMA\nConcurrent'
 }
-
+STRAT_ORDER = ['GMA', 'OMA\nMax', 'PMA\nMax', 'OMA\nConcurrent', 'PMA\nConcurrent']
 PALETTE = "Set1"
 
 PLOT_THRESH = 1e-3

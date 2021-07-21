@@ -178,7 +178,7 @@ def main(args):
         else:
             count = PathCounting2(dirs, cores, force)
             count.run()
-
+        '''
         for r in ratios:
             if not args.n_ksp == 1:
                 count = PathCounting2(dirs, cores, force, ratio=r, num_sp=args.n_ksp)
@@ -186,6 +186,7 @@ def main(args):
             else:
                 count = PathCounting2(dirs, cores, force, ratio=r)
                 count.run()
+        '''
     '''
 
     if args.count or args.all:
@@ -213,7 +214,7 @@ def main(args):
             
             s11 = SQoSPBComputation(dirs, cores, force, num_sp=args.n_ksp)
             s11.run()
-
+            '''
             for r in ratios:
                 s20 = SQoSOTComputation(dirs, cores, force, r, args.n_ksp)
                 s20.run()
@@ -221,6 +222,7 @@ def main(args):
             for r in ratios:
                 s21 = SQoSOBComputation(dirs, cores, force, r, args.n_ksp)
                 s21.run()
+            '''
         else:
 
             gma = GMAAllocationComputation(dirs, cores, force)
@@ -231,7 +233,7 @@ def main(args):
 
             s11 = SQoSPBComputation(dirs, cores, force)
             s11.run()
-
+            '''
             for r in ratios:
                 s20 = SQoSOTComputation(dirs, cores, force, r)
                 s20.run()
@@ -239,7 +241,7 @@ def main(args):
             for r in ratios:
                 s21 = SQoSOBComputation(dirs, cores, force, r)
                 s21.run()
-
+            '''
     if args.cov or args.all:
         if not args.n_ksp == 1:
             for s in STRATEGIES:

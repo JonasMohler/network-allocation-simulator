@@ -96,22 +96,7 @@ def main(args):
     with open(os.path.join(args.which, 'aggregate_allocations.csv'), "r+") as f:
         df_alloc_all = pd.read_csv(f)
 
-    '''
-    # Comparison of different sampling strategies, only 1 shortest path
-    df_alloc = df_alloc_all[df_alloc_all['Num Shortest Paths'] == 1]
-
-    # TODO: Test
-    dft = df_alloc[['Median-Allocation', 'Ratio']][(df_alloc['Ratio'] == '0.5') | (df_alloc['Ratio'] == 0.5) | (df_alloc['Ratio'] == 'u0.5') | (df_alloc['Ratio'] == 'a0.5')]
-    r_map = {0.5: 'Degree weighted pick probability', '0.5': 'Degree weighted pick probability', 'u0.5': 'Uniform random sampling', 'a0.5': 'Degree weighted number of destinations'}
-    dft['Ratio'].replace(r_map, inplace=True)
-    sns.boxplot(y='Median-Allocation', hue='Ratio', data=dft)
-    plt.show()
-    '''
-
-    ####################################################################################################################
-    '''
-    Median Allocations - Constant Link Model vs. Degree-weighted link model, in Zoo and Rand graphs, 0.5 sampling for M-Approach
-    '''
+    df_alloc_all["Strategy"].replace(STRATEGY_LABEL, inplace=True)
 
     df_alloc_1sp = df_alloc_all[df_alloc_all['Num Shortest Paths'] == 1]
     df_alloc_const = df_alloc_1sp[df_alloc_1sp.Graph.str.startswith('c_')]
@@ -122,11 +107,6 @@ def main(args):
     df_alloc_dw_rand = df_alloc_dw[df_alloc_dw.Graph.str.startswith('Barabasi')]
     df_alloc_dw_zoo = df_alloc_dw[~df_alloc_dw.Graph.str.startswith('Barabasi')]
 
-    X_AXIS = 'Average Node Degree'
-
-    # compare const & dw in rand:
-    #fig, axs = plt.subplots(2, 2, sharey=True)
-
     df_alloc_dw_zoo['Capacity Model'] = 'Degree-Weighted'
     df_alloc_const_zoo['Capacity Model'] = 'Constant'
     df_alloc_zoo = pd.concat([df_alloc_dw_zoo, df_alloc_const_zoo])
@@ -135,135 +115,250 @@ def main(args):
     df_alloc_const_rand['Capacity Model'] = 'Constant'
     df_alloc_rand = pd.concat([df_alloc_const_rand, df_alloc_dw_rand])
 
-    '''
+    sns.set(rc={"axes.facecolor":"gainsboro", "figure.facecolor": "whitesmoke"})
+    #sns.set_palette((sns.color_palette('crest')))
 
-    sns.scatterplot(x=X_AXIS,y='Median-Allocation', hue='Capacity Model', data=df_alloc_zoo[df_alloc_zoo['Strategy'] == 'GMAImproved'], alpha=0.4, style='Capacity Model', ax=axs[0][0])
-    axs[0][0].set_title('GMA in Zoo Graphs')
-
-    # compare const & dw in zoo:
-
-    sns.scatterplot(x=X_AXIS, y='Median-Allocation', hue='Capacity Model', data=df_alloc_rand[df_alloc_rand['Strategy'] == 'GMAImproved'], alpha=0.4, style='Capacity Model', ax=axs[0][1])
-    axs[0][1].set_title('GMA in Random Graphs')
-
-    sns.scatterplot(x=X_AXIS, y='Median-Allocation', hue='Capacity Model', data=df_alloc_zoo[(df_alloc_zoo['Strategy'] == 'sqos_ot') & (df_alloc_zoo['Ratio'] == '0.5')], alpha=0.4, style='Capacity Model', ax=axs[1][0])
-    axs[1][0].set_title('M-Approach in Zoo Graphs')
-
-    sns.scatterplot(x=X_AXIS, y='Median-Allocation', hue='Capacity Model', data=df_alloc_rand[(df_alloc_rand['Strategy'] == 'sqos_ot') & (df_alloc_rand['Ratio'] == '0.5')], alpha=0.4, style='Capacity Model', ax=axs[1][1])
-    axs[1][1].set_title('M-Approach in Random Graphs')
-
-    plt.yscale('log')
-    fig.suptitle('Influence of Link Model on Allocations')
-    #plt.show()
-    '''
     ####################################################################################################################
     '''
-    As above in boxplots
+    Aggregates of allocations over size
     '''
+
+    zoo = df_alloc_const_zoo[(df_alloc_const_zoo['Ratio'] == '0.5') | (df_alloc_const_zoo['Ratio'] == '1')]
+    rand = df_alloc_const_rand[(df_alloc_const_rand['Ratio'] == '0.5') | (df_alloc_const_rand['Ratio'] == '1')]
+
+    ####################################################################################################################
+
+    xs = ['Diameter', 'Size', 'Average Node Degree']
     fig, axs = plt.subplots(1, 2, sharey=True)
-    sns.boxplot(x='Strategy', y='Median-Allocation', hue='Capacity Model', data=df_alloc_zoo, ax=axs[0])
+    fig.set_size_inches(17, 9.27)
+
+    sns.scatterplot(x='Diameter', y='Median-Allocation', hue='Strategy', data=zoo, ax=axs[0])
     axs[0].set_title('Zoo Graphs')
+    axs[0].set_ylabel('Median Allocation [Gbps]')
     axs[0].get_legend().remove()
     axs[0].grid(b=True)
 
-    sns.boxplot(x='Strategy', y='Median-Allocation', hue='Capacity Model', data=df_alloc_rand, ax=axs[1])
+    sns.scatterplot(x='Diameter', y='Median-Allocation', hue='Strategy', data=rand, ax=axs[1])
     axs[1].set_title('Random Graphs')
+    axs[1].set_ylabel('')
+    axs[1].get_legend().remove()
+    axs[1].grid(b=True)
+
+    handles, labels = axs[1].get_legend_handles_labels()
+    lgd = axs[1].legend(handles, labels, loc='center left', ncol=1, bbox_to_anchor=(1.05, .5))
+    plt.yscale('log')
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95], pad=2)
+    fig.suptitle('Median Allocations [Gbps] over Graph Diameter', fontsize='x-large')
+
+    ####################################################################################################################
+    fig, axs = plt.subplots(1, 2, sharey=True)
+    fig.set_size_inches(17, 9.27)
+
+    sns.scatterplot(x='Size', y='Median-Allocation', hue='Strategy', data=zoo, ax=axs[0])
+    axs[0].set_title('Zoo Graphs')
+    axs[0].set_ylabel('Median Allocation [Gbps]')
+    axs[0].get_legend().remove()
+    axs[0].grid(b=True)
+
+    sns.scatterplot(x='Size', y='Median-Allocation', hue='Strategy', data=rand, ax=axs[1])
+    axs[1].set_title('Random Graphs')
+    axs[1].set_ylabel('')
+    axs[1].get_legend().remove()
+    axs[1].grid(b=True)
+
+    handles, labels = axs[1].get_legend_handles_labels()
+    lgd = axs[1].legend(handles, labels, loc='center left', ncol=1, bbox_to_anchor=(1.05, .5))
+    plt.yscale('log')
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95], pad=2)
+    fig.suptitle('Median Allocations [Gbps] over Graph Size (#Nodes)', fontsize='x-large')
+
+    ####################################################################################################################
+    fig, axs = plt.subplots(1, 2, sharey=True)
+    fig.set_size_inches(17, 9.27)
+
+    sns.scatterplot(x='Average Node Degree', y='Median-Allocation', hue='Strategy', data=zoo, ax=axs[0])
+    axs[0].set_title('Zoo Graphs')
+    axs[0].set_ylabel('Median Allocation [Gbps]')
+    axs[0].get_legend().remove()
+    axs[0].grid(b=True)
+
+    sns.scatterplot(x='Average Node Degree', y='Median-Allocation', hue='Strategy', data=rand, ax=axs[1])
+    axs[1].set_title('Random Graphs')
+    axs[1].set_ylabel('')
+    axs[1].get_legend().remove()
+    axs[1].grid(b=True)
+
+    handles, labels = axs[1].get_legend_handles_labels()
+    lgd = axs[1].legend(handles, labels, loc='center left', ncol=1, bbox_to_anchor=(1.05, .5))
+    plt.yscale('log')
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95], pad=2)
+    fig.suptitle('Median Allocations [Gbps] over Graph Average Node Degree', fontsize='x-large')
+
+
+    ####################################################################################################################
+    fig, axs = plt.subplots(1, 2, sharey=True)
+    fig.set_size_inches(17, 9.27)
+
+    zoo['Average Node Degree / #Nodes'] = [row['Average Node Degree'] / (row['Size'] -1) for index, row in zoo.iterrows()]
+    rand['Average Node Degree / #Nodes'] = [row['Average Node Degree'] /(row['Size'] -1) for index, row in rand.iterrows()]
+
+    sns.scatterplot(x='Average Node Degree / #Nodes', y='Median-Allocation', hue='Strategy', data=zoo, ax=axs[0])
+    axs[0].set_title('Zoo Graphs')
+    axs[0].set_ylabel('Median Allocation [Gbps]')
+    axs[0].get_legend().remove()
+    axs[0].grid(b=True)
+
+    sns.scatterplot(x='Average Node Degree / #Nodes', y='Median-Allocation', hue='Strategy', data=rand, ax=axs[1])
+    axs[1].set_title('Random Graphs')
+    axs[1].set_ylabel('')
+    axs[1].get_legend().remove()
+    axs[1].grid(b=True)
+
+    handles, labels = axs[1].get_legend_handles_labels()
+    lgd = axs[1].legend(handles, labels, loc='center left', ncol=1, bbox_to_anchor=(1.05, .5))
+    plt.yscale('log')
+    plt.xscale('log')
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95], pad=2)
+    fig.suptitle('Median Allocations [Gbps] over Graph Density', fontsize='x-large')
+
+    plt.show()
+
+    ####################################################################################################################
+    '''
+    CDF Allocations - Barabasi-Albert 20 30 1000
+    '''
+    dat = dh.get_allocs_as_df(['Barabasi_Albert_20_30_(1000)'], STRATEGIES, [0.5])
+    dat['Allocations Gbps'] = dat['Allocations Gbps'].astype('float')
+
+    fig, ax = plt.subplots(1,1)
+    fig.set_size_inches(17, 9.27)
+
+    sns.ecdfplot(data=dat, x='Allocations Gbps', hue='Strategy', ax=ax)
+
+    ax.set_yticks([0, 0.1, 0.25, 0.5, 0.75, 0.9, 1])
+    ax.set_ylabel('Percentiles')
+    ax.set_xlabel('Allocations [Gbps]')
+
+    handles, labels = ax.get_legend_handles_labels()
+    lgd = ax.legend(handles, labels, loc='center left', ncol=1, bbox_to_anchor=(1.05, .5))
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95], pad=2)
+    fig.suptitle('Distribution of Allocations [Gbps]', fontsize='x-large')
+
+    plt.xscale('log')
+    plt.legend(labels=STRAT_ORDER, bbox_to_anchor=(1.05, 1), loc="upper left")
+    plt.tight_layout()
+    #plt.show()
+
+    ####################################################################################################################
+    '''
+    Median Allocations - Constant Link Model vs. Degree-weighted link model, in Zoo and Rand graphs, 0.5 sampling for M-Approach
+    '''
+
+    fig, axs = plt.subplots(1, 2, sharey=True)
+    fig.set_size_inches(17, 9.27)
+
+    sns.boxplot(x='Strategy', y='Median-Allocation', hue='Capacity Model', data=df_alloc_zoo, order=STRAT_ORDER, flierprops=dict(markerfacecolor='0.50', markersize=2), ax=axs[0])
+    axs[0].set_title('Zoo Graphs')
+    axs[0].set_ylabel('Median Allocation [Gbps]')
+    axs[0].get_legend().remove()
+    axs[0].grid(b=True)
+
+    sns.boxplot(x='Strategy', y='Median-Allocation', hue='Capacity Model', data=df_alloc_rand, order=STRAT_ORDER, flierprops=dict(markerfacecolor='0.50', markersize=2), ax=axs[1])
+    axs[1].set_title('Random Graphs')
+    axs[1].set_ylabel('')
     axs[1].get_legend().remove()
     axs[1].grid(b=True)
 
     plt.yscale('log')
     handles, labels = axs[1].get_legend_handles_labels()
-    fig.legend(handles, labels, loc='upper center', ncol=3, bbox_to_anchor=(.75, -0.98))
-    #plt.legend(title='Link Capacity Models', labels=['Constant', 'Degree-Weighted'], bbox_to_anchor=(1, 1.23), fancybox=True, shadow=True, ncol=5, loc='upper right')
-    plt.tight_layout()
-    fig.suptitle('Influence of Link-Capacity Model on Allocations')
-    plt.show()
+    lgd = axs[1].legend(handles, labels, loc='center left', ncol=1, bbox_to_anchor=(1.05, .5))
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95], pad=2)
+    fig.suptitle('Influence of Link-Capacity Model on Allocations', fontsize='x-large')
+    #fig.show(bbox_extra_artists=(lgd,))
+    #plt.show()
 
     ####################################################################################################################
     '''
     Median Allocations for sqos_ot sampling models - constant link model, 0.5 sampling 
     '''
-    '''
-    fig, axs = plt.subplots(1,2, sharey=True)
+    r_map = {
+        '0.5': 'Degree-weighted probability distribution',
+        'u0.5': 'Uniform probability distribution',
+        'a0.5': 'Degree-weighted #paths per node'
 
-    df_samp_comp_zoo = df_alloc_const_zoo[(df_alloc_const_zoo['Strategy'] == 'sqos_ot') & ((df_alloc_const_zoo['Ratio'] == '0.5') | (df_alloc_const_zoo['Ratio'] == 'u0.5') | (df_alloc_const_zoo['Ratio'] == 'a0.5'))]
-    sns.scatterplot(x='Size', y='Median-Allocation', hue='Ratio', data=df_samp_comp_zoo, alpha=0.4, style='Ratio', ax=axs[0])
-
-    df_samp_comp_rand = df_alloc_const_rand[(df_alloc_const_rand['Strategy'] == 'sqos_ot') & ((df_alloc_const_rand['Ratio'] == '0.5') | (df_alloc_const_rand['Ratio'] == 'u0.5') | (df_alloc_const_rand['Ratio'] == 'a0.5'))]
-    sns.scatterplot(x='Size', y='Median-Allocation', hue='Ratio', data=df_samp_comp_rand, alpha=0.4,style='Ratio', ax=axs[1])
-
-    plt.yscale('log')
-    plt.title('Influence of Sampling Model on M-Approach Allocations')
-    #plt.show()
-    '''
-    ####################################################################################################################
-    '''
-    As above in boxplot
-    '''
-    df_samp_comp_zoo = df_alloc_const_zoo[(df_alloc_const_zoo['Strategy'] == 'sqos_ot') & ((df_alloc_const_zoo['Ratio'] == '0.5') | (df_alloc_const_zoo['Ratio'] == 'u0.5') | (df_alloc_const_zoo['Ratio'] == 'a0.5'))]
-    df_samp_comp_rand = df_alloc_const_rand[(df_alloc_const_rand['Strategy'] == 'sqos_ot') & ((df_alloc_const_rand['Ratio'] == '0.5') | (df_alloc_const_rand['Ratio'] == 'u0.5') | (df_alloc_const_rand['Ratio'] == 'a0.5'))]
+    }
+    df_samp_comp_zoo = df_alloc_const_zoo[((df_alloc_const_zoo['Strategy'] == STRATEGY_LABEL['sqos_ot']) | (df_alloc_const_zoo['Strategy'] == STRATEGY_LABEL['sqos_ob'])) & ((df_alloc_const_zoo['Ratio'] == '0.5') | (df_alloc_const_zoo['Ratio'] == 'u0.5') | (df_alloc_const_zoo['Ratio'] == 'a0.5'))]
+    df_samp_comp_zoo['Ratio'].replace(r_map, inplace=True)
+    df_samp_comp_rand = df_alloc_const_rand[((df_alloc_const_rand['Strategy'] == STRATEGY_LABEL['sqos_ot']) | (df_alloc_const_rand['Strategy'] == STRATEGY_LABEL['sqos_ob']))& ((df_alloc_const_rand['Ratio'] == '0.5') | (df_alloc_const_rand['Ratio'] == 'u0.5') | (df_alloc_const_rand['Ratio'] == 'a0.5'))]
+    df_samp_comp_rand['Ratio'].replace(r_map, inplace=True)
 
     fig, axs = plt.subplots(1,2, sharey=True)
-    sns.boxplot(x='Ratio', y='Median-Allocation', hue='Ratio', data=df_samp_comp_zoo, ax=axs[0])
+    fig.set_size_inches(17, 9.27)
+    sns.boxplot(x='Strategy', y='Median-Allocation', hue='Ratio', data=df_samp_comp_zoo, flierprops=dict(markerfacecolor='0.50', markersize=2), ax=axs[0])
     axs[0].set_title('Zoo Graphs')
-    axs[0].set(xticklabels=[])
+    axs[0].set_ylabel('Median Allocation [Gbps]')
+    axs[0].get_legend().remove()
+    #axs[0].set(xticklabels=[])
     axs[0].grid(b=True)
 
-    sns.boxplot(x='Ratio', y='Median-Allocation', hue='Ratio', data=df_samp_comp_rand, ax=axs[1])
+    sns.boxplot(x='Strategy', y='Median-Allocation', hue='Ratio', data=df_samp_comp_rand, flierprops=dict(markerfacecolor='0.50', markersize=2), ax=axs[1])
     axs[1].set_title('Random Graphs')
-    axs[1].set(xticklabels=[])
+    axs[1].set_ylabel('')
+    axs[1].get_legend().remove()
+    #axs[1].set(xticklabels=[])
     axs[1].grid(b=True)
 
     plt.yscale('log')
-    plt.legend(title='Ratios', labels=['0.5', 'u0.5'],bbox_to_anchor=(1, 1.23), fancybox=True, shadow=True, ncol=5, loc='upper right')
-    plt.tight_layout()
+    handles, labels = axs[1].get_legend_handles_labels()
+    lgd = axs[1].legend(handles, labels, loc='center left', ncol=1, bbox_to_anchor=(1.05, .5))
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95], pad=2)
     fig.suptitle('Influence of Sampling Strategy on M-Approach Allocations')
-    plt.show()
+    #plt.show()
 
     ####################################################################################################################
     # TODO: Adapt for appropriate graph
     '''
-    Comparison of Allocations GMA vs M-Approach flavours, const capacity model, classic link model, ratio 0.5
+    Comparison of Allocations GMA vs M-Approach flavours, const capacity model, classic sampling model, ratio 0.5
     - Once one plot with median allocations (aggregated)
     - Once one plot with cdf of allocation ratios (one graph, no aggregates)
     '''
-    '''
+
     fig, axs = plt.subplots(1, 2, sharey=True)
+    fig.set_size_inches(17, 9.27)
 
-    df = df_alloc_const_zoo[(df_alloc_const_zoo['Strategy'] == 'GMAImproved') | (df_alloc_const_zoo['Strategy'] == 'sqos_pb') | (df_alloc_const_zoo['Strategy'] == 'sqos_pt') | (df_alloc_const_zoo['Ratio'] == '0.5')]
-    sns.scatterplot(x='Size', y='Median-Allocation', hue='Strategy', data=df, alpha=0.4, style='Strategy', ax=axs[0])
+    df = df_alloc_const_zoo[(df_alloc_const_zoo['Strategy'] == STRATEGY_LABEL['GMAImproved']) | (df_alloc_const_zoo['Strategy'] == STRATEGY_LABEL['sqos_pb']) | (df_alloc_const_zoo['Strategy'] == STRATEGY_LABEL['sqos_pt']) | (df_alloc_const_zoo['Ratio'] == '0.5')]
+    df = pd.melt(df, id_vars=['Strategy'], value_vars=['Min-Allocation', 'Median-Allocation', 'Max-Allocation'], value_name='Allocation Size [Gbps]', var_name='Metric')
+    sns.boxplot(x='Metric', y='Allocation Size [Gbps]', hue='Strategy', data=df, flierprops=dict(markerfacecolor='0.50', markersize=2), ax=axs[0])
 
-    df = df_alloc_const_rand[(df_alloc_const_rand['Strategy'] == 'GMAImproved') | (df_alloc_const_rand['Strategy'] == 'sqos_pb') | (df_alloc_const_rand['Strategy'] == 'sqos_pt') | (df_alloc_const_rand['Ratio'] == '0.5')]
-    sns.scatterplot(x='Size', y='Median-Allocation', hue='Strategy', data=df, alpha=0.4, style='Strategy', ax=axs[1])
-
-    plt.yscale('log')
-    plt.show()
-    '''
-    ####################################################################################################################
-    '''
-    As above in boxplot
-    '''
-    fig, axs = plt.subplots(1, 2, sharey=True)
-
-    df = df_alloc_const_zoo[(df_alloc_const_zoo['Strategy'] == 'GMAImproved') | (df_alloc_const_zoo['Strategy'] == 'sqos_pb') | (df_alloc_const_zoo['Strategy'] == 'sqos_pt') | (df_alloc_const_zoo['Ratio'] == '0.5')]
-    print(df.Strategy.unique())
-    sns.boxplot(x='Strategy', y='Median-Allocation', hue='Strategy', data=df, ax=axs[0])
+    axs[0].set_xticklabels(['Min','Median', 'Max'])
+    axs[0].set_xlabel('')
     axs[0].set_title('Zoo Graphs')
-    axs[0].set(xticklabels=[])
+    axs[0].set_ylabel('Allocation Size [Gbps]')
+    axs[0].get_legend().remove()
     axs[0].grid(b=True)
 
-    df = df_alloc_const_rand[(df_alloc_const_rand['Strategy'] == 'GMAImproved') | (df_alloc_const_rand['Strategy'] == 'sqos_pb') | (df_alloc_const_rand['Strategy'] == 'sqos_pt') | (df_alloc_const_rand['Ratio'] == '0.5')]
-    print(df.Strategy.unique())
-    sns.boxplot(x='Strategy',y='Median-Allocation', hue='Strategy', data=df, ax=axs[1])
+    df = df_alloc_const_rand[(df_alloc_const_rand['Strategy'] == STRATEGY_LABEL['GMAImproved']) | (df_alloc_const_rand['Strategy'] == STRATEGY_LABEL['sqos_pb']) | (df_alloc_const_rand['Strategy'] == STRATEGY_LABEL['sqos_pt']) | (df_alloc_const_rand['Ratio'] == '0.5')]
+    df = pd.melt(df, id_vars=['Strategy'], value_vars=['Min-Allocation', 'Median-Allocation', 'Max-Allocation'], value_name='Allocation Size [Gbps]', var_name='Metric')
+    sns.boxplot(x='Metric', y='Allocation Size [Gbps]', hue='Strategy', data=df, flierprops=dict(markerfacecolor='0.50', markersize=2), ax=axs[1])
+
+    axs[1].set_xticklabels(['Min', 'Median', 'Max'])
+    axs[1].set_xlabel('')
     axs[1].set_title('Random Graphs')
-    axs[1].set(xticklabels=[])
+    axs[1].set_ylabel('')
+    axs[1].get_legend().remove()
     axs[1].grid(b=True)
+
+    handles, labels = axs[1].get_legend_handles_labels()
+    lgd = axs[1].legend(handles, labels, loc='center left', ncol=3, bbox_to_anchor=(1.05, .5))
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95], pad=2)
     fig.suptitle('Median Allocations across Strategies')
     plt.yscale('log')
-    plt.show()
+    #plt.show()
 
     ####################################################################################################################
 
-    fig, axs = plt.subplots(1, 2, sharey=True, sharex=True)
+    fig, axs = plt.subplots(1, 1, sharey=True, sharex=True)
+    fig.set_size_inches(17, 9.27)
     # Zoo: comparison in colt(153)
     data = dh.get_alloc_quots_as_df(['c_Barabasi_Albert_20_30_(1000)'], 'GMAImproved', ['sqos_ob', 'sqos_ot', 'sqos_pt', 'sqos_pb'], ratios=['0.1'])
 
@@ -272,14 +367,26 @@ def main(args):
     med = data['Allocation Ratio'].median()
     mean = data['Allocation Ratio'].mean()
 
-    sns.ecdfplot(data=data, x='Allocation Ratio', hue="Strategies", ax=axs[0])#, palette=DIFF_C_MAP)
+    axs.set_title('Barabasi-Albert 20 30 1000')
+    axs.set_xlim(d_min, d_max)
+    axs.grid(b=True)
+    axs.axvline(x=1, c='r', linestyle='--', alpha=0.3)
 
-    axs[0].set_xlim(d_min, d_max)
-    axs[0].grid(b=True)
-    axs[0].axvline(x=1, c='r', linestyle='--', alpha=0.3, label='One')
-    fig.suptitle('Comparison of GMA vs M-Approach Flavour Allocations in Barabasi-Albert 20 30 1000')
+    l = sns.ecdfplot(data=data, x='Allocation Ratio', hue="Strategies", ax=axs)#, palette=DIFF_C_MAP)
+
+    handles, labels = axs.get_legend_handles_labels()
+    lgd = axs.legend(handles, labels, loc='center left', ncol=1, bbox_to_anchor=(1.05, .5))
+    axs.set_xlabel('Factor MA Flavor : GMA')
+    axs.set_yticks([0, 0.1, 0.25, 0.5, 0.75, 0.9, 1])
+
+    #fig.tight_layout(rect=[0, 0.03, 1, 0.95], pad=2)
+    #fig.legend(labels, loc='upper center', ncol=1, bbox_to_anchor=(1.05, .5))
+    fig.suptitle('Comparison of Allocations: GMA vs MA Flavours ')
+
+    plt.legend(labels=STRAT_ORDER, bbox_to_anchor=(1.05, 1), loc="upper left")
+    plt.tight_layout()
     plt.xscale('log')
-    plt.show()
+    #plt.show()
 
     ####################################################################################################################
     '''
@@ -307,42 +414,50 @@ def main(args):
     df_alloc_const_zoo = df_alloc_all[df_alloc_all.Graph.str.startswith('c_') & (~df_alloc_all.Graph.str.startswith('c_Barabasi'))]
     df_alloc_const_rand = df_alloc_all[df_alloc_all.Graph.str.startswith('c_Barabasi')]
 
-    df_alloc_const_zoo_gma = df_alloc_const_zoo[df_alloc_const_zoo['Strategy'] == 'GMAImproved']
-    df_alloc_const_rand_gma = df_alloc_const_rand[df_alloc_const_rand['Strategy'] == 'GMAImproved']
+    fig, axs = plt.subplots(1, 2, sharey=True)
+    fig.set_size_inches(17, 9.27)
 
-    df_alloc_const_zoo_pb = df_alloc_const_zoo[df_alloc_const_zoo['Strategy'] == 'sqos_pb']
-    df_alloc_const_rand_pb = df_alloc_const_rand[df_alloc_const_rand['Strategy'] == 'sqos_pb']
+    sns.boxplot(x='Strategy', y='Median-Allocation', hue='Num Shortest Paths', data=df_alloc_const_zoo, flierprops=dict(markerfacecolor='0.50', markersize=2), ax=axs[0])
+    axs[0].set_title('Zoo Graphs')
+    axs[0].set_ylabel('Median Allocation [Gbps]')
+    axs[0].set_xlabel('')
+    axs[0].grid(b=True)
+    axs[0].get_legend().remove()
 
-    fig, axs = plt.subplots(2, 2, sharey=True)
-    sns.scatterplot(x='Size', y='Median-Allocation', hue='Num Shortest Paths', data=df_alloc_const_zoo_gma, ax=axs[0][0])
-    axs[0][0].set_title('GMA in Zoo Graphs')
-    axs[0][0].grid(b=True)
-    sns.scatterplot(x='Size', y='Median-Allocation', hue='Num Shortest Paths', data=df_alloc_const_rand_gma, ax=axs[0][1])
-    axs[0][1].set_title('GMA in Rand Graphs')
-    axs[0][1].grid(b=True)
+    sns.boxplot(x='Strategy', y='Median-Allocation', hue='Num Shortest Paths', data=df_alloc_const_rand, flierprops=dict(markerfacecolor='0.50', markersize=2), ax=axs[1])
+    axs[1].set_title('Rand Graphs')
+    axs[1].set_xlabel('')
+    axs[1].set_ylabel('')
+    axs[1].grid(b=True)
+    axs[1].get_legend().remove()
 
-    sns.scatterplot(x='Size', y='Median-Allocation', hue='Num Shortest Paths', data=df_alloc_const_zoo_pb,
-                    ax=axs[1][0])
-    axs[1][0].set_title('M-Approach (pb) in Zoo Graphs')
-    axs[1][0].grid(b=True)
-
-    sns.scatterplot(x='Size', y='Median-Allocation', hue='Num Shortest Paths', data=df_alloc_const_rand_pb,
-                    ax=axs[1][1])
-    axs[1][1].set_title('M-Approach (pb) in Rand Graphs')
-    axs[1][1].grid(b=True)
+    handles, labels = axs[1].get_legend_handles_labels()
+    lgd = axs[1].legend(handles, labels, loc='center left', ncol=1, bbox_to_anchor=(1.05, .5), title='#Shortest Paths')
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95], pad=2)
     fig.suptitle('Multipath improvements across Graphs')
-
     plt.yscale('log')
-    plt.show()
+    #plt.show()
 
-
+    ####################################################################################################################
+    '''
+    Allocation multipath gain: cdf single graph
+    '''
 
     data = dh.get_alloc_quots_multipath_as_df('c_Barabasi_Albert_20_30_(1000)', ['GMAImproved', 'sqos_pt'])
     fig, ax = plt.subplots(1,1)
+    fig.set_size_inches(17, 9.27)
+
     sns.ecdfplot(data=data, x='Allocation Ratio', hue='Strategy', ax=ax)
+
+    handles, labels = ax.get_legend_handles_labels()
+    lgd = ax.legend(handles, labels, loc='center left', ncol=1, bbox_to_anchor=(1.05, .5))
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95], pad=2)
+
     plt.xscale('log')
     fig.suptitle('Multipath improvements for GMA and M-Approach PT Allocations in Barabasi-Albert 20_30_(1000)')
-    plt.show()
+    #plt.show()
+
+    ####################################################################################################################
 
     gma = data[data['Strategy'] == STRATEGY_LABEL['GMAImproved']]
     pt = data[data['Strategy'] == STRATEGY_LABEL['sqos_pt']]
@@ -363,39 +478,67 @@ def main(args):
     df_cover = df_cover_all[~df_cover_all.Graph.str.startswith('c_')]
     df_cover["Cover Threshold"].replace(THRESH_LABEL, inplace=True)
     df_cover = df_cover[df_cover['Num Shortest Paths'] == 1]
-    df_cover = df_cover[(df_cover['Strategy'] == 'GMAImproved') | (df_cover['Strategy'] == 'sqos_pb') | (df_cover['Strategy'] == 'sqos_pt') | (df_cover['Ratio'] == '0.5')]
+    df_cover["Strategy"].replace(STRATEGY_LABEL, inplace=True)
+    print(df_cover.Strategy.unique())
+    df_cover = df_cover[(df_cover['Strategy'] == STRATEGY_LABEL['GMAImproved']) | (df_cover['Strategy'] == STRATEGY_LABEL['sqos_pb']) | (df_cover['Strategy'] == STRATEGY_LABEL['sqos_pt']) | (df_cover['Ratio'] == '0.5')]
 
-    df_cover_zoo = df_cover[~df_cover.Graph.str.startswith('c_Barabasi')]
-    df_cover_rand = df_cover[df_cover.Graph.str.startswith('c_Barabasi')]
+    print(df_cover)
+
+    df_cover_zoo = df_cover[~df_cover.Graph.str.startswith('Barabasi')]
+    print(df_cover_zoo)
+    df_cover_rand = df_cover[df_cover.Graph.str.startswith('Barabasi')]
+    print(df_cover_rand)
 
     fig, axs = plt.subplots(1, 2, sharey=True)
-    sns.boxplot(x='Cover Threshold', y='Median-Cover', hue='Strategy', data=df_cover_zoo, flierprops=dict(markerfacecolor='0.50', markersize=2), ax=axs[0])
+    fig.set_size_inches(17, 9.27)
+
+    sns.boxplot(x='Cover Threshold', y='Median-Cover', hue='Strategy', data=df_cover_zoo, hue_order=STRAT_ORDER, flierprops=dict(markerfacecolor='0.50', markersize=2), ax=axs[0])
     axs[0].set_title('Zoo Graphs')
+    axs[0].get_legend().remove()
     axs[0].grid(b=True)
 
-    #sns.boxplot(x='Cover Threshold', y='Median-Cover', hue='Strategy', data=df_cover_rand, flierprops=dict(markerfacecolor='0.50', markersize=2), ax=axs[1])
+    sns.boxplot(x='Cover Threshold', y='Median-Cover', hue='Strategy', data=df_cover_rand, hue_order=STRAT_ORDER, flierprops=dict(markerfacecolor='0.50', markersize=2), ax=axs[1])
     axs[1].set_title('Rand Graphs')
     axs[1].grid(b=True)
+    axs[1].get_legend().remove()
 
+    handles, labels = axs[1].get_legend_handles_labels()
+    axs[0].set_yticks([0, 0.1, 0.25, 0.5, 0.75, 0.9, 1])
+    lgd = axs[1].legend(handles, labels, loc='center left', ncol=1, bbox_to_anchor=(1.05, .5))
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95], pad=2)
     fig.suptitle('Strategies by Cover Thresholds Reached')
+    #plt.show()
 
-    plt.show()
-
+    ####################################################################################################################
+    '''
+    Cover multipath gain
+    '''
     df_cover_const = df_cover_all[~df_cover_all.Graph.str.startswith('c_')]
     df_cover_const["Cover Threshold"].replace(THRESH_LABEL, inplace=True)
 
-    df_cover_zoo = df_cover_const[~df_cover_const.Graph.str.startswith('c_Barabasi')]
-    df_cover_rand = df_cover_const[df_cover_const.Graph.str.startswith('c_Barabasi')]
+    df_cover_zoo = df_cover_const[~df_cover_const.Graph.str.startswith('Barabasi')]
+    df_cover_zoo = df_cover_zoo[df_cover_zoo['Cover Threshold'] == THRESH_LABEL[1e-5]]
+    df_cover_rand = df_cover_const[df_cover_const.Graph.str.startswith('Barabasi')]
+    df_cover_rand = df_cover_rand[df_cover_rand['Cover Threshold'] == THRESH_LABEL[1e-5]]
 
     fig, axs = plt.subplots(1, 2, sharey=True)
+    fig.set_size_inches(17, 9.27)
 
     # GMA
-    sns.boxplot(y='Median-Cover', hue='Num Shortest Paths', data=df_cover_zoo[df_cover_zoo['Strategy'] == 'GMAImproved'], ax=axs[0])
+    sns.boxplot(x='Strategy', y='Median-Cover', hue='Num Shortest Paths', data=df_cover_zoo, flierprops=dict(markerfacecolor='0.50', markersize=2), ax=axs[0])
     axs[0].set_title('Zoo Graphs')
     axs[0].grid(b=True)
-    sns.boxplot(y='Median-Cover', hue='Num Shortest Paths', data=df_cover_rand[df_cover_rand['Strategy'] == 'GMAImproved'], ax=axs[1])
-    axs[0].set_title('Rand Graphs')
-    axs[0].grid(b=True)
+    axs[0].get_legend().remove()
+
+    sns.boxplot(x='Strategy', y='Median-Cover', hue='Num Shortest Paths', data=df_cover_rand, flierprops=dict(markerfacecolor='0.50', markersize=2), ax=axs[1])
+    axs[1].set_title('Rand Graphs')
+    axs[1].grid(b=True)
+    axs[1].get_legend().remove()
+
+    handles, labels = axs[1].get_legend_handles_labels()
+    lgd = axs[1].legend(handles, labels, loc='center left', ncol=1, bbox_to_anchor=(1.05, .5))
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95], pad=2)
+    fig.suptitle('Multipath improvements in Median Covers for 10 Kbps Threshold')
     plt.show()
 
 
