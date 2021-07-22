@@ -1,6 +1,7 @@
 import os
 from argparse import ArgumentParser
-
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 from src.multiprocessing.topology.PerTopologyOperations import *
