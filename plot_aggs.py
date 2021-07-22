@@ -279,7 +279,7 @@ def main(args):
     '''
     Cover box single graph: by thresholds
     '''
-    covs = dh.get_covers_as_df(['Core(10000)'], STRATEGIES, [0.5], ['0.01', '0.001', '0.0001', '1e-05', '1e-06'])
+    covs = dh.get_covers_as_df(['Core(10000)'], STRATEGIES, [0.1], ['0.01', '0.001', '0.0001', '1e-05', '1e-06'])
     covs = covs.compute()
 
     covs["Cover Threshold"] = covs["Cover Threshold"].astype('float')
