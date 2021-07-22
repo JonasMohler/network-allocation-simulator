@@ -200,26 +200,6 @@ def main(args):
     #fig.suptitle('Influence of Sampling Strategy on M-Approach Allocations')
     #plt.show()
     '''
-    ####################################################################################################################
-    '''
-    Results: Allocations in Barabasi-Albert 20 30 1000 (cdf)
-    '''
-    #TODO: On Server
-    '''
-    dat = dh.get_allocs_as_df(['Barabasi_Albert_20_30_(1000)'], STRATEGIES, [0.5])
-    dat['Allocations Gbps'] = dat['Allocations Gbps'].astype('float')
-
-    fig, ax = plt.subplots(1,1)
-    fig.set_size_inches(17, 9.27)
-
-    sns.ecdfplot(data=dat, x='Allocations Gbps', hue='Strategy', hue_order=STRAT_ORDER, ax=ax)
-
-    ax.set_yticks([0, 0.1, 0.25, 0.5, 0.75, 0.9, 1])
-    ax.set_ylabel('Percentiles')
-    ax.set_xlabel('Allocations [Gbps]')
-
-    plt.xscale('log')
-    '''
 
 
     ####################################################################################################################
@@ -414,12 +394,33 @@ def main(args):
     plt.tight_layout()
     #plt.show()
     '''
+    ####################################################################################################################
+    '''
+    Results: Allocations in Barabasi-Albert 20 30 1000 (cdf)
+    '''
+    #TODO: On Server
+    '''
+    dat = dh.get_allocs_as_df(['c_Barabasi_Albert_15_25_(1000)'], STRATEGIES, [0.5])
+    dat['Allocations Gbps'] = dat['Allocations Gbps'].astype('float')
+
+    fig, ax = plt.subplots(1,1)
+    fig.set_size_inches(17, 9.27)
+
+    sns.ecdfplot(data=dat, x='Allocations Gbps', hue='Strategy', hue_order=STRAT_ORDER, ax=ax)
+
+    ax.set_yticks([0, 0.1, 0.25, 0.5, 0.75, 0.9, 1])
+    ax.set_ylabel('Percentiles')
+    ax.set_xlabel('Allocations [Gbps]')
+
+    plt.xscale('log')
+    plt.savefig(os.path.join(dh.get_general_figure_path(),'all_allocs_cdf_barab.png'))
+    '''
 
     ####################################################################################################################
     '''
     Results: GMA vs PMA Max
     '''
-
+    '''
     fig, axs = plt.subplots(1, 1, sharey=True, sharex=True)
     fig.set_size_inches(17, 9.27)
 
@@ -442,12 +443,12 @@ def main(args):
     plt.tight_layout()
     plt.xscale('log')
     plt.savefig(os.path.join(dh.get_general_figure_path(),'gma_v_pmam_barab.png'))
-
+    '''
     ####################################################################################################################
     '''
     Results: PMA Max vs OMA Max & PMA Max vs PMA Concurrent
     '''
-
+    '''
     fig, axs = plt.subplots(1, 2, sharey=True, sharex=True)
     fig.set_size_inches(17, 9.27)
 
@@ -486,13 +487,13 @@ def main(args):
 
     plt.xscale('log')
     plt.savefig(os.path.join(dh.get_general_figure_path(),'pmam_v_fl_barab.png'))
-
+    '''
 
     ####################################################################################################################
     '''
     Results: Sampling ratios for each model: (cdf)
     '''
-
+    '''
     r_map = {
         'u0.1': '0.1',
         'u0.2': '0.2',
@@ -527,7 +528,7 @@ def main(args):
 
     plt.show()
     plt.savefig(os.path.join(dh.get_general_figure_path(),'samps.png'))
-
+    '''
     ####################################################################################################################
     '''
     Results: Allocation multipath gain: cdf single graph
