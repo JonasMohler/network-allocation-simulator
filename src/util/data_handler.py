@@ -502,7 +502,7 @@ def get_covers_as_df(graphs, strategies, ratios=[0.1], threshs=['0.001']):
 
 def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
     print(ratios)
-    df = pd.DataFrame(columns=[PLOT_Y_LABEL['alloc'], "Path Length", "Strategy", "Ratio"])
+    df = pd.DataFrame(columns=[PLOT_Y_LABEL['alloc'], "Strategy", "Ratio"]) #"Path Length",
     dask_df_l = dd.from_pandas(df, chunksize=4000)
 
     all_g = len(graphs)
@@ -513,7 +513,7 @@ def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
     for g in graphs:
         print(f"Fetching Allocations for {g}")
 
-        path_lengths = get_pl(g)
+        #path_lengths = get_pl(g)
 
         all_s = len(strategies)
         i=0
@@ -533,13 +533,13 @@ def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
                         for src, dests in alloc.items():
                             for dst in dests.keys():
                                 als.append(alloc[src][dst][0])
-                                pls.append(path_lengths[src][dst])
+                                #pls.append(path_lengths[src][dst])
                                 srcs.append(src)
                                 dsts.append(dst)
 
                         df_small = pd.DataFrame()
                         df_small[PLOT_Y_LABEL['alloc']] = als
-                        df_small["Path Length"] = pls
+                        #df_small["Path Length"] = pls
                         df_small['Strategy'] = STRATEGY_LABEL[s]
                         df_small["Ratio"] = r
                         df_small["Source"] = srcs
@@ -562,13 +562,13 @@ def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
                     for src, dests in alloc.items():
                         for dst in dests.keys():
                             als.append(alloc[src][dst][0])
-                            pls.append(path_lengths[src][dst])
+                            #pls.append(path_lengths[src][dst])
                             srcs.append(src)
                             dsts.append(dst)
 
                     df_small = pd.DataFrame()
                     df_small[PLOT_Y_LABEL['alloc']] = als
-                    df_small["Path Length"] = pls
+                    #df_small["Path Length"] = pls
                     df_small['Strategy'] = STRATEGY_LABEL[s]
                     df_small["Ratio"] = 1
                     df_small["Source"] = srcs
