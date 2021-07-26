@@ -1,7 +1,7 @@
 import os
 from argparse import ArgumentParser
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 from src.multiprocessing.topology.PerTopologyOperations import *
@@ -68,14 +68,48 @@ def main(args):
     sns.set(rc={"axes.facecolor":"gainsboro", "figure.facecolor": "whitesmoke"})
     #sns.set_palette((sns.color_palette('crest')))
 
+    plt.rcParams.update({
+        'axes.labelsize': 'x-large',
+        'axes.titlesize': 'x-large',
+        'xtick.labelsize': 'large',
+        'ytick.labelsize': 'large'
+                         })
+
+    plt.rc('legend', fontsize='large')
+
     ####################################################################################################################
     '''
-    Aggregates of allocations over size
+    OMA Ratios vs GMA
     '''
+    comp = dh.get_alloc_quots_as_df(['Barabasi_Albert_20_30_(1000)'], 'GMAImproved', ['sqos_ot', 'sqos_ob'], [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
+
+
+    ####################################################################################################################
+    '''
+    Allocs over ave node degree
+    '''
+    fig, axs = plt.subplots(1, 2, sharey=True)
+    fig.set_size_inches(17, 9.27)
 
     zoo = df_alloc_const_zoo[(df_alloc_const_zoo['Ratio'] == '0.5') | (df_alloc_const_zoo['Ratio'] == '1')]
     rand = df_alloc_const_rand[(df_alloc_const_rand['Ratio'] == '0.5') | (df_alloc_const_rand['Ratio'] == '1')]
 
+    sns.scatterplot(x='Average Node Degree', y='Median-Allocation', hue='Strategy', data=zoo, ax=axs[0])
+    axs[0].get_legend().remove()
+    axs[0].set_title('Zoo Graphs')#, fontsize=12)
+    #axs[0].set_xlabel('Average Node Degree', fontsize=12)
+    #axs[0].set_ylabel('Median Allocation [Gbps]', fontsize=12)
+    axs[0].set_yscale('log')
+    sns.scatterplot(x='Average Node Degree', y='Median-Allocation', hue='Strategy', data=rand, ax=axs[1])
+    axs[1].get_legend().remove()
+    axs[1].set_title('Rand Graphs')
+
+    handles, labels = axs[1].get_legend_handles_labels()
+    lgd = axs[1].legend(handles, labels, loc='center left', ncol=1, bbox_to_anchor=(1.05, .5))
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95], pad=2)
+
+
+    plt.show()
     ####################################################################################################################
     '''
     Design: How do the graphs look like
@@ -206,7 +240,7 @@ def main(args):
     '''
     Cover plots: Median Covers by thresholds, degweighted, 1sp: GMA vs PT
     '''
-    '''
+
     with open(os.path.join(args.which, 'aggregate_covers.csv'), "r+") as f:
         df_cover_all = pd.read_csv(f)
 
@@ -218,7 +252,7 @@ def main(args):
 
     df_cover_zoo = df_cover[~df_cover.Graph.str.startswith('Barabasi')]
     df_cover_rand = df_cover[df_cover.Graph.str.startswith('Barabasi')]
-
+    '''
     fig, axs = plt.subplots(1, 2, sharey=True)
     fig.set_size_inches(17, 9.27)
 
@@ -244,12 +278,12 @@ def main(args):
     '''
     Cover plots: Median Covers by thresholds, degweighted, 1sp: PT vs flavors
     '''
-    '''
+
     df_cover = df_cover_all[~df_cover_all.Graph.str.startswith('c_')]
     df_cover["Cover Threshold"].replace(THRESH_LABEL, inplace=True)
     df_cover = df_cover[df_cover['Num Shortest Paths'] == 1]
     df_cover["Strategy"].replace(STRATEGY_LABEL, inplace=True)
-    df_cover = df_cover[(df_cover['Strategy'] == STRATEGY_LABEL['sqos_pt']) | (df_cover['Strategy'] == STRATEGY_LABEL['sqos_pt']) | (df_cover['Ratio'] == '0.5')]
+    df_cover = df_cover[(df_cover['Strategy'] == STRATEGY_LABEL['sqos_pt']) | (df_cover['Strategy'] == STRATEGY_LABEL['sqos_pb']) | (df_cover['Ratio'] == '0.5')]
 
     df_cover_zoo = df_cover[~df_cover.Graph.str.startswith('Barabasi')]
     df_cover_rand = df_cover[df_cover.Graph.str.startswith('Barabasi')]
@@ -274,7 +308,7 @@ def main(args):
     fig.tight_layout(rect=[0, 0.03, 1, 0.95], pad=2)
     #fig.suptitle('Strategies by Cover Thresholds Reached')
     plt.show()
-    '''
+
     ####################################################################################################################
     '''
     Cover box single graph: by thresholds
@@ -367,9 +401,9 @@ def main(args):
     '''
     ####################################################################################################################
     '''
-    Results: Allocations in Barabasi-Albert 20 30 1000 (cdf)
+    Results: Allocations in Barabasi-Albert 15 25 1000 (cdf)
     '''
-
+    '''
     dat = dh.get_allocs_as_df(['c_Barabasi_Albert_15_25_(1000)'], STRATEGIES, [0.5])
     dat['Allocations Gbps'] = dat['Allocations Gbps'].astype('float')
 
@@ -385,12 +419,12 @@ def main(args):
     plt.xscale('log')
     plt.savefig(os.path.join(dh.get_general_figure_path(),'all_allocs_cdf_barab.png'))
 
-
+    '''
     ####################################################################################################################
     '''
     Results: GMA vs PMA Max
     '''
-
+    '''
     fig, axs = plt.subplots(1, 1, sharey=True, sharex=True)
     fig.set_size_inches(17, 9.27)
 
@@ -413,12 +447,12 @@ def main(args):
     plt.tight_layout()
     plt.xscale('log')
     plt.savefig(os.path.join(dh.get_general_figure_path(),'gma_v_pmam_barab.png'))
-
+    '''
     ####################################################################################################################
     '''
     Results: PMA Max vs OMA Max & PMA Max vs PMA Concurrent
     '''
-
+    '''
     fig, axs = plt.subplots(1, 2, sharey=True, sharex=True)
     fig.set_size_inches(17, 9.27)
 
@@ -457,13 +491,13 @@ def main(args):
 
     plt.xscale('log')
     plt.savefig(os.path.join(dh.get_general_figure_path(),'pmam_v_fl_barab.png'))
-
+    '''
 
     ####################################################################################################################
     '''
     Results: Sampling ratios for each model: (cdf)
     '''
-
+    '''
     r_map = {
         'u0.1': '0.1',
         'u0.2': '0.2',
@@ -498,7 +532,7 @@ def main(args):
 
     plt.show()
     plt.savefig(os.path.join(dh.get_general_figure_path(),'samps.png'))
-
+    '''
     ####################################################################################################################
     '''
     Results: Allocation multipath gain: cdf single graph
@@ -557,17 +591,17 @@ def main(args):
     Results: Multipath Gain: Percentage cover improvement (scatter) (Barabasi Albert 15 25 1000)
     '''
     '''
-    g_cov_1sp = dh.get_cover('c_Barabasi_Albert_15_25_(1000)', 'GMAImproved', '1e-5')
-    g_cov_2sp = dh.get_cover('c_Barabasi_Albert_15_25_(1000)', 'GMAImproved', '1e-5', num_sp=2)
-    g_cov_3sp = dh.get_cover('c_Barabasi_Albert_15_25_(1000)', 'GMAImproved', '1e-5', num_sp=3)
-    g_cov_5sp = dh.get_cover('c_Barabasi_Albert_15_25_(1000)', 'GMAImproved', '1e-5', num_sp=5)
+    g_cov_1sp = dh.get_cover('c_Barabasi_Albert_15_25_(1000)', 'GMAImproved', '1e-6')
+    g_cov_2sp = dh.get_cover('c_Barabasi_Albert_15_25_(1000)', 'GMAImproved', '1e-6', num_sp=2)
+    g_cov_3sp = dh.get_cover('c_Barabasi_Albert_15_25_(1000)', 'GMAImproved', '1e-6', num_sp=3)
+    g_cov_5sp = dh.get_cover('c_Barabasi_Albert_15_25_(1000)', 'GMAImproved', '1e-6', num_sp=5)
 
 
 
-    m_cov_1sp = dh.get_cover('c_Barabasi_Albert_15_25_(1000)', 'sqos_pt', '1e-5')
-    m_cov_2sp = dh.get_cover('c_Barabasi_Albert_15_25_(1000)', 'sqos_pt', '1e-5', num_sp=2)
-    m_cov_3sp = dh.get_cover('c_Barabasi_Albert_15_25_(1000)', 'sqos_pt', '1e-5', num_sp=3)
-    m_cov_5sp = dh.get_cover('c_Barabasi_Albert_15_25_(1000)', 'sqos_pt', '1e-5', num_sp=5)
+    m_cov_1sp = dh.get_cover('c_Barabasi_Albert_15_25_(1000)', 'sqos_pt', '1e-6')
+    m_cov_2sp = dh.get_cover('c_Barabasi_Albert_15_25_(1000)', 'sqos_pt', '1e-6', num_sp=2)
+    m_cov_3sp = dh.get_cover('c_Barabasi_Albert_15_25_(1000)', 'sqos_pt', '1e-6', num_sp=3)
+    m_cov_5sp = dh.get_cover('c_Barabasi_Albert_15_25_(1000)', 'sqos_pt', '1e-6', num_sp=5)
     # TODO
     '''
 

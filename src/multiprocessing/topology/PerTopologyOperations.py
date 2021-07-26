@@ -651,25 +651,25 @@ class GMAAllocationComputation(TopologyMultiprocessing):
     def per_dir_op(self, cur_dir):
         try:
             super(GMAAllocationComputation, self).per_dir_op(cur_dir)
-
-            #path = dh.get_full_path(cur_dir, self.data_type, self.strategy)
-
-            #if not os.path.exists(path) or self.force:
-
-            graph = dh.get_graph(cur_dir)
-            tm = dh.get_tm(cur_dir)
-            strat = GMAImproved(graph, tm)
-
-            if self.num_sp is not None:
-                sp = dh.get_k_shortest_paths(cur_dir, self.num_sp)
-                allocs = strat.compute_for_all_multipaths(sp)
-                dh.set_allocations(allocs, cur_dir, self.strategy, num_sp=self.num_sp)
-            else:
-                sp = dh.get_shortest_paths(cur_dir)
-                allocs = strat.compute_for_all_single_paths(sp, False)
-                dh.set_allocations(allocs, cur_dir, self.strategy)
-
-            print(f"{cur_dir}: Done")
+            if not os.path.exists(dh.get_full_path(cur_dir, ALLOCATION, self.strategy, num_sp=self.num_sp)):
+                #path = dh.get_full_path(cur_dir, self.data_type, self.strategy)
+                
+                #if not os.path.exists(path) or self.force:
+                
+                graph = dh.get_graph(cur_dir)
+                tm = dh.get_tm(cur_dir)
+                strat = GMAImproved(graph, tm)
+                
+                if self.num_sp is not None:
+                    sp = dh.get_k_shortest_paths(cur_dir, self.num_sp)
+                    allocs = strat.compute_for_all_multipaths(sp)
+                    dh.set_allocations(allocs, cur_dir, self.strategy, num_sp=self.num_sp)
+                else:
+                    sp = dh.get_shortest_paths(cur_dir)
+                    allocs = strat.compute_for_all_single_paths(sp, False)
+                    dh.set_allocations(allocs, cur_dir, self.strategy)
+                
+                print(f"{cur_dir}: Done")
 
         except Exception as e:
             print(f"Error occurred in GMA Allocation computation")
@@ -768,24 +768,24 @@ class SQoSPTComputation(TopologyMultiprocessing):
     def per_dir_op(self, cur_dir):
         try:
             super(SQoSPTComputation, self).per_dir_op(cur_dir)
+            if not os.path.exists(dh.get_full_path(cur_dir, ALLOCATION, self.strategy, num_sp=self.num_sp)):
+                graph = dh.get_graph(cur_dir)
+                tm = dh.get_tm(cur_dir)
 
-            graph = dh.get_graph(cur_dir)
-            tm = dh.get_tm(cur_dir)
+                strat = ScaledQoSAlgorithmPT(graph, tm, node_count=graph.number_of_nodes())
 
-            strat = ScaledQoSAlgorithmPT(graph, tm, node_count=graph.number_of_nodes())
+                if self.num_sp is not None:
+                    sp = dh.get_k_shortest_paths(cur_dir, self.num_sp)
+                    #print('pre alloc comp')
+                    allocs = strat.compute_for_all_multipaths(sp)
+                    #print('here')
+                    dh.set_allocations(allocs, cur_dir, self.strategy, num_sp=self.num_sp)
+                else:
+                    sp = dh.get_shortest_paths(cur_dir)
+                    allocs = strat.compute_for_all_single_paths(sp, False)
+                    dh.set_allocations(allocs, cur_dir, self.strategy)
 
-            if self.num_sp is not None:
-                sp = dh.get_k_shortest_paths(cur_dir, self.num_sp)
-                #print('pre alloc comp')
-                allocs = strat.compute_for_all_multipaths(sp)
-                #print('here')
-                dh.set_allocations(allocs, cur_dir, self.strategy, num_sp=self.num_sp)
-            else:
-                sp = dh.get_shortest_paths(cur_dir)
-                allocs = strat.compute_for_all_single_paths(sp, False)
-                dh.set_allocations(allocs, cur_dir, self.strategy)
-
-            print(f"{cur_dir}: Done")
+                print(f"{cur_dir}: Done")
         except Exception as e:
             print(f"Error occurred in SQoS Allocation Computation: {e}")
 
@@ -807,22 +807,22 @@ class SQoSPBComputation(TopologyMultiprocessing):
     def per_dir_op(self, cur_dir):
         try:
             super(SQoSPBComputation, self).per_dir_op(cur_dir)
+            if not os.path.exists(dh.get_full_path(cur_dir, ALLOCATION, self.strategy, num_sp=self.num_sp)):
+                graph = dh.get_graph(cur_dir)
+                tm = dh.get_tm(cur_dir)
+                path_counts = dh.get_pc(cur_dir, self.ratio, self.num_sp)
 
-            graph = dh.get_graph(cur_dir)
-            tm = dh.get_tm(cur_dir)
-            path_counts = dh.get_pc(cur_dir, self.ratio, self.num_sp)
+                strat = ScaledQoSAlgorithmPB(graph, tm, path_counts=path_counts, node_count=graph.number_of_nodes())
+                if self.num_sp is not None:
+                    sp = dh.get_k_shortest_paths(cur_dir, self.num_sp)
+                    allocs = strat.compute_for_all_multipaths(sp)
+                    dh.set_allocations(allocs, cur_dir, self.strategy, num_sp=self.num_sp)
+                else:
+                    sp = dh.get_shortest_paths(cur_dir)
+                    allocs = strat.compute_for_all_single_paths(sp, False)
+                    dh.set_allocations(allocs, cur_dir, self.strategy)
 
-            strat = ScaledQoSAlgorithmPB(graph, tm, path_counts=path_counts, node_count=graph.number_of_nodes())
-            if self.num_sp is not None:
-                sp = dh.get_k_shortest_paths(cur_dir, self.num_sp)
-                allocs = strat.compute_for_all_multipaths(sp)
-                dh.set_allocations(allocs, cur_dir, self.strategy, num_sp=self.num_sp)
-            else:
-                sp = dh.get_shortest_paths(cur_dir)
-                allocs = strat.compute_for_all_single_paths(sp, False)
-                dh.set_allocations(allocs, cur_dir, self.strategy)
-
-            print(f"{cur_dir}: Done")
+                print(f"{cur_dir}: Done")
         except Exception as e:
             print(f"Error occurred in SQoS Allocation Computation: {e}")
 
