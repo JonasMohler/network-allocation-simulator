@@ -672,7 +672,7 @@ class GMAAllocationComputation(TopologyMultiprocessing):
                 print(f"{cur_dir}: Done")
 
         except Exception as e:
-            print(f"Error occurred in GMA Allocation computation")
+            print(f"Error occurred in GMA Allocation computation: {e}")
 
 
 class SQoSOTComputation(TopologyMultiprocessing):
