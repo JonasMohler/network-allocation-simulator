@@ -536,7 +536,7 @@ def get_cover_mp_improv(graph, num_sps, strategy, thresh):
     return df
 
 
-def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
+def get_allocs_as_df(graphs, strategies, ratios=[0.1], num_sp=[1]):
     print(ratios)
     df = pd.DataFrame(columns=[PLOT_Y_LABEL['alloc'], "Strategy", "Ratio"]) #"Path Length",
     dask_df_l = dd.from_pandas(df, chunksize=4000)
@@ -554,13 +554,45 @@ def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
         all_s = len(strategies)
         i=0
         print(f"Fetching Allocations for {all_s} Strategies")
-        for s in strategies:
-            if s in ['sqos_ot', 'sqos_ob']:
-                for r in ratios:
-                    #print(r)
-                    #print(f'fetching: {get_full_path(g, ALLOCATION, s, r)}')
-                    if os.path.exists(get_full_path(g, ALLOCATION, s, r)):
-                        alloc = get_allocations(g, s, r)
+        for nsp in num_sp:
+            if nsp == 1: nsp=None
+            for s in strategies:
+                if s in ['sqos_ot', 'sqos_ob']:
+                    for r in ratios:
+                        #print(r)
+                        #print(f'fetching: {get_full_path(g, ALLOCATION, s, r)}')
+                        if os.path.exists(get_full_path(g, ALLOCATION, s, r, num_sp=nsp)):
+                            alloc = get_allocations(g, s, r, nsp)
+
+                            als = []
+                            pls = []
+                            srcs = []
+                            dsts = []
+                            for src, dests in alloc.items():
+                                for dst in dests.keys():
+                                    als.append(alloc[src][dst][0])
+                                    #pls.append(path_lengths[src][dst])
+                                    srcs.append(src)
+                                    dsts.append(dst)
+
+                            df_small = pd.DataFrame()
+                            df_small[PLOT_Y_LABEL['alloc']] = als
+                            #df_small["Path Length"] = pls
+                            df_small['Strategy'] = STRATEGY_LABEL[s]
+                            df_small["Ratio"] = r
+                            df_small["Source"] = srcs
+                            df_small["Dest"] = dsts
+                            df_small["# Shortest Paths"] = nsp if nsp is not None else 1
+
+                            #df = pd.concat([df, df_small])
+                            dask_df = dd.from_pandas(df_small, chunksize = 4000)
+                            dask_df_l = dd.concat([dask_df_l, dask_df])
+                            #small_dfs.append(df_small)
+
+                else:
+
+                    if os.path.exists(get_full_path(g, ALLOCATION, s, num_sp=nsp)):
+                        alloc = get_allocations(g, s, num_sp=nsp)
 
                         als = []
                         pls = []
@@ -577,46 +609,18 @@ def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
                         df_small[PLOT_Y_LABEL['alloc']] = als
                         #df_small["Path Length"] = pls
                         df_small['Strategy'] = STRATEGY_LABEL[s]
-                        df_small["Ratio"] = r
+                        df_small["Ratio"] = 1
                         df_small["Source"] = srcs
                         df_small["Dest"] = dsts
+                        df_small["# Shortest Paths"] = nsp if nsp is not None else 1
 
                         #df = pd.concat([df, df_small])
-                        dask_df = dd.from_pandas(df_small, chunksize = 4000)
+                        dask_df = dd.from_pandas(df_small, chunksize=4000)
                         dask_df_l = dd.concat([dask_df_l, dask_df])
                         #small_dfs.append(df_small)
 
-            else:
-
-                if os.path.exists(get_full_path(g, ALLOCATION, s)):
-                    alloc = get_allocations(g, s)
-
-                    als = []
-                    pls = []
-                    srcs = []
-                    dsts = []
-                    for src, dests in alloc.items():
-                        for dst in dests.keys():
-                            als.append(alloc[src][dst][0])
-                            #pls.append(path_lengths[src][dst])
-                            srcs.append(src)
-                            dsts.append(dst)
-
-                    df_small = pd.DataFrame()
-                    df_small[PLOT_Y_LABEL['alloc']] = als
-                    #df_small["Path Length"] = pls
-                    df_small['Strategy'] = STRATEGY_LABEL[s]
-                    df_small["Ratio"] = 1
-                    df_small["Source"] = srcs
-                    df_small["Dest"] = dsts
-
-                    #df = pd.concat([df, df_small])
-                    dask_df = dd.from_pandas(df_small, chunksize=4000)
-                    dask_df_l = dd.concat([dask_df_l, dask_df])
-                    #small_dfs.append(df_small)
-
-            i = i+1
-            print(f'Done with {i*100/all_s}% of strategies for current graph')
+                i = i+1
+                print(f'Done with {i*100/all_s}% of strategies for current graph')
 
         j = j+1
         print(f"Done with {j*100/all_g}% of graphs")

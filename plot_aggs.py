@@ -95,10 +95,10 @@ def main(args):
 
     ####################################################################################################################
     '''
-    Cover improvement multipath in single graph
+    Allocs by number shortest paths, PMA CONC, const
     '''
     # TODO: Server
-
+    allocs = dh.get_allocs_as_df(['c_Barabasi_Albert_15_25_(1000)'], )
     cov_imp = dh.get_cover_mp_improv('c_Barabasi_Albert_15_25_(1000)', [1,2,3,5], 'sqos_pt', 0.001)
 
     sns.ecdfplot(data=cov_imp, x='improvement', hue='num_sp')
