@@ -945,6 +945,8 @@ class CoverImprovement(TopologyMultiprocessing):
             cout = {}
             for src, dsts in c1.items():
                 cout[src] = {}
+                print(f"src: {src}")
+                print(f"dsts: {dsts}")
                 for dst, cov in c1.items():
                     cout[src][dst] = (cx[src][dst] - cov)/cov
 
