@@ -776,4 +776,4 @@ def get_cover_imp_dist(graph, strategy, threshold, num_sp, ratio=None):
     for cov in cov_imp.values():
         c_list.append(cov)
 
-    return _ser_to_stats(pd.series(data=c_list))
+    return _ser_to_stats(pd.Series(data=c_list))
