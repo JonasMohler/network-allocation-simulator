@@ -99,7 +99,7 @@ def main(args):
     '''
     # TODO: Server
     allocs = dh.get_allocs_as_df(['c_Barabasi_Albert_15_25_(1000)'], 'sqos_pb', num_sp=[1, 2 , 3, 5])
-    allocs['Allocations [Gbps'] = allocs['Allocations [Gbps]'].asfloat()
+    allocs['Allocations [Gbps'] = allocs['Allocations [Gbps]'].astype(float)
     sns.ecdfplot(data=allocs, x='Allocations [Gbps]', hue='# Shortest Paths')
     plt.xscale('log')
     plt.savefig(os.path.join(dh.get_general_figure_path(), 'single_graph_mp_imp.png'))
