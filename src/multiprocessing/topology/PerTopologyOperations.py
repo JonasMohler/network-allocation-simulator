@@ -940,7 +940,7 @@ class CoverImprovement(TopologyMultiprocessing):
 
     def per_dir_op(self, cur_dir):
         try:
-            c1 = dh.get_cover(cur_dir, self.strategy, self.thresh, self.ratio, 1)
+            c1 = dh.get_cover(cur_dir, self.strategy, self.thresh, self.ratio)
             cx = dh.get_cover(cur_dir, self.strategy, self.thresh, self.ratio, self.num_sp)
             cout = {}
             for src, dsts in c1.items():
