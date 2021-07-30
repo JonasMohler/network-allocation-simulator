@@ -98,10 +98,10 @@ def main(args):
     Allocs by number shortest paths, PMA CONC, const
     '''
     # TODO: Server
-    allocs = dh.get_allocs_as_df(['c_Barabasi_Albert_15_25_(1000)'], )
-    cov_imp = dh.get_cover_mp_improv('c_Barabasi_Albert_15_25_(1000)', [1,2,3,5], 'sqos_pt', 0.001)
+    allocs = dh.get_allocs_as_df(['c_Barabasi_Albert_15_25_(1000)'], 'sqos_pb', num_sp=[1, 2 , 3, 5])
 
-    sns.ecdfplot(data=cov_imp, x='improvement', hue='num_sp')
+    sns.ecdfplot(data=allocs, x='Allocation [Gbps]', hue='# Shortest Paths')
+    plt.xscale('log')
     plt.savefig(os.path.join(dh.get_general_figure_path(), 'single_graph_mp_imp.png'))
 
     ####################################################################################################################
