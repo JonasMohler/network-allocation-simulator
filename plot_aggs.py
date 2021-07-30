@@ -99,7 +99,7 @@ def main(args):
     '''
     # TODO: Server
 
-    cov_imp = dh.get_cover_mp_improv('c_Barabasi_Albert_15_25_(1000)', [1,2,3,5], 'sqos_pt', '1e-3')
+    cov_imp = dh.get_cover_mp_improv('c_Barabasi_Albert_15_25_(1000)', [1,2,3,5], 'sqos_pt', 0.001)
 
     sns.ecdfplot(data=cov_imp, x='improvement', hue='num_sp')
     plt.savefig(os.path.join(dh.get_general_figure_path(), 'single_graph_mp_imp.png'))
