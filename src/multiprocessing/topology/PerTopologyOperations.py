@@ -939,15 +939,19 @@ class CoverImprovement(TopologyMultiprocessing):
         self.ratio = ratio
 
     def per_dir_op(self, cur_dir):
-        c1 = dh.get_cover(cur_dir, self.strategy, self.thresh, self.ratio, 1)
-        cx = dh.get_cover(cur_dir, self.strategy, self.thresh, self.ratio, self.num_sp)
-        cout = {}
-        for src, dsts in c1.items():
-            cout[src] = {}
-            for dst, cov in c1.items():
-                cout[src][dst] = (cx[src][dst] - cov)/cov
+        try:
+            c1 = dh.get_cover(cur_dir, self.strategy, self.thresh, self.ratio, 1)
+            cx = dh.get_cover(cur_dir, self.strategy, self.thresh, self.ratio, self.num_sp)
+            cout = {}
+            for src, dsts in c1.items():
+                cout[src] = {}
+                for dst, cov in c1.items():
+                    cout[src][dst] = (cx[src][dst] - cov)/cov
 
-        dh.set_c_imp(cout, cur_dir, self.strategy, self.num_sp, self.thresh, self.ratio)
+            dh.set_c_imp(cout, cur_dir, self.strategy, self.num_sp, self.thresh, self.ratio)
+
+        except Exception as e:
+            print(e)
 
 
 class AddInternalFractionCapacity(TopologyMultiprocessing):
