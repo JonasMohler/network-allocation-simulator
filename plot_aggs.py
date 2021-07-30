@@ -397,7 +397,7 @@ def main(args):
     fig, axs = plt.subplots(1, 2, sharey=True, sharex=True)
     fig.set_size_inches(17, 9.27)
 
-    data1 = dh.get_alloc_quots_as_df(['Core(10000)'], 'sqos_pt', ['sqos_ot'], ratios=['0.5'])
+    data1 = dh.get_alloc_quots_as_df(['Core(10000)'], 'sqos_pt', ['sqos_ot'], ratios=['0.1'])
     data2 = dh.get_alloc_quots_as_df(['Core(10000)'], 'sqos_pt', ['sqos_pb'])
     print(data2)
 
