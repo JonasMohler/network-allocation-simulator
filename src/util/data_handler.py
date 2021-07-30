@@ -518,20 +518,19 @@ def get_cover_mp_improv(graph, num_sps, strategy, thresh):
         covers[num_sp] = cover
 
     all_rows = []
-    for src, dsts in cover[1].items():
-        for dst, cov in dsts.items():
-            row = [src, dst]
-            for num_sp in num_sps:
-                row = row + [covers[num_sp][src][dst]]
-            row[3] = ((row[3]-row[2])/row[2])*100
-            sp2 = [2, row[3]]
-            all_rows.append(sp2)
-            row[4] = ((row[4] - row[2]) / row[2]) * 100
-            sp3 = [3, row[4]]
-            all_rows.append(sp3)
-            row[5] = ((row[5] - row[2]) / row[2]) * 100
-            sp5 = [5, row[5]]
-            all_rows.append(sp5)
+    for src, cov in cover[1].items():
+        row = [src]
+        for num_sp in num_sps:
+            row = row + [covers[num_sp][src]]
+        row[3] = ((row[3]-row[2])/row[2])*100
+        sp2 = [2, row[3]]
+        all_rows.append(sp2)
+        row[4] = ((row[4] - row[2]) / row[2]) * 100
+        sp3 = [3, row[4]]
+        all_rows.append(sp3)
+        row[5] = ((row[5] - row[2]) / row[2]) * 100
+        sp5 = [5, row[5]]
+        all_rows.append(sp5)
 
     df = pd.DataFrame(columns=['num_sp', 'improvement'], data=all_rows)
     return df
