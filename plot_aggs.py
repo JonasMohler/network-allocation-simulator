@@ -82,7 +82,7 @@ def main(args):
     OMA Ratios vs GMA
     '''
     # TODO: Servre
-
+    '''
     comp = dh.get_alloc_quots_as_df(['c_Barabasi_Albert_15_25_(1000)'], 'GMAImproved', ['sqos_ot'], [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
 
     fig, axs = plt.subplots(1, 1)
@@ -92,7 +92,7 @@ def main(args):
     plt.xscale('log')
     plt.xlabel('Ratio OMA : GMA')
     plt.savefig(os.path.join(dh.get_general_figure_path(), 'oma_rat_v_gma.png'))
-
+    '''
     ####################################################################################################################
     '''
     Allocs by number shortest paths, PMA CONC, const
@@ -345,7 +345,7 @@ def main(args):
     Cover box single graph: by thresholds
     '''
     #TODO: Server CORE
-    '''
+
     covs = dh.get_covers_as_df(['Core(10000)'], STRATEGIES, [0.1], ['0.01', '0.001', '0.0001', '1e-05', '1e-06'])
     covs = covs.compute()
 
@@ -358,13 +358,13 @@ def main(args):
     sns.boxplot(x='Cover Threshold', y='Cover [%]', hue='Strategy', data=covs, hue_order=STRAT_ORDER, flierprops=dict(markerfacecolor='0.50', markersize=2), ax=ax)
     ax.grid(b=True)
     plt.savefig(os.path.join(dh.get_general_figure_path(), 'covers_b_threshs_core.png'))
-    '''
+
     ####################################################################################################################
     '''
     Results: GMA vs PMA Max (Core)
     '''
     #TODO: Server CORE
-    '''
+
     fig, axs = plt.subplots(1, 1, sharey=True, sharex=True)
     fig.set_size_inches(17, 9.27)
 
@@ -387,13 +387,13 @@ def main(args):
     plt.tight_layout()
     plt.xscale('log')
     plt.savefig(os.path.join(dh.get_general_figure_path(),'gma_v_pmam_core.png'))
-    '''
+
     ####################################################################################################################
     '''
     Results: PMA Max vs OMA Max & PMA Max vs PMA Concurrent: Core
     '''
     # TODO: Server CORE
-    '''
+
     fig, axs = plt.subplots(1, 2, sharey=True, sharex=True)
     fig.set_size_inches(17, 9.27)
 
@@ -432,13 +432,13 @@ def main(args):
 
     plt.xscale('log')
     plt.savefig(os.path.join(dh.get_general_figure_path(),'pmam_v_fl_core.png'))
-    '''
+
     ####################################################################################################################
     '''
     Results: Allocations in Barabasi-Albert 15 25 1000 (cdf)
     '''
     # TODO: Server
-
+    '''
     dat = dh.get_allocs_as_df(['c_Barabasi_Albert_15_25_(1000)'], STRATEGIES, [0.5])
     dat['Allocations [Gbps]'] = dat['Allocations [Gbps]'].astype('float')
 
@@ -453,14 +453,14 @@ def main(args):
 
     plt.xscale('log')
     plt.savefig(os.path.join(dh.get_general_figure_path(),'all_allocs_cdf_barab.png'))
-
+    '''
 
     ####################################################################################################################
     '''
     Results: GMA vs PMA Max
     '''
     # TODO: Server
-
+    '''
     fig, axs = plt.subplots(1, 1, sharey=True, sharex=True)
     fig.set_size_inches(17, 9.27)
 
@@ -483,13 +483,13 @@ def main(args):
     plt.tight_layout()
     plt.xscale('log')
     plt.savefig(os.path.join(dh.get_general_figure_path(),'gma_v_pmam_barab.png'))
-
+    '''
     ####################################################################################################################
     '''
     Results: PMA Max vs OMA Max & PMA Max vs PMA Concurrent
     '''
     #TODO: Server
-
+    '''
     fig, axs = plt.subplots(1, 2, sharey=True, sharex=True)
     fig.set_size_inches(17, 9.27)
 
@@ -528,13 +528,13 @@ def main(args):
 
     plt.xscale('log')
     plt.savefig(os.path.join(dh.get_general_figure_path(),'pmam_v_fl_barab.png'))
-
+    '''
     ####################################################################################################################
     '''
     Results: Sampling ratios for each model: (cdf)
     '''
     #TODO: Server
-
+    '''
     r_map = {
         'u0.1': '0.1',
         'u0.2': '0.2',
@@ -569,13 +569,13 @@ def main(args):
 
     plt.show()
     plt.savefig(os.path.join(dh.get_general_figure_path(),'samps.png'))
-
+    '''
     ####################################################################################################################
     '''
     Results: Allocation multipath gain: cdf single graph
     '''
     #TODO: On Server
-
+    '''
     data = dh.get_alloc_quots_multipath_as_df('c_Barabasi_Albert_15_25_(1000)', ['GMAImproved', 'sqos_pt'])
     fig, ax = plt.subplots(1,1)
     fig.set_size_inches(17, 9.27)
@@ -589,7 +589,7 @@ def main(args):
     plt.xscale('log')
     fig.suptitle('Multipath improvements for GMA and M-Approach PT Allocations in Barabasi-Albert 20_30_(1000)')
     plt.savefig(os.path.join(dh.get_general_figure_path(), 'mp_gain_single.png'))
-
+    '''
     ####################################################################################################################
     '''
     Results: Multipath improvements in allocations  
