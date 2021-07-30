@@ -59,7 +59,7 @@ def main(args):
 
     for s in ['GMAImproved', 'sqos_pt', 'sqos_pb']:
         for nsp in num_sps:
-            proc = CoverImprovement(dirs, cores, s, thresh, nsp)
+            proc = CoverImprovement(dirs, cores, s, thresh, nsp, force=force)
             proc.run()
 
     cover_imps = []

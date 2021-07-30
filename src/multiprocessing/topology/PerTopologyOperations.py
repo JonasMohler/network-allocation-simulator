@@ -931,8 +931,8 @@ class CoverImprovement(TopologyMultiprocessing):
     def find_or_compute_precursors(self, cur_dir):
         pass
 
-    def __init__(self, dirs, n_proc, strategy, thresh, num_sp, ratio=None):
-        super(CoverImprovement, self).__init__(dirs, n_proc, COVER)
+    def __init__(self, dirs, n_proc, strategy, thresh, num_sp, ratio=None, force=False):
+        super(CoverImprovement, self).__init__(dirs, n_proc, COVER, force)
         self.thresh = thresh
         self.num_sp = num_sp
         self.strategy = strategy
