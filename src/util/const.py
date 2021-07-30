@@ -18,8 +18,8 @@ VERBOSITY = 2
 ###################################################
 # Data
 ###################################################
-DATA_PATH = os.path.join(os.getcwd(), '/data2/jmohler/dat/topologies/')
-DATA_PATH_LOCAL = os.path.join(os.getcwd(), 'dat/topologies/')
+DATA_PATH_REMOTE = os.path.join(os.getcwd(), '/data2/jmohler/dat/topologies/')
+DATA_PATH = os.path.join(os.getcwd(), 'dat/topologies/')
 CONST_DATA_PATH = os.path.join(os.getcwd(), 'dat/c_topologies/')
 FIGURE_PATH = os.path.join(os.getcwd(), 'dat/figures/')
 CONST_FIGURE_PATH = os.path.join(os.getcwd(), 'dat/c_figures/')
@@ -37,6 +37,7 @@ COMPARISON = 7
 COVER = 8
 DEGREE = 9
 FIGURE = 10
+COVER_IMPROVEMENT = 11
 
 # DATA TYPE - FILE TYPE MAP
 FILE_TYPE = [
@@ -47,6 +48,7 @@ FILE_TYPE = [
     'pkl',
     'xml',
     'txt',
+    'json',
     'json',
     'json',
     'json'

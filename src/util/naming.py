@@ -12,6 +12,7 @@ TM_COVER_FILE_NAME = "tm_cover.json"
 PC_FILE_NAME = f"path_counts.{FILE_TYPE[PATH_COUNTS]}"
 PL_FILE_NAME = f"path_lengths.{FILE_TYPE[PATH_LENGTHS]}"
 TOPOLOGY_FILE_NAME = f"topology.{FILE_TYPE[TOPOLOGY]}"
+C_IMPROVEMENT_NAME = f"c_imp.{FILE_TYPE[COVER_IMPROVEMENT]}"
 
 # Allocations
 ALLOC_FILE_NAME = f"allocations.{FILE_TYPE[ALLOCATION]}"
@@ -50,6 +51,10 @@ def sampled_cover_file_name(ratio, thresh):
 
 def cover_file_name(thresh):
     return f"{thresh}_{COVER_FILE_NAME}"
+
+
+def cov_imp_file_name(thresh, num_sp):
+    return f"{thresh}_{num_sp}_{C_IMPROVEMENT_NAME}"
 
 
 def sampled_multi_cover_file_name(ratio, thresh, num_sp):
@@ -196,6 +201,10 @@ def get_full_path(graph, data_type, strategy=None, ratio=None, thresh=None, fig_
             full_path = os.path.join(get_general_figure_path(), fig_name)
         else:
             full_path = os.path.join(get_graph_figure_path(graph, fig_name))
+
+    if data_type == COVER_IMPROVEMENT:
+        name = cov_imp_file_name(thresh, num_sp)
+        full_path = os.path.join(os.path.join(strategies_path, strategy), name)
 
     return full_path
 

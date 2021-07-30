@@ -81,9 +81,27 @@ def main(args):
     '''
     OMA Ratios vs GMA
     '''
-    comp = dh.get_alloc_quots_as_df(['Barabasi_Albert_20_30_(1000)'], 'GMAImproved', ['sqos_ot', 'sqos_ob'], [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
+    # TODO
+    comp = dh.get_alloc_quots_as_df(['Barabasi_Albert_20_30_(1000)'], 'GMAImproved', ['sqos_ot'], [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
 
+    fig, axs = plt.subplots(1, 1)
+    fig.set_size_inches(17, 9.27)
 
+    sns.ecdfplot(comp, x='Allocation Ratio', hue='Ratio', ax=axs)
+    plt.xscale('log')
+    plt.show()
+
+    ####################################################################################################################
+    '''
+    Cover improvement multipath in single graph
+    '''
+    # TODO: Server
+    '''
+    cov_imp = dh.get_cover_mp_improv('Colt(153)', [1,2,3,5], 'sqos_pt', '1e-4')
+
+    sns.ecdfplot(data=cov_imp, x='improvement', hue='num_sp')
+    plt.show()
+    '''
     ####################################################################################################################
     '''
     Allocs over ave node degree
@@ -114,7 +132,7 @@ def main(args):
     '''
     Design: How do the graphs look like
     '''
-    '''
+
     fig, ax = plt.subplots(1, 1)
     fig.set_size_inches(17, 9.27)
 
@@ -134,12 +152,13 @@ def main(args):
 
     plt.xlim(0, )
     plt.ylim(0, )
-    '''
+
+    plt.show()
     ####################################################################################################################
     '''
     Results: Behaviour over graph metrics
     '''
-    '''
+
     xs = ['Diameter', 'Size', 'Average Node Degree']
     fig, axs = plt.subplots(1, 3, sharey=True)
     fig.set_size_inches(17, 9.27)
@@ -168,7 +187,7 @@ def main(args):
     fig.tight_layout(rect=[0, 0.03, 1, 0.95], pad=2)
 
     plt.show()
-    '''
+
     ####################################################################################################################
     '''
     Median Allocations - Constant Link Model vs. Degree-weighted link model, in Zoo and Rand graphs, 0.5 sampling for M-Approach
@@ -553,15 +572,18 @@ def main(args):
     fig.suptitle('Multipath improvements for GMA and M-Approach PT Allocations in Barabasi-Albert 20_30_(1000)')
     #plt.show()
     '''
+
     ####################################################################################################################
     '''
     Results: Multipath improvements in allocations  
     '''
     #TODO: On Server
-    '''
-    df_alloc_const_zoo = df_alloc_all[df_alloc_all.Graph.str.startswith('c_') & (~df_alloc_all.Graph.str.startswith('c_Barabasi'))]
-    df_alloc_const_rand = df_alloc_all[df_alloc_all.Graph.str.startswith('c_Barabasi')]
-
+    df_alloc_gma_p = df_alloc_all[(df_alloc_all['Strategy'] == STRATEGY_LABEL['GMAImproved']) | (df_alloc_all['Strategy'] == STRATEGY_LABEL['sqos_pb']) | (df_alloc_all['Strategy'] == STRATEGY_LABEL['sqos_pt'])]
+    print(df_alloc_gma_p)
+    df_alloc_const_zoo = df_alloc_gma_p[df_alloc_gma_p.Graph.str.startswith('c_') & (~df_alloc_gma_p.Graph.str.startswith('c_Barabasi'))]
+    print(df_alloc_const_zoo)
+    df_alloc_const_rand = df_alloc_gma_p[df_alloc_gma_p.Graph.str.startswith('c_Barabasi')]
+    print(df_alloc_const_rand)
     fig, axs = plt.subplots(1, 2, sharey=True)
     fig.set_size_inches(17, 9.27)
 
@@ -584,8 +606,128 @@ def main(args):
     fig.tight_layout(rect=[0, 0.03, 1, 0.95], pad=2)
     #fig.suptitle('Multipath improvements across Graphs')
     plt.yscale('log')
-    #plt.show()
+    plt.show()
+
+    ####################################################################################################################
     '''
+    Cover multipath improvement: Degree-weighted graphs
+    '''
+    df_cover = df_cover_all[~df_cover_all.Graph.str.startswith('c_')]
+    df_cover["Cover Threshold"].replace(THRESH_LABEL, inplace=True)
+    df_cover_gma_p = df_cover[(df_cover['Strategy'] == 'GMAImproved') | (df_cover['Strategy'] == 'sqos_pb') | (df_cover['Strategy'] == 'sqos_pt')]
+    df_cover_gp_zoo = df_cover_gma_p[~df_cover_gma_p.Graph.str.startswith('Barabasi_Albert')]
+    df_cover_gp_rand = df_cover_gma_p[df_cover_gma_p.Graph.str.startswith('Barabasi_Albert')]
+
+    fig, axs = plt.subplots(1, 2, sharey=True)
+    fig.set_size_inches(17, 9.27)
+
+    sns.boxplot(x='Strategy', y='Median-Cover', hue='Num Shortest Paths', data=df_cover_gp_zoo, flierprops=dict(markerfacecolor='0.50', markersize=2), ax=axs[0])
+    axs[0].set_title('Zoo Graphs')
+    axs[0].set_ylabel('Median Cover [%]')
+    axs[0].set_xlabel('')
+    axs[0].grid(b=True)
+    axs[0].get_legend().remove()
+
+    sns.boxplot(x='Strategy', y='Median-Cover', hue='Num Shortest Paths', data=df_cover_gp_rand, flierprops=dict(markerfacecolor='0.50', markersize=2), ax=axs[1])
+    axs[1].set_title('Rand Graphs')
+    axs[1].set_xlabel('')
+    axs[1].set_ylabel('')
+    axs[1].grid(b=True)
+    axs[1].get_legend().remove()
+
+    handles, labels = axs[1].get_legend_handles_labels()
+    lgd = axs[1].legend(handles, labels, loc='center left', ncol=1, bbox_to_anchor=(1.05, .5), title='#Shortest Paths')
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95], pad=2)
+    #fig.suptitle('Multipath improvements across Graphs')
+
+    plt.show()
+
+    ####################################################################################################################
+    '''
+    Cover multipath improvement: Const graphs
+    '''
+    df_cover = df_cover_all[df_cover_all.Graph.str.startswith('c_')]
+    df_cover["Cover Threshold"].replace(THRESH_LABEL, inplace=True)
+    df_cover_gma_p = df_cover[(df_cover['Strategy'] == 'GMAImproved') | (df_cover['Strategy'] == 'sqos_pb') | (df_cover['Strategy'] == 'sqos_pt')]
+    df_cover_gp_zoo = df_cover_gma_p[~df_cover_gma_p.Graph.str.startswith('c_Barabasi_Albert')]
+    df_cover_gp_rand = df_cover_gma_p[df_cover_gma_p.Graph.str.startswith('c_Barabasi_Albert')]
+
+    fig, axs = plt.subplots(1, 2, sharey=True)
+    fig.set_size_inches(17, 9.27)
+
+    sns.boxplot(x='Strategy', y='Median-Cover', hue='Num Shortest Paths', data=df_cover_gp_zoo, flierprops=dict(markerfacecolor='0.50', markersize=2), ax=axs[0])
+    axs[0].set_title('Zoo Graphs')
+    axs[0].set_ylabel('Median Cover [%]')
+    axs[0].set_xlabel('')
+    axs[0].grid(b=True)
+    axs[0].get_legend().remove()
+
+    sns.boxplot(x='Strategy', y='Median-Cover', hue='Num Shortest Paths', data=df_cover_gp_rand, flierprops=dict(markerfacecolor='0.50', markersize=2), ax=axs[1])
+    axs[1].set_title('Rand Graphs')
+    axs[1].set_xlabel('')
+    axs[1].set_ylabel('')
+    axs[1].grid(b=True)
+    axs[1].get_legend().remove()
+
+    handles, labels = axs[1].get_legend_handles_labels()
+    lgd = axs[1].legend(handles, labels, loc='center left', ncol=1, bbox_to_anchor=(1.05, .5), title='#Shortest Paths')
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95], pad=2)
+    #fig.suptitle('Multipath improvements across Graphs')
+
+    plt.show()
+    ####################################################################################################################
+    '''
+    Cover improvement multipath: percent improvement in medians, scatter
+    '''
+    df_cover = df_cover_all[df_cover_all.Graph.str.startswith('c_')]
+    print(df_cover.columns)
+    df_cover["Cover Threshold"].replace(THRESH_LABEL, inplace=True)
+    df_cover = df_cover[df_cover['Cover Threshold'] == '10Mbps']
+    df_cover_gma_p = df_cover[(df_cover['Strategy'] == 'GMAImproved') | (df_cover['Strategy'] == 'sqos_pb') | (df_cover['Strategy'] == 'sqos_pt')]
+    df1 = df_cover_gma_p[df_cover_gma_p['Num Shortest Paths'] == 1]
+    df2 = df_cover_gma_p[df_cover_gma_p['Num Shortest Paths'] == 2]
+    df3 = df_cover_gma_p[df_cover_gma_p['Num Shortest Paths'] == 3]
+    df5 = df_cover_gma_p[df_cover_gma_p['Num Shortest Paths'] == 5]
+
+    print(df1)
+    print(df2)
+    dfall = pd.merge(df1[['Graph', 'Size', 'Strategy', 'Median-Cover']], df2[['Graph', 'Strategy', 'Median-Cover']], how='left',left_on=['Graph', 'Strategy'], right_on=['Graph', 'Strategy'], suffixes=['_1','_2'])
+    dfall = pd.merge(dfall[['Graph', 'Size', 'Strategy', 'Median-Cover_1', 'Median-Cover_2']], df3[['Graph', 'Strategy', 'Median-Cover']], how='left', left_on=['Graph', 'Strategy'], right_on=['Graph', 'Strategy']).rename(columns={'Median-Cover': 'Median-Cover_3'})
+    dfall = pd.merge(dfall[['Graph', 'Size', 'Strategy', 'Median-Cover_1', 'Median-Cover_2', 'Median-Cover_3']], df5[['Graph', 'Strategy', 'Median-Cover']], how='left',left_on=['Graph', 'Strategy'], right_on=['Graph', 'Strategy']).rename(columns={'Median-Cover': 'Median-Cover_5'})
+
+    dfall = dfall.dropna()
+    print(dfall)
+    '''
+    dfall['Median-Cover_2'] = ((dfall['Median-Cover_2']-dfall['Median-Cover_1'])/dfall['Median-Cover_1'])*100
+    dfall['Median-Cover_3'] = ((dfall['Median-Cover_3'] - dfall['Median-Cover_1']) / dfall['Median-Cover_1'])*100
+    dfall['Median-Cover_5'] = ((dfall['Median-Cover_5'] - dfall['Median-Cover_1']) / dfall['Median-Cover_1'])*100
+    '''
+
+    dfall = dfall.rename(columns={'Median-Cover_2': '2', 'Median-Cover_3': '3', 'Median-Cover_5': '5'})
+    dfall = dfall.drop(axis=1, columns='Median-Cover_1')
+
+    #dfall = pd.melt(dfall, id_vars=['Graph', 'Size', 'Strategy'], value_vars=['2', '3', '5'], var_name='# Shortest Paths', value_name='% Improvement')
+    dfall = pd.melt(dfall, id_vars=['Graph', 'Size', 'Strategy'], value_vars=['2', '3', '5'], var_name='# Shortest Paths', value_name='Cover %')
+
+
+    print(dfall)
+
+    fig, axs = plt.subplots(1, 2, sharey=True)
+    fig.set_size_inches(17, 9.27)
+
+    dfall_zoo = dfall[~dfall.Graph.str.startswith('c_Barabasi_Albert')]
+    dfall_rand = dfall[dfall.Graph.str.startswith('c_Barabasi_Albert')]
+
+
+    sns.scatterplot(data=dfall_zoo, x='Size', y='Cover %', hue='# Shortest Paths', ax=axs[0])
+    sns.scatterplot(data=dfall_rand, x='Size', y='Cover %', hue='# Shortest Paths', ax=axs[1])
+    plt.show()
+
+    pb_rand = dfall_rand[dfall_rand['Strategy'] == 'sqos_pb']
+    sns.scatterplot(data=pb_rand, x='Size', y='Cover %', hue='# Shortest Paths')
+    plt.show()
+
+
     ####################################################################################################################
     '''
     Results: Multipath Gain: Percentage cover improvement (scatter) (Barabasi Albert 15 25 1000)

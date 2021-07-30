@@ -190,6 +190,14 @@ def set_k_shortest_paths(data, graph, k, ratio=None):
     _store(data, graph, SHORTEST_PATH, num_sp=k, ratio=ratio)
 
 
+def set_c_imp(data, graph, strategy, num_sp, thresh, ratio=None):
+    _store(data, graph, COVER_IMPROVEMENT, strategy, ratio, thresh, num_sp)
+
+
+def get_c_imp(graph, strategy, num_sp, thresh, ratio=None):
+    data = _load(graph, COVER_IMPROVEMENT, strategy, ratio, thresh, num_sp)
+    return data
+
 def get_alloc_diffs_as_df(graphs, s1='GMAImproved', s2s=['sqos_ot'], ratios=[0.1]):
 
     small_dfs = []
@@ -500,6 +508,32 @@ def get_covers_as_df(graphs, strategies, ratios=[0.1], threshs=['0.001']):
     return df
 
 
+def get_cover_mp_improv(graph, num_sps, strategy, thresh):
+    covers = {}
+    for num_sp in num_sps:
+        cover = get_cover(graph, strategy, thresh, num_sp=num_sp)
+        covers[num_sp] = cover
+
+    all_rows = []
+    for src, dsts in cover[1].items():
+        for dst, cov in dsts.items():
+            row = [src, dst]
+            for num_sp in num_sps:
+                row = row + [covers[num_sp][src][dst]]
+            row[3] = ((row[3]-row[2])/row[2])*100
+            sp2 = [2, row[3]]
+            all_rows.append(sp2)
+            row[4] = ((row[4] - row[2]) / row[2]) * 100
+            sp3 = [3, row[4]]
+            all_rows.append(sp3)
+            row[5] = ((row[5] - row[2]) / row[2]) * 100
+            sp5 = [5, row[5]]
+            all_rows.append(sp5)
+
+    df = pd.DataFrame(columns=['num_sp', 'improvement'], data=all_rows)
+    return df
+
+
 def get_allocs_as_df(graphs, strategies, ratios=[0.1]):
     print(ratios)
     df = pd.DataFrame(columns=[PLOT_Y_LABEL['alloc'], "Strategy", "Ratio"]) #"Path Length",
@@ -734,3 +768,12 @@ def get_cover_dist(graph, strategy, threshold, ratio=None, num_sp=None):
         c_list.append(cover)
 
     return _ser_to_stats(pd.Series(data=c_list))
+
+
+def get_cover_imp_dist(graph, strategy, threshold, num_sp, ratio=None):
+    cov_imp = get_c_imp(graph, strategy, num_sp, threshold, ratio)
+    c_list = []
+    for cov in cov_imp.values():
+        c_list.append(cov)
+
+    return _ser_to_stats(pd.series(data=c_list))

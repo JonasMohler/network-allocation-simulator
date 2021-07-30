@@ -926,6 +926,30 @@ class AddDegreeGravityCapacity(TopologyMultiprocessing):
         dh.set_graph(graph, cur_dir)
 
 
+class CoverImprovement(TopologyMultiprocessing):
+
+    def find_or_compute_precursors(self, cur_dir):
+        pass
+
+    def __init__(self, dirs, n_proc, strategy, thresh, num_sp, ratio=None):
+        super(CoverImprovement, self).__init__(dirs, n_proc, COVER)
+        self.thresh = thresh
+        self.num_sp = num_sp
+        self.strategy = strategy
+        self.ratio = ratio
+
+    def per_dir_op(self, cur_dir):
+        c1 = dh.get_cover(cur_dir, self.strategy, self.thresh, self.ratio, 1)
+        cx = dh.get_cover(cur_dir, self.strategy, self.thresh, self.ratio, self.num_sp)
+        cout = {}
+        for src, dsts in c1.items():
+            cout[src] = {}
+            for dst, cov in c1.items():
+                cout[src][dst] = (cx[src][dst] - cov)/cov
+
+        dh.set_c_imp(cout, cur_dir, self.strategy, self.num_sp, self.thresh, self.ratio)
+
+
 class AddInternalFractionCapacity(TopologyMultiprocessing):
     def __init__(self, dirs, n_proc, capacity, fraction):
         super(AddInternalFractionCapacity, self).__init__(dirs, n_proc, TOPOLOGY, True)
