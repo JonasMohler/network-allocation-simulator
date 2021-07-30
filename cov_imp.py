@@ -37,7 +37,7 @@ def parse_args():
     )
     parser.add_argument(
         "--n_ksps",
-        n_args="+",
+        nargs="+",
         default=[2],
         help="Number of shortest paths to compare to 1"
     )
