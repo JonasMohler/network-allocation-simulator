@@ -65,14 +65,17 @@ def main(args):
     cover_imps = []
 
     for dir in dirs:
-        dia = dh.get_diameter(dir)
-        size = dh.sfname(dir)
+        try:
+            dia = dh.get_diameter(dir)
+            size = dh.sfname(dir)
 
-        for s in ['GMAImproved', 'sqos_pt', 'sqos_pb']:
-            for nsp in num_sps:
-                cov_imp = dh.get_cover_imp_dist(dir, s, thresh, nsp)
-                row = [dir, dia, size, s, thresh, nsp]+cov_imp
-                cover_imps.append(row)
+            for s in ['GMAImproved', 'sqos_pt', 'sqos_pb']:
+                for nsp in num_sps:
+                    cov_imp = dh.get_cover_imp_dist(dir, s, thresh, nsp)
+                    row = [dir, dia, size, s, thresh, nsp]+cov_imp
+                    cover_imps.append(row)
+        except Exception as e:
+            print(e)
 
     df_cover = pd.DataFrame(columns=['Graph', 'Diameter', 'Size', 'Strategy', 'Cover Threshold', 'Num Shortest Paths',  'Min-Cover', 'Q1-Cover', 'Mean-Cover', 'Median-Cover', 'Q3-Cover', 'Max-Cover'], data=cover_imps)
     with open(os.path.join(args.out, 'agg_cov_imp.csv'), "w+") as f:
