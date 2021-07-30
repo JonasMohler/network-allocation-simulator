@@ -562,7 +562,7 @@ def main(args):
     axs[0].set_xlabel('Allocations [Gbps]')
     axs[0].set_title('Degree-weighted')
 
-    sns.ecdfplot(data=data_unif, x='Allocations Gbps', hue='Ratio', ax=axs[1])
+    sns.ecdfplot(data=data_unif, x='Allocations [Gbps]', hue='Ratio', ax=axs[1])
     axs[1].set_xscale('log')
     axs[1].set_xlabel('Allocations [Gbps]')
     axs[1].set_title('Uniform')
