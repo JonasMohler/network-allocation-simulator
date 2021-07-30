@@ -511,7 +511,10 @@ def get_covers_as_df(graphs, strategies, ratios=[0.1], threshs=['0.001']):
 def get_cover_mp_improv(graph, num_sps, strategy, thresh):
     covers = {}
     for num_sp in num_sps:
-        cover = get_cover(graph, strategy, thresh, num_sp=num_sp)
+        if num_sp !=1:
+            cover = get_cover(graph, strategy, thresh, num_sp=num_sp)
+        else:
+            cover = get_cover(graph, strategy, thresh)
         covers[num_sp] = cover
 
     all_rows = []
