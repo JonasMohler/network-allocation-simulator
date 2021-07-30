@@ -576,7 +576,7 @@ def main(args):
     '''
     #TODO: On Server
 
-    data = dh.get_alloc_quots_multipath_as_df('c_Barabasi_Albert_20_30_(1000)', ['GMAImproved', 'sqos_pt'])
+    data = dh.get_alloc_quots_multipath_as_df('c_Barabasi_Albert_15_25_(1000)', ['GMAImproved', 'sqos_pt'])
     fig, ax = plt.subplots(1,1)
     fig.set_size_inches(17, 9.27)
 
