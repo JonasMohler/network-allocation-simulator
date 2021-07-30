@@ -85,6 +85,8 @@ def main(args):
     with open(os.path.join(args.out, 'agg_cov_imp.csv'), "w+") as f:
         df_cover.to_csv(f)
 
+    print(num_sps)
+
 if __name__ == "__main__":
     args = parse_args()
     main(args)
