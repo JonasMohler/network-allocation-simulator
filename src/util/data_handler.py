@@ -656,7 +656,7 @@ def get_alloc_quots_multipath_as_df(graph, strategies=['GMAImproved', 'sqos_ot',
     for strategy in strategies:
         if strategy in ['sqos_ot', 'sqos_ob']:
             a1 = get_allocations(graph, strategy, ratio)
-            a2 = get_allocations(graph, strategy, ratio, 3)
+            a2 = get_allocations(graph, strategy, ratio, 5)
         else:
             a1 = get_allocations(graph, strategy)
             a2 = get_allocations(graph, strategy, num_sp=3)

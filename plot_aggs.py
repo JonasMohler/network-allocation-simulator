@@ -440,12 +440,12 @@ def main(args):
     # TODO: Server
 
     dat = dh.get_allocs_as_df(['c_Barabasi_Albert_15_25_(1000)'], STRATEGIES, [0.5])
-    dat['Allocations Gbps'] = dat['Allocations Gbps'].astype('float')
+    dat['Allocations [Gbps]'] = dat['Allocations [Gbps]'].astype('float')
 
     fig, ax = plt.subplots(1,1)
     fig.set_size_inches(17, 9.27)
 
-    sns.ecdfplot(data=dat, x='Allocations Gbps', hue='Strategy', hue_order=STRAT_ORDER, ax=ax)
+    sns.ecdfplot(data=dat, x='Allocations [Gbps]', hue='Strategy', hue_order=STRAT_ORDER, ax=ax)
 
     ax.set_yticks([0, 0.1, 0.25, 0.5, 0.75, 0.9, 1])
     ax.set_ylabel('Percentiles')
@@ -554,10 +554,10 @@ def main(args):
     fig, axs = plt.subplots(1, 2, sharey=True)
     fig.set_size_inches(17, 9.27)
 
-    d_min = data_classic['Allocations Gbps'].min()
-    d_max = data_classic['Allocations Gbps'].max()
+    d_min = data_classic['Allocations [Gbps]'].min()
+    d_max = data_classic['Allocations [Gbps]'].max()
 
-    sns.ecdfplot(data=data_classic, x='Allocations Gbps', hue='Ratio', ax=axs[0])
+    sns.ecdfplot(data=data_classic, x='Allocations [Gbps]', hue='Ratio', ax=axs[0])
     axs[0].set_xscale('log')
     axs[0].set_xlabel('Allocations [Gbps]')
     axs[0].set_title('Degree-weighted')
@@ -575,7 +575,7 @@ def main(args):
     Results: Allocation multipath gain: cdf single graph
     '''
     #TODO: On Server
-    '''
+
     data = dh.get_alloc_quots_multipath_as_df('c_Barabasi_Albert_20_30_(1000)', ['GMAImproved', 'sqos_pt'])
     fig, ax = plt.subplots(1,1)
     fig.set_size_inches(17, 9.27)
@@ -588,8 +588,7 @@ def main(args):
 
     plt.xscale('log')
     fig.suptitle('Multipath improvements for GMA and M-Approach PT Allocations in Barabasi-Albert 20_30_(1000)')
-    #plt.show()
-    '''
+    plt.savefig(os.path.join(dh.get_general_figure_path(), 'mp_gain_single.png'))
 
     ####################################################################################################################
     '''
