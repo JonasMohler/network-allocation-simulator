@@ -26,9 +26,9 @@ def parse_args():
     )
     parser.add_argument(
         "--thrs",
-        default=COVER_THRESHOLD,
-        type=float,
-        help="The threshold for cover and reach.",
+        default=[COVER_THRESHOLD],
+        nargs="+",
+        help="The thresholds for cover and reach.",
     )
     parser.add_argument(
         "--fr",
@@ -54,13 +54,14 @@ def main(args):
     dirs = args.directories
     cores = args.cores
     force = args.fr
-    thresh = args.thrs
+    threshs = args.thrs
     num_sps = args.n_ksps
 
     for s in ['GMAImproved', 'sqos_pt', 'sqos_pb']:
         for nsp in num_sps:
-            proc = CoverImprovement(dirs, cores, s, thresh, nsp, force=force)
-            proc.run()
+            for t in threshs:
+                proc = CoverImprovement(dirs, cores, s, t, nsp, force=force)
+                proc.run()
 
     cover_imps = []
 
@@ -71,9 +72,10 @@ def main(args):
 
             for s in ['GMAImproved', 'sqos_pt', 'sqos_pb']:
                 for nsp in num_sps:
-                    cov_imp = dh.get_cover_imp_dist(dir, s, thresh, nsp)
-                    row = [dir, dia, size, s, thresh, nsp]+cov_imp
-                    cover_imps.append(row)
+                    for t in threshs:
+                        cov_imp = dh.get_cover_imp_dist(dir, s, t, nsp)
+                        row = [dir, dia, size, s, t, nsp]+cov_imp
+                        cover_imps.append(row)
         except Exception as e:
             print(e)
 

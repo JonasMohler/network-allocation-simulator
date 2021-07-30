@@ -677,56 +677,23 @@ def main(args):
     plt.show()
     ####################################################################################################################
     '''
-    Cover improvement multipath: percent improvement in medians, scatter
+    Cover improvement multipath: percent improvement in medians, box
     '''
-    df_cover = df_cover_all[df_cover_all.Graph.str.startswith('c_')]
-    print(df_cover.columns)
-    df_cover["Cover Threshold"].replace(THRESH_LABEL, inplace=True)
-    df_cover = df_cover[df_cover['Cover Threshold'] == '10Mbps']
-    df_cover_gma_p = df_cover[(df_cover['Strategy'] == 'GMAImproved') | (df_cover['Strategy'] == 'sqos_pb') | (df_cover['Strategy'] == 'sqos_pt')]
-    df1 = df_cover_gma_p[df_cover_gma_p['Num Shortest Paths'] == 1]
-    df2 = df_cover_gma_p[df_cover_gma_p['Num Shortest Paths'] == 2]
-    df3 = df_cover_gma_p[df_cover_gma_p['Num Shortest Paths'] == 3]
-    df5 = df_cover_gma_p[df_cover_gma_p['Num Shortest Paths'] == 5]
+    with open('agg_cov_imp.csv', 'r+') as f:
+        all_cov_imps = pd.read_csv(f)
 
-    print(df1)
-    print(df2)
-    dfall = pd.merge(df1[['Graph', 'Size', 'Strategy', 'Median-Cover']], df2[['Graph', 'Strategy', 'Median-Cover']], how='left',left_on=['Graph', 'Strategy'], right_on=['Graph', 'Strategy'], suffixes=['_1','_2'])
-    dfall = pd.merge(dfall[['Graph', 'Size', 'Strategy', 'Median-Cover_1', 'Median-Cover_2']], df3[['Graph', 'Strategy', 'Median-Cover']], how='left', left_on=['Graph', 'Strategy'], right_on=['Graph', 'Strategy']).rename(columns={'Median-Cover': 'Median-Cover_3'})
-    dfall = pd.merge(dfall[['Graph', 'Size', 'Strategy', 'Median-Cover_1', 'Median-Cover_2', 'Median-Cover_3']], df5[['Graph', 'Strategy', 'Median-Cover']], how='left',left_on=['Graph', 'Strategy'], right_on=['Graph', 'Strategy']).rename(columns={'Median-Cover': 'Median-Cover_5'})
+    const_cov_imps = all_cov_imps[all_cov_imps.Graph.str.startswith('c_')]
+    const_cov_imps = const_cov_imps[(const_cov_imps['Strategy'] == 'GMAImproved') | (const_cov_imps['Strategy'] == 'sqos_pb')]
+    zoo = const_cov_imps[~const_cov_imps.Graph.str.startswith('c_Barab')]
+    rand = const_cov_imps[const_cov_imps.Graph.str.startswith('c_Barab')]
 
-    dfall = dfall.dropna()
-    print(dfall)
-    '''
-    dfall['Median-Cover_2'] = ((dfall['Median-Cover_2']-dfall['Median-Cover_1'])/dfall['Median-Cover_1'])*100
-    dfall['Median-Cover_3'] = ((dfall['Median-Cover_3'] - dfall['Median-Cover_1']) / dfall['Median-Cover_1'])*100
-    dfall['Median-Cover_5'] = ((dfall['Median-Cover_5'] - dfall['Median-Cover_1']) / dfall['Median-Cover_1'])*100
-    '''
-
-    dfall = dfall.rename(columns={'Median-Cover_2': '2', 'Median-Cover_3': '3', 'Median-Cover_5': '5'})
-    dfall = dfall.drop(axis=1, columns='Median-Cover_1')
-
-    #dfall = pd.melt(dfall, id_vars=['Graph', 'Size', 'Strategy'], value_vars=['2', '3', '5'], var_name='# Shortest Paths', value_name='% Improvement')
-    dfall = pd.melt(dfall, id_vars=['Graph', 'Size', 'Strategy'], value_vars=['2', '3', '5'], var_name='# Shortest Paths', value_name='Cover %')
-
-
-    print(dfall)
 
     fig, axs = plt.subplots(1, 2, sharey=True)
     fig.set_size_inches(17, 9.27)
 
-    dfall_zoo = dfall[~dfall.Graph.str.startswith('c_Barabasi_Albert')]
-    dfall_rand = dfall[dfall.Graph.str.startswith('c_Barabasi_Albert')]
-
-
-    sns.scatterplot(data=dfall_zoo, x='Size', y='Cover %', hue='# Shortest Paths', ax=axs[0])
-    sns.scatterplot(data=dfall_rand, x='Size', y='Cover %', hue='# Shortest Paths', ax=axs[1])
+    sns.boxplot(x='Strategy', y='Median-Cover', hue='Num Shortest Paths', data=zoo, ax=axs[0])
+    sns.boxplot(x='Strategy', y='Median-Cover', hue='Num Shortest Paths', data=rand, ax=axs[1])
     plt.show()
-
-    pb_rand = dfall_rand[dfall_rand['Strategy'] == 'sqos_pb']
-    sns.scatterplot(data=pb_rand, x='Size', y='Cover %', hue='# Shortest Paths')
-    plt.show()
-
 
     ####################################################################################################################
     '''
