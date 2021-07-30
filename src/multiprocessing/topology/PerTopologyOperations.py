@@ -943,12 +943,10 @@ class CoverImprovement(TopologyMultiprocessing):
             c1 = dh.get_cover(cur_dir, self.strategy, self.thresh, self.ratio)
             cx = dh.get_cover(cur_dir, self.strategy, self.thresh, self.ratio, self.num_sp)
             cout = {}
-            for src, dsts in c1.items():
+            for src, cov in c1.items():
                 cout[src] = {}
-                print(f"src: {src}")
-                print(f"dsts: {dsts}")
                 for dst, cov in c1.items():
-                    cout[src][dst] = (cx[src][dst] - cov)/cov
+                    cout[src] = (cx[src] - cov)/cov
 
             dh.set_c_imp(cout, cur_dir, self.strategy, self.num_sp, self.thresh, self.ratio)
 
