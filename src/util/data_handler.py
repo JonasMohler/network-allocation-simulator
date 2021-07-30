@@ -538,7 +538,7 @@ def get_cover_mp_improv(graph, num_sps, strategy, thresh):
 
 def get_allocs_as_df(graphs, strategies, ratios=[0.1], num_sp=[1]):
     print(ratios)
-    df = pd.DataFrame(columns=[PLOT_Y_LABEL['alloc'], "Strategy", "Ratio"]) #"Path Length",
+    df = pd.DataFrame(columns=["Allocations [Gbps]", "Strategy", "Ratio", "Source", "Dest", "# Shortest Paths"]) #"Path Length",
     dask_df_l = dd.from_pandas(df, chunksize=4000)
 
     all_g = len(graphs)
@@ -576,7 +576,7 @@ def get_allocs_as_df(graphs, strategies, ratios=[0.1], num_sp=[1]):
                                     dsts.append(dst)
 
                             df_small = pd.DataFrame()
-                            df_small[PLOT_Y_LABEL['alloc']] = als
+                            df_small["Allocations [Gbps]"] = als
                             #df_small["Path Length"] = pls
                             df_small['Strategy'] = STRATEGY_LABEL[s]
                             df_small["Ratio"] = r
@@ -606,7 +606,7 @@ def get_allocs_as_df(graphs, strategies, ratios=[0.1], num_sp=[1]):
                                 dsts.append(dst)
 
                         df_small = pd.DataFrame()
-                        df_small[PLOT_Y_LABEL['alloc']] = als
+                        df_small["Allocations [Gbps]"] = als
                         #df_small["Path Length"] = pls
                         df_small['Strategy'] = STRATEGY_LABEL[s]
                         df_small["Ratio"] = 1
