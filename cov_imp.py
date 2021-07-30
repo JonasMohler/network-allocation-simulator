@@ -59,6 +59,7 @@ def main(args):
 
     for s in ['GMAImproved', 'sqos_pt', 'sqos_pb']:
         for nsp in num_sps:
+            print(nsp)
             for t in threshs:
                 proc = CoverImprovement(dirs, cores, s, t, nsp, force=force)
                 proc.run()
@@ -72,6 +73,7 @@ def main(args):
 
             for s in ['GMAImproved', 'sqos_pt', 'sqos_pb']:
                 for nsp in num_sps:
+                    print(nsp)
                     for t in threshs:
                         cov_imp = dh.get_cover_imp_dist(dir, s, t, nsp)
                         row = [dir, dia, size, s, t, nsp]+cov_imp

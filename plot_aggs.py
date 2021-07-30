@@ -612,6 +612,7 @@ def main(args):
     '''
     Cover multipath improvement: Degree-weighted graphs
     '''
+    '''
     df_cover = df_cover_all[~df_cover_all.Graph.str.startswith('c_')]
     df_cover["Cover Threshold"].replace(THRESH_LABEL, inplace=True)
     df_cover_gma_p = df_cover[(df_cover['Strategy'] == 'GMAImproved') | (df_cover['Strategy'] == 'sqos_pb') | (df_cover['Strategy'] == 'sqos_pt')]
@@ -641,10 +642,11 @@ def main(args):
     #fig.suptitle('Multipath improvements across Graphs')
 
     plt.show()
-
+    '''
     ####################################################################################################################
     '''
     Cover multipath improvement: Const graphs
+    '''
     '''
     df_cover = df_cover_all[df_cover_all.Graph.str.startswith('c_')]
     df_cover["Cover Threshold"].replace(THRESH_LABEL, inplace=True)
@@ -675,6 +677,7 @@ def main(args):
     #fig.suptitle('Multipath improvements across Graphs')
 
     plt.show()
+    '''
     ####################################################################################################################
     '''
     Cover improvement multipath: percent improvement in medians, box
@@ -683,16 +686,26 @@ def main(args):
         all_cov_imps = pd.read_csv(f)
 
     const_cov_imps = all_cov_imps[all_cov_imps.Graph.str.startswith('c_')]
+
     const_cov_imps = const_cov_imps[(const_cov_imps['Strategy'] == 'GMAImproved') | (const_cov_imps['Strategy'] == 'sqos_pb')]
-    zoo = const_cov_imps[~const_cov_imps.Graph.str.startswith('c_Barab')]
     rand = const_cov_imps[const_cov_imps.Graph.str.startswith('c_Barab')]
 
+
+    fig, axs = plt.subplots(1, 1, sharey=True)
+    fig.set_size_inches(17, 9.27)
+
+
+    sns.boxplot(x='Strategy', y='Median-Cover', hue='Num Shortest Paths', data=rand, ax=axs)
+    plt.show()
 
     fig, axs = plt.subplots(1, 2, sharey=True)
     fig.set_size_inches(17, 9.27)
 
-    sns.boxplot(x='Strategy', y='Median-Cover', hue='Num Shortest Paths', data=zoo, ax=axs[0])
-    sns.boxplot(x='Strategy', y='Median-Cover', hue='Num Shortest Paths', data=rand, ax=axs[1])
+    rand_g = rand[rand['Strategy'] == 'GMAImproved']
+    rand_s = rand[rand['Strategy'] == 'sqos_pb']
+    sns.scatterplot(x='Size', y='Median-Cover', hue='Num Shortest Paths', data=rand_g, ax=axs[0])
+    sns.scatterplot(x='Size', y='Median-Cover', hue='Num Shortest Paths', data=rand_s, ax=axs[1])
+
     plt.show()
 
     ####################################################################################################################
