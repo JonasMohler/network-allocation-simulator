@@ -518,7 +518,7 @@ def get_cover_mp_improv(graph, num_sps, strategy, thresh):
         covers[num_sp] = cover
 
     all_rows = []
-    for src, cov in cover[1].items():
+    for src, cov in covers[1].items():
         row = [src]
         for num_sp in num_sps:
             row = row + [covers[num_sp][src]]
