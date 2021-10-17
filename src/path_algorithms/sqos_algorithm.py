@@ -40,7 +40,7 @@ class ScaledQoSAlgorithm(PathAlgorithm):
             prev_node = path[idx - 1]
             next_node = path[idx + 1] if (idx + 1) < len(path) else None
 
-            # Get interface-to-interface capacity
+            # Get interface-to-interface capacityI
             cap = get_entry_cap(self.graph, self.allocation_matrices, cur_node, prev_node, next_node)
             next_node = next_node if next_node is not None else cur_node
             norm = self.calculate_norm(path[idx], path[0], prev_node, next_node)
